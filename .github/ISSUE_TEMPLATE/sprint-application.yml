@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Apply by September 18, 2026 for Sprint 01. Applications are public. Do not include email addresses, credentials, serial numbers, private facility details, or safety-sensitive information.
+        Apply by September 18, 2026 for Known Robot Sprint 01. Applications are public. Do not include email addresses, credentials, serial numbers, private facility details, or safety-sensitive information.
   - type: input
     id: team
     attributes:
@@ -57,4 +57,3 @@ body:
       description: Examples include a different camera layout, SO-100 hardware, CPU-only inference, or a custom gripper.
     validations:
       required: true
-

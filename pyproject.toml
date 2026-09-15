@@ -3,13 +3,13 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "embodied-registry"
-version = "1.0.0"
+name = "knownrobot"
+version = "1.1.0"
 description = "Inspect robot-policy repositories and produce portable reproducibility manifests."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
-authors = [{ name = "Embodied Registry contributors" }]
+authors = [{ name = "Known Robot contributors" }]
 keywords = ["robotics", "lerobot", "reproducibility", "robot-policy"]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -24,9 +24,9 @@ classifiers = [
 dependencies = ["PyYAML>=6.0.1,<7", "jsonschema>=4.22,<5"]
 
 [project.urls]
-Homepage = "https://embodied-registry.vercel.app/validator"
-Repository = "https://github.com/arcofdescent1/embodied-registry"
-Issues = "https://github.com/arcofdescent1/embodied-registry/issues"
+Homepage = "https://knownrobot.com/validator"
+Repository = "https://github.com/arcofdescent1/knownrobot"
+Issues = "https://github.com/arcofdescent1/knownrobot/issues"
 
 [project.scripts]
 robot-skill = "robot_skill.cli:main"

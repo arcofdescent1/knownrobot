@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "Reproduction Sprints — Embodied Registry",
+  title: "Reproduction Sprints — Known Robot",
   description: "Join a two-week, multi-hardware reproduction study and publish compatibility evidence with the robotics community.",
 };
 
-const applyUrl = "https://github.com/arcofdescent1/embodied-registry/issues/new?template=sprint-application.yml";
-const evidenceUrl = "https://github.com/arcofdescent1/embodied-registry/issues/new?template=sprint-evidence.yml";
+const applyUrl = "https://github.com/arcofdescent1/knownrobot/issues/new?template=sprint-application.yml";
+const evidenceUrl = "https://github.com/arcofdescent1/knownrobot/issues/new?template=sprint-evidence.yml";
 
 export default function SprintsPage() {
   return <>
@@ -69,9 +69,9 @@ export default function SprintsPage() {
         <div>
           <a className="primary-link lime" href={applyUrl}>Apply by September 18 ↗</a>
           <a href={evidenceUrl}>Submit sprint evidence →</a>
-          <a href="https://github.com/arcofdescent1/embodied-registry/discussions/2">Join the sprint discussion →</a>
-          <a href="https://github.com/arcofdescent1/embodied-registry/blob/main/community/sprints/README.md">Read the operating handbook →</a>
-          <a href="https://meet.jit.si/EmbodiedRegistrySprint01">Open the public session room →</a>
+          <a href="https://github.com/arcofdescent1/knownrobot/discussions/2">Join the sprint discussion →</a>
+          <a href="https://github.com/arcofdescent1/knownrobot/blob/main/community/sprints/README.md">Read the operating handbook →</a>
+          <a href="https://meet.jit.si/KnownRobotSprint01">Open the public session room →</a>
         </div>
       </section>
     </main>

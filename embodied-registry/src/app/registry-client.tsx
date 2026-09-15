@@ -26,7 +26,7 @@ export function RegistryClient({ evaluations, demo }: { evaluations: EvaluationS
     const lifecycle = new AbortController();
     void Promise.resolve(context.registerTool({
       name: "search_robot_skill_evaluations", title: "Search robot skill evaluations",
-      description: "Search the visible Embodied Registry evaluations by skill, author, robot, or framework.",
+      description: "Search the visible Known Robot evaluations by skill, author, robot, or framework.",
       inputSchema: { type: "object", properties: { query: { type: "string" } }, required: ["query"], additionalProperties: false },
       annotations: { readOnlyHint: true, untrustedContentHint: false },
       execute(input: unknown) {
@@ -43,7 +43,7 @@ export function RegistryClient({ evaluations, demo }: { evaluations: EvaluationS
   }, [evaluations]);
 
   return <main>
-    <header className="topbar"><Link className="brand" href="/" aria-label="Embodied Registry home"><span className="brand-mark">ER</span><span>Embodied Registry</span><span className="alpha">ALPHA</span></Link><nav aria-label="Primary navigation"><Link className="nav-active" href="/">Registry</Link><Link href="/thesis">Thesis</Link><Link href="/field-notes">Field notes</Link><Link href="/participate">Participate</Link></nav><div className="top-actions"><Link className="primary-link" href="/participate">Join the study <span>↗</span></Link></div></header>
+    <header className="topbar"><Link className="brand" href="/" aria-label="Known Robot home"><span className="brand-mark">KR</span><span>Known Robot</span><span className="alpha">ALPHA</span></Link><nav aria-label="Primary navigation"><Link className="nav-active" href="/">Registry</Link><Link href="/validator">Validator</Link><Link href="/sprints">Sprints</Link><Link href="/thesis">Thesis</Link><Link href="/field-notes">Field notes</Link><Link href="/participate">Participate</Link></nav><div className="top-actions"><Link className="primary-link" href="/sprints">Join Sprint 01 <span>↗</span></Link></div></header>
     <section className="workspace" id="registry">
       <aside><div className="side-section"><p className="eyebrow">EXPLORE</p><a className="side-link selected" href="#registry"><span>⌁</span> Registry</a><Link className="side-link" href="/thesis"><span>◇</span> Thesis</Link><Link className="side-link" href="/field-notes"><span>◌</span> Field notes</Link><Link className="side-link" href="/participate"><span>↗</span> Participate</Link></div><div className="side-section"><p className="eyebrow">FILTER BY STATUS</p>{(["reproduced", "runner_verified", "self_tested"] as VerificationStatus[]).map((status) => <label key={status}><input type="checkbox" checked={statuses.has(status)} onChange={() => toggleStatus(status)} /> {statusLabel[status]} <b>{evaluations.filter((item) => item.status === status).length}</b></label>)}</div><div className="manifest-card"><span>OPEN STANDARD</span><h3>Make transfer testable.</h3><p>Read the focused Phase 0 thesis and its boundaries.</p><Link href="/thesis">Read the thesis →</Link></div></aside>
       <div className="content">

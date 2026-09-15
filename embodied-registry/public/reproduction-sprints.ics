@@ -1,28 +1,28 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Embodied Registry//Reproduction Sprints//EN
+PRODID:-//Known Robot//Reproduction Sprints//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
-X-WR-CALNAME:Embodied Registry Reproduction Sprints
+X-WR-CALNAME:Known Robot Reproduction Sprints
 X-WR-TIMEZONE:America/Denver
 BEGIN:VEVENT
-UID:sprint01-kickoff@embodied-registry.vercel.app
+UID:sprint01-kickoff@knownrobot.com
 DTSTAMP:20260908T170000Z
 DTSTART;TZID=America/Denver:20260921T100000
 DTEND;TZID=America/Denver:20260921T110000
 SUMMARY:Sprint 01 kickoff — ACT SO-101 Pick-and-Place
-DESCRIPTION:Protocol freeze and team kickoff. Public room: https://meet.jit.si/EmbodiedRegistrySprint01
-URL:https://embodied-registry.vercel.app/sprints
-LOCATION:https://meet.jit.si/EmbodiedRegistrySprint01
+DESCRIPTION:Protocol freeze and team kickoff. Public room: https://meet.jit.si/KnownRobotSprint01
+URL:https://knownrobot.com/sprints
+LOCATION:https://meet.jit.si/KnownRobotSprint01
 END:VEVENT
 BEGIN:VEVENT
-UID:sprint01-results@embodied-registry.vercel.app
+UID:sprint01-results@knownrobot.com
 DTSTAMP:20260908T170000Z
 DTSTART;TZID=America/Denver:20261008T100000
 DTEND;TZID=America/Denver:20261008T110000
 SUMMARY:Sprint 01 public results — ACT SO-101 Pick-and-Place
-DESCRIPTION:Public results and correction session. Public room: https://meet.jit.si/EmbodiedRegistrySprint01
-URL:https://embodied-registry.vercel.app/sprints
-LOCATION:https://meet.jit.si/EmbodiedRegistrySprint01
+DESCRIPTION:Public results and correction session. Public room: https://meet.jit.si/KnownRobotSprint01
+URL:https://knownrobot.com/sprints
+LOCATION:https://meet.jit.si/KnownRobotSprint01
 END:VEVENT
 END:VCALENDAR

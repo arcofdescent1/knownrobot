@@ -9,14 +9,14 @@ export function generateStaticParams() { return fieldNotes.map(({ slug }) => ({ 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const note = getFieldNote((await params).slug);
   if (!note) return {};
-  return { title: `${note.title} — Embodied Registry`, description: note.summary };
+  return { title: `${note.title} — Known Robot`, description: note.summary };
 }
 
 export default async function FieldNotePage({ params }: { params: Promise<{ slug: string }> }) {
   const note = getFieldNote((await params).slug);
   if (!note) notFound();
   return <main><SiteHeader/><article className="article-page"><header><Link className="back-link" href="/field-notes">← All field notes</Link><p className="kicker">FIELD NOTE {note.number} · BASELINE DESK RESEARCH</p><h1>{note.title}</h1><p className="editorial-deck">{note.summary}</p><div className="article-meta"><span>{note.published}</span><span>{note.readTime} read</span><span>Version 1.0</span></div></header>
-    <div className="article-layout"><div className="article-body">{note.sections.map((section) => <section key={section.heading}><h2>{section.heading}</h2>{section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{section.bullets && <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>}</section>)}</div><aside className="source-rail"><p className="eyebrow">PRIMARY SOURCES</p>{note.sources.map((source) => <a href={source.href} key={source.href} target="_blank" rel="noreferrer">{source.label}<span>↗</span></a>)}<div className="inference-key"><strong>Interpretation policy</strong><p>Sources establish observations. Recommendations and the proposed record are Embodied Registry’s current inferences.</p></div></aside></div>
+    <div className="article-layout"><div className="article-body">{note.sections.map((section) => <section key={section.heading}><h2>{section.heading}</h2>{section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{section.bullets && <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>}</section>)}</div><aside className="source-rail"><p className="eyebrow">PRIMARY SOURCES</p>{note.sources.map((source) => <a href={source.href} key={source.href} target="_blank" rel="noreferrer">{source.label}<span>↗</span></a>)}<div className="inference-key"><strong>Interpretation policy</strong><p>Sources establish observations. Recommendations and the proposed record are Known Robot’s current inferences.</p></div></aside></div>
     <section className="article-cta"><p>Did we miss the condition that determined your result?</p><Link href="/participate">Add direct evidence →</Link></section>
   </article></main>;
 }

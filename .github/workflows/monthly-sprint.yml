@@ -30,7 +30,7 @@ jobs:
               title,
               labels: ['sprint-operations'],
               body: [
-                `This issue operates the ${cycle} monthly sprint.`,
+                `This issue operates the ${cycle} Known Robot Reproduction Sprint.`,
                 '',
                 'Selection gate:',
                 '- Public policy and immutable revision',

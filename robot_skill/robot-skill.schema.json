@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://embodied-registry.vercel.app/schema/robot-skill/1.0.json",
-  "title": "Embodied Registry robot skill manifest",
+  "$id": "https://knownrobot.com/schema/robot-skill/1.0.json",
+  "title": "Known Robot skill manifest",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "skill", "policy", "hardware", "runtime", "dataset", "compatibility", "evaluations"],

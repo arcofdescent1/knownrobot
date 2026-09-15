@@ -1,4 +1,4 @@
-project_id = "embodied-registry"
+project_id = "knownrobot"
 
 [api]
 enabled = true

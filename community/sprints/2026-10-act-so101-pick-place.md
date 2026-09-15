@@ -29,7 +29,7 @@ This is a compatibility study, not a competition. Results from different physica
 - Public results session: October 8, 2026 at 10:00
 - Joint report: October 12, 2026
 
-Kickoff and results use the public room https://meet.jit.si/EmbodiedRegistrySprint01. The room opens ten minutes before each session. Decisions and corrections are also recorded in the public sprint discussion.
+Kickoff and results use the public room https://meet.jit.si/KnownRobotSprint01. The room opens ten minutes before each session. Decisions and corrections are also recorded in the public sprint discussion.
 
 ## Eligibility and selection
 
@@ -45,8 +45,7 @@ A successful trial begins with the cube and target region in the team’s declar
 
 ## Owners
 
-- Event lead: Embodied Registry maintainers
-- Evidence reviewer: Embodied Registry maintainers, with a second independent reviewer requested from accepted teams before kickoff
+- Event lead: Known Robot maintainers
+- Evidence reviewer: Known Robot maintainers, with a second independent reviewer requested from accepted teams before kickoff
 
 The policy publisher is not represented as a sponsor or verifier. Selection does not imply endorsement by Hugging Face, LeRobot, or the artifact author.
-

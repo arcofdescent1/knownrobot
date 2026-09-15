@@ -1,6 +1,6 @@
-# Contributing to Embodied Registry
+# Contributing to Known Robot
 
-Embodied Registry is currently studying reproducibility and compatibility for low-cost LeRobot manipulation arms. The most useful contribution is a concrete account of attempting to run someone else's policy.
+Known Robot is currently studying reproducibility and compatibility for low-cost LeRobot manipulation arms. The most useful contribution is a concrete account of attempting to run someone else's policy.
 
 ## Validator changes
 

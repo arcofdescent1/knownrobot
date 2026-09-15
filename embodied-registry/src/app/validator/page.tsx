@@ -3,11 +3,11 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "robot-skill validator — Embodied Registry",
+  title: "robot-skill validator — Known Robot",
   description: "Inspect a robot-policy repository, generate a portable manifest, and find the evidence another team would need to reproduce it.",
 };
 
-const install = "pipx install git+https://github.com/arcofdescent1/embodied-registry.git@v1.0.0";
+const install = "pipx install git+https://github.com/arcofdescent1/knownrobot.git@v1.1.0";
 
 export default function ValidatorPage() {
   return <>
@@ -65,8 +65,8 @@ export default function ValidatorPage() {
       <section className="validator-actions">
         <div><p className="kicker">STANDARDIZE IN THE OPEN</p><h2>Use the format without joining a platform.</h2><p>The schema, example, implementation, and tests are public. Keep the manifest with your policy and review it like code.</p></div>
         <div>
-          <a className="primary-link lime" href="https://github.com/arcofdescent1/embodied-registry/tree/v1.0.0#robot-skill-validator">Read the CLI guide ↗</a>
-          <a href="https://raw.githubusercontent.com/arcofdescent1/embodied-registry/v1.0.0/embodied-registry/schema/robot-skill.schema.json">Download schema 1.0 ↗</a>
+          <a className="primary-link lime" href="https://github.com/arcofdescent1/knownrobot/tree/v1.1.0#robot-skill-validator">Read the CLI guide ↗</a>
+          <a href="https://raw.githubusercontent.com/arcofdescent1/knownrobot/v1.1.0/embodied-registry/schema/robot-skill.schema.json">Download schema 1.0 ↗</a>
           <Link href="/participate">Report a transfer failure →</Link>
         </div>
       </section>

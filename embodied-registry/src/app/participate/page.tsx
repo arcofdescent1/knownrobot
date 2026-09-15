@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = { title: "Participate — Embodied Registry", description: "Share a robot-policy transfer experience or apply as a founding Embodied Registry design partner." };
+export const metadata: Metadata = { title: "Participate — Known Robot", description: "Share a robot-policy transfer experience or apply as a founding Known Robot design partner." };
 
-const repo = "https://github.com/arcofdescent1/embodied-registry";
+const repo = "https://github.com/arcofdescent1/knownrobot";
 
 export default function ParticipatePage() {
   return <main><SiteHeader/><article className="editorial-page participate-page">

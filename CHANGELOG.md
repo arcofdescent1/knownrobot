@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 — 2026-09-15
+
+- Rebranded Embodied Registry as Known Robot.
+- Made `knownrobot.com` the canonical product origin while preserving legacy links.
+- Renamed package, repository, documentation, event, and metadata identities without changing the `robot-skill` command or schema version.
+
 ## Phase 4 event system — 2026-09-08
 
 - Launched the monthly Reproduction Sprint operating model and public calendar.

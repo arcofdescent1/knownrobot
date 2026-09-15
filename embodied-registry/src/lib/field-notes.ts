@@ -87,9 +87,9 @@ export const fieldNotes: FieldNote[] = [
       { heading: "The useful output is the missing list", paragraphs: ["The validator is valuable before it can fill every field. A maintainer can run it, commit the draft, and resolve a finite list of absent claims. Another team can inspect the same record before buying hardware or beginning integration."] }
     ],
     sources: [
-      { label: "robot-skill 1.0 implementation", href: "https://github.com/arcofdescent1/embodied-registry/tree/v1.0.0/robot_skill" },
-      { label: "robot-skill 1.0 schema", href: "https://github.com/arcofdescent1/embodied-registry/blob/v1.0.0/embodied-registry/schema/robot-skill.schema.json" },
-      { label: "Validator test suite", href: "https://github.com/arcofdescent1/embodied-registry/blob/v1.0.0/tests/test_cli.py" }
+      { label: "robot-skill 1.0 implementation", href: "https://github.com/arcofdescent1/knownrobot/tree/v1.0.0/robot_skill" },
+      { label: "robot-skill 1.0 schema", href: "https://github.com/arcofdescent1/knownrobot/blob/v1.0.0/embodied-registry/schema/robot-skill.schema.json" },
+      { label: "Validator test suite", href: "https://github.com/arcofdescent1/knownrobot/blob/v1.0.0/tests/test_cli.py" }
     ]
   }
 ];

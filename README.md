@@ -1,6 +1,8 @@
-# Embodied Registry
+# Known Robot
 
-Embodied Registry makes robot-policy transfer a testable claim.
+**Know what works before the robot moves.**
+
+Known Robot makes robot-policy transfer a testable claim.
 
 We help developers using low-cost, LeRobot-compatible manipulation arms determine whether a published policy can run on their hardware—and understand why when it cannot.
 
@@ -9,7 +11,7 @@ We help developers using low-cost, LeRobot-compatible manipulation arms determin
 The Phase 2 public utility inspects a local robot-policy repository, creates a portable `robot-skill.yaml`, and reports the evidence required for another team to reproduce it. It detects common LeRobot and robotics metadata conventions without uploading source code or artifacts.
 
 ```bash
-pipx install git+https://github.com/arcofdescent1/embodied-registry.git@v1.0.0
+pipx install git+https://github.com/arcofdescent1/knownrobot.git@v1.1.0
 robot-skill check ./policy
 ```
 
@@ -17,7 +19,7 @@ The default check writes an incomplete draft so it can be improved and reviewed 
 
 The 1.0 evidence contract covers policy framework and version; robot, gripper, and sensors; control frequency; observation and action shapes; dataset schema; dependencies; source revision; known compatibility; and evaluation evidence.
 
-See the [public validator guide](https://embodied-registry.vercel.app/validator), [JSON Schema](embodied-registry/schema/robot-skill.schema.json), and [complete example](embodied-registry/schema/example.robot-skill.json).
+See the [public validator guide](https://knownrobot.com/validator), [JSON Schema](embodied-registry/schema/robot-skill.schema.json), and [complete example](embodied-registry/schema/example.robot-skill.json).
 
 The inspector reads only the supplied directory. It never executes policy code, imports the target repository, contacts a registry, or sends telemetry. Python 3.10–3.12 is supported on Linux, macOS, and Windows.
 
@@ -25,27 +27,27 @@ The inspector reads only the supplied directory. It never executes policy code, 
 
 The community runs one two-week, multi-hardware reproduction study each month. Every sprint freezes one public policy revision, recruits three to five materially different configurations, publishes failures as they occur, holds a public results session, and produces a reviewed joint report.
 
-[Sprint 01: ACT SO-101 Pick-and-Place](https://embodied-registry.vercel.app/sprints) accepts applications through September 18, 2026. The run window is September 21–October 4, the public results session is October 8, and the joint report is published October 12.
+[Sprint 01: ACT SO-101 Pick-and-Place](https://knownrobot.com/sprints) accepts applications through September 18, 2026. The run window is September 21–October 4, the public results session is October 8, and the joint report is published October 12.
 
-- [Apply to Sprint 01](https://github.com/arcofdescent1/embodied-registry/issues/new?template=sprint-application.yml)
-- [Submit sprint evidence](https://github.com/arcofdescent1/embodied-registry/issues/new?template=sprint-evidence.yml)
-- [Join the Sprint 01 discussion](https://github.com/arcofdescent1/embodied-registry/discussions/2)
+- [Apply to Sprint 01](https://github.com/arcofdescent1/knownrobot/issues/new?template=sprint-application.yml)
+- [Submit sprint evidence](https://github.com/arcofdescent1/knownrobot/issues/new?template=sprint-evidence.yml)
+- [Join the Sprint 01 discussion](https://github.com/arcofdescent1/knownrobot/discussions/2)
 - [Read the operating handbook](community/sprints/README.md)
 - [Read the frozen sprint brief](community/sprints/2026-10-act-so101-pick-place.md)
-- [Subscribe to the event calendar](https://embodied-registry.vercel.app/reproduction-sprints.ics)
+- [Subscribe to the event calendar](https://knownrobot.com/reproduction-sprints.ics)
 
 ## Phase 0 focus
 
 The initial community is practitioners actively attempting to reproduce or adapt public manipulation policies on SO-100, SO-101, and closely compatible low-cost LeRobot hardware. The first measurable problem is the time and uncertainty involved in reconstructing artifact, calibration, sensing, action, runtime, and evaluation conditions.
 
-Read the complete [project thesis](https://embodied-registry.vercel.app/thesis).
+Read the complete [project thesis](https://knownrobot.com/thesis).
 
 ## Participate in Phase 1
 
-- [Share a policy-transfer experience](https://github.com/arcofdescent1/embodied-registry/issues/new?template=problem-conversation.yml)
-- [Apply as a founding design partner](https://github.com/arcofdescent1/embodied-registry/issues/new?template=design-partner.yml)
-- [Read and challenge the field notes](https://embodied-registry.vercel.app/field-notes)
-- [Join the public discussion](https://github.com/arcofdescent1/embodied-registry/discussions)
+- [Share a policy-transfer experience](https://github.com/arcofdescent1/knownrobot/issues/new?template=problem-conversation.yml)
+- [Apply as a founding design partner](https://github.com/arcofdescent1/knownrobot/issues/new?template=design-partner.yml)
+- [Read and challenge the field notes](https://knownrobot.com/field-notes)
+- [Join the public discussion](https://github.com/arcofdescent1/knownrobot/discussions)
 
 The first discovery cycle consists of 25 problem conversations and five concrete design-partner commitments. Public issue forms must not contain confidential information, credentials, personal contact information, private datasets, or safety-sensitive operational details.
 

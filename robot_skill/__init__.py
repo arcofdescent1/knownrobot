@@ -1,4 +1,3 @@
-"""Embodied Registry robot-policy manifest tools."""
+"""Known Robot policy manifest tools."""
 
-__version__ = "1.0.0"
-
+__version__ = "1.1.0"

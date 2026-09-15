@@ -11,7 +11,7 @@ import yaml
 
 from robot_skill.cli import main
 from robot_skill.inspector import inspect_policy
-from robot_skill.schema import validate_manifest
+from robot_skill.schema import load_schema, validate_manifest
 
 
 COMPLETE_MANIFEST = {
@@ -33,6 +33,7 @@ class ValidatorTests(unittest.TestCase):
     def test_published_example_and_schema_pass(self):
         example = json.loads(Path("embodied-registry/schema/example.robot-skill.json").read_text(encoding="utf-8"))
         self.assertEqual(validate_manifest(example), [])
+        self.assertEqual(load_schema()["$id"], "https://knownrobot.com/schema/robot-skill/1.0.json")
 
     def test_invalid_manifest_fails(self):
         invalid = dict(COMPLETE_MANIFEST, schema_version="0.1")

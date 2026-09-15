@@ -1,6 +1,6 @@
 # Reproduction Sprint operating handbook
 
-Embodied Registry runs one two-week public reproduction study each month. Every sprint uses one immutable policy revision, a declared task, three to five materially different hardware configurations, and a joint report that includes failures.
+Known Robot runs one two-week public reproduction study each month. Every sprint uses one immutable policy revision, a declared task, three to five materially different hardware configurations, and a joint report that includes failures.
 
 ## Roles
 
@@ -33,9 +33,8 @@ The event lead and evidence reviewer must be named in the sprint brief before ap
 
 ## Safety boundary
 
-Embodied Registry does not certify a policy or direct hardware operation. Each team controls its equipment, risk assessment, workspace, emergency stop, and supervision. Initial sprints exclude people from the robot operating envelope, prohibit safety-control bypasses, and stop when unexpected motion or a configuration mismatch creates doubt.
+Known Robot does not certify a policy or direct hardware operation. Each team controls its equipment, risk assessment, workspace, emergency stop, and supervision. Initial sprints exclude people from the robot operating envelope, prohibit safety-control bypasses, and stop when unexpected motion or a configuration mismatch creates doubt.
 
 ## Corrections and disputes
 
 Participants may request a factual correction by commenting on the evidence issue or report pull request. The event lead records substantive post-publication changes in the report’s correction log. Disagreement about interpretation remains visible and attributed; raw results are not deleted merely because a reproduction failed.
-

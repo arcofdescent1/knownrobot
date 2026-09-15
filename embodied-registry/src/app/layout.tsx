@@ -6,11 +6,12 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://embodied-registry.vercel.app"),
-  title: "Embodied Registry — Evidence for robot skills",
+  metadataBase: new URL("https://knownrobot.com"),
+  title: "Known Robot — Evidence for robot skills",
   description: "A trusted, open registry for reproducible robot skills, hardware compatibility, and real-world evaluation evidence.",
-  openGraph: { type: "website", title: "Embodied Registry", description: "Make robot-policy transfer a testable claim." },
-  twitter: { card: "summary_large_image", title: "Embodied Registry", description: "Make robot-policy transfer a testable claim." },
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", siteName: "Known Robot", title: "Known Robot", description: "Know what works before the robot moves.", url: "https://knownrobot.com" },
+  twitter: { card: "summary_large_image", title: "Known Robot", description: "Know what works before the robot moves." },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
