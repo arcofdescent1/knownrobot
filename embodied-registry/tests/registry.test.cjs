@@ -8,6 +8,30 @@ const { demoRecord } = require('../.test-build/src/lib/demo-data.js');
 const id = '40000000-0000-0000-0000-000000000001';
 const liveRecord = () => ({ ...structuredClone(demoRecord), id });
 const filters = { query: 'SO-101', status: '', page: 1 };
+const { registryMetadata, pageMetadata } = require('../.test-build/src/lib/seo.js');
+
+test('search-intent metadata preserves canonical and evidence indexing boundaries', () => {
+  const previousEnv = process.env.VERCEL_ENV;
+  try {
+    process.env.VERCEL_ENV = 'production';
+    const live = registryMetadata({ query: '', status: '', page: 1 }, 'live');
+    assert.match(live.title, /LeRobot Policy Compatibility/);
+    assert.match(live.description, /SO-101/);
+    assert.equal(live.alternates.canonical, 'https://knownrobot.com/');
+    assert.equal(live.robots.index, true);
+    for (const state of ['demo', 'unavailable', 'unconfigured']) {
+      assert.equal(registryMetadata({ query: '', status: '', page: 1 }, state).robots.index, false);
+    }
+    assert.equal(registryMetadata(filters, 'live').robots.index, false);
+    assert.equal(registryMetadata({ query: '', status: '', page: 2 }, 'live').robots.index, false);
+    process.env.VERCEL_ENV = 'preview';
+    assert.equal(registryMetadata({ query: '', status: '', page: 1 }, 'live').robots.index, false);
+    assert.equal(pageMetadata('/validator', 'Validator', 'Guide').robots.index, false);
+  } finally {
+    if (previousEnv === undefined) delete process.env.VERCEL_ENV;
+    else process.env.VERCEL_ENV = previousEnv;
+  }
+});
 
 async function api(reply, fn) {
   const requests = [];

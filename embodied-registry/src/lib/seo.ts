@@ -15,5 +15,5 @@ export function pageMetadata(path: string, title: string, description: string, o
   };
 }
 export function registryMetadata(filters: RegistryFilters, state: string): Metadata {
-  return pageMetadata(registryUrl(filters), "Known Robot — Evidence for robot skills", "Inspect published robot-policy evaluations, source revisions, hardware configurations and attributable review evidence.", { index: state === "live" && !filters.query && !filters.status && filters.page === 1 });
+  return pageMetadata(registryUrl(filters), "Known Robot — LeRobot Policy Compatibility & Reproduction", "Explore robot-policy compatibility and reproduction evidence for low-cost LeRobot arms, starting with SO-100 and SO-101. Check configurations and review results.", { index: state === "live" && !filters.query && !filters.status && filters.page === 1 });
 }

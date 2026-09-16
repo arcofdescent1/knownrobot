@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = pageMetadata("/thesis", "Project thesis — Known Robot", "The initial community, problem, boundaries, and measurable Phase 0 thesis for Known Robot.");
+export const metadata: Metadata = pageMetadata("/thesis", "Reproducing LeRobot Policies on SO-101 Arms — Known Robot", "Why robot-policy reproduction needs pinned software, calibration, sensor configuration, and evaluation protocols. Known Robot's scope for SO-100 and SO-101 arms.");
 
 export default function ThesisPage() {
   return <main><SiteHeader/><article className="editorial-page">

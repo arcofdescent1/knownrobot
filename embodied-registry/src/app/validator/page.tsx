@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = pageMetadata("/validator", "robot-skill validator — Known Robot", "Inspect a robot-policy repository, generate a portable manifest, and find the evidence another team would need to reproduce it.");
+export const metadata: Metadata = pageMetadata("/validator", "Robot Policy Validator for LeRobot — Known Robot", "Check LeRobot policy metadata, compare declared hardware configurations, and generate robot-skill.yaml for GitHub or Hugging Face. CLI quickstart and CI guide.");
 
 const install = "pipx install .  # from the Known Robot 1.2.0 checkout";
 
@@ -14,8 +14,8 @@ export default function ValidatorPage() {
       <section className="validator-hero">
         <div>
           <p className="kicker">OPEN UTILITY · VERSION 1.2.0 RELEASE CANDIDATE</p>
-          <h1>Find what is missing before the robot moves.</h1>
-          <p className="editorial-deck">Run one command inside an existing policy repository. The validator inventories reproducibility evidence, writes a portable <code>robot-skill.yaml</code>, and tells you exactly what another team would still need.</p>
+          <h1>Validate robot-policy reproducibility.</h1>
+          <p className="editorial-deck">Check a LeRobot policy repository before attempting reproduction on an SO-100 or SO-101 arm. The validator inventories reproducibility evidence, writes a portable <code>robot-skill.yaml</code>, and identifies missing metadata. Configuration comparison does not prove physical transfer or safe operation.</p>
         </div>
         <div className="terminal-card" aria-label="Validator command example">
           <div className="terminal-bar"><span></span><span></span><span></span><b>policy / terminal</b></div>
