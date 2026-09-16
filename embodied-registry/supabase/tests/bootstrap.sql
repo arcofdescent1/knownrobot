@@ -14,7 +14,7 @@ create function auth.uid() returns uuid language sql stable as $$
 $$;
 grant usage on schema public, auth to anon, authenticated, service_role;
 grant execute on function auth.uid() to anon, authenticated, service_role;
-alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+-- Emulate new Supabase projects: SQL-created tables require explicit API grants.
 create schema storage;
 create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint);
 create table storage.objects (id uuid primary key, bucket_id text, name text);
