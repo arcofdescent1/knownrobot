@@ -12,6 +12,8 @@ Known Robot's public identity is `https://knownrobot.com`. Every indexable HTML 
 
 The dynamic sitemap includes indexable static pages, published field notes, and up to 30 latest genuine public evaluation records returned by the registry. Older records remain discoverable through pagination and permanent evidence links. Demos and unavailable data are never substituted. No invented modification dates are emitted. `robots.txt` advertises the production sitemap.
 
+Production evidence HTML uses a narrowly matched proxy existence check against the anonymous public view before streaming. Missing/private and malformed identifiers receive HTTP 404 with no-store/noindex; backend failures pass through to the honest unavailable page. The static missing-page rewrite preserves the full existing not-found UI. No operator credentials, full evidence fetches, or persistent existence cache are used in this check.
+
 ## Verification and release
 
 From `embodied-registry`, run `npm test`, `npm run lint`, `npm run build`, `npm run test:smoke` and `npm run test:preview`. Smoke checks fetch built HTML using a crawler user agent and verify a single canonical, matching social URL, robots policy, crawler-head metadata, missing-note HTTP status, live/demo/outage behavior, sitemap contents and export headers. Preview checks rebuild in the preview environment, test both static and dynamic pages, then restore a production build even if a check fails. These checks also run in web CI.

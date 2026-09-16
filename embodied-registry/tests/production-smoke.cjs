@@ -135,6 +135,11 @@ async function main() {
       await metadataCheck(origin, '/');
       await metadataCheck(origin, '/?q=SO-101&status=reproduced&page=2', false);
       await metadataCheck(origin, `/evaluations/${liveId}`);
+      const missingEvidence = await fetch(`${origin}/evaluations/40000000-0000-0000-0000-000000000099`, { headers: { 'User-Agent': 'Bingbot' } });
+      assert.equal(missingEvidence.status, 404, 'Missing evaluation returns a crawler HTTP 404 before streaming');
+      assert.ok((await missingEvidence.text()).includes('noindex'));
+      const invalidEvidence = await fetch(`${origin}/evaluations/invalid-record`, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      assert.equal(invalidEvidence.status, 404, 'Invalid identifiers return HTTP 404 for browsers too');
       const sitemap = await (await fetch(origin + '/sitemap.xml')).text();
       assert.ok(sitemap.includes(`<loc>https://knownrobot.com/evaluations/${liveId}</loc>`));
       assert.ok(!sitemap.includes('badge.svg')); assert.ok(!sitemap.includes('lastmod'));
@@ -160,6 +165,9 @@ async function main() {
     });
     console.log('PASS: live evidence badges, citations, author/publisher/reviewer credit and stale-review downgrade');
     await withSite({ NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-public-key' }, async origin => {
+      const unavailableEvidence = await fetch(`${origin}/evaluations/${liveId}`, { headers: { 'User-Agent': 'Bingbot' } });
+      assert.equal(unavailableEvidence.status, 200, 'Backend failure is not a fabricated missing-record response');
+      assert.ok((await unavailableEvidence.text()).includes('Evidence temporarily unavailable'));
       const html = await (await fetch(origin)).text();
       assert.ok(html.includes('Evidence temporarily unavailable')); assert.ok(!html.includes('DEMONSTRATION ONLY'));
     });

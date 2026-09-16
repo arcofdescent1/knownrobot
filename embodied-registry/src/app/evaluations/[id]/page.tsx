@@ -12,6 +12,7 @@ type Props = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const result = await getEvaluation(id);
+  if (result.state === "missing") notFound();
   if (!("record" in result)) return { title: "Evaluation unavailable — Known Robot", robots: { index: false } };
   return pageMetadata(`/evaluations/${result.record.id}`, `${result.record.skill.name} — Known Robot`,
     `Published evaluation on ${result.record.hardware.robot_family}. Inspect source revisions, protocol, and attributable review history.`,
