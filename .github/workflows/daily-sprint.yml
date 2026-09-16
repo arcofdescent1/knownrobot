@@ -1,0 +1,28 @@
+name: Daily sprint operating gates
+on:
+  schedule:
+    - cron: '15 16 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: sprint-operations
+  cancel-in-progress: false
+jobs:
+  operate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: embodied-registry
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: embodied-registry/package-lock.json
+      - run: npm ci
+      - run: npm run sprint:operate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

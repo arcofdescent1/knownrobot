@@ -10,17 +10,17 @@ from pathlib import Path
 import yaml
 
 from robot_skill.cli import main
-from robot_skill.inspector import inspect_policy
+from robot_skill.inspector import inspect_policy, _missing
 from robot_skill.schema import load_schema, validate_manifest
 
 
 COMPLETE_MANIFEST = {
     "schema_version": "1.0",
-    "skill": {"name": "Cube transfer", "version": "1.0.0", "source": {"type": "huggingface", "repository": "lab/cube", "revision": "abcdef123456"}},
+    "skill": {"name": "Cube transfer", "version": "1.0.0", "source": {"type": "huggingface", "repository": "lab/cube", "revision": "a" * 40}},
     "policy": {"framework": "lerobot", "framework_version": "0.4.0", "architecture": "act"},
     "hardware": {"robot_family": "SO-101", "gripper": "standard", "sensors": [{"type": "rgb", "name": "wrist"}]},
-    "runtime": {"control_frequency_hz": 30, "observation_shape": {"state": [6]}, "action_shape": {"action": [6]}, "dependencies": ["pyproject.toml"]},
-    "dataset": {"repository": "lab/cube-data", "schema": {"action": "float32[6]"}},
+    "runtime": {"control_frequency_hz": 30, "observation_shape": {"state": [6]}, "action_shape": {"action": [6]}, "dependencies": ["lerobot==0.4.0"]},
+    "dataset": {"repository": "lab/cube-data", "revision": "b" * 40, "schema": {"action": "float32[6]"}},
     "compatibility": [{"robot_family": "SO-101", "status": "compatible", "evidence": "evaluation.json"}],
     "evaluations": [{"benchmark": "cube-v1", "trials": 10, "successes": 8, "evaluator": "Lab A", "date": "2026-08-14"}],
 }
@@ -33,7 +33,9 @@ class ValidatorTests(unittest.TestCase):
     def test_published_example_and_schema_pass(self):
         example = json.loads(Path("embodied-registry/schema/example.robot-skill.json").read_text(encoding="utf-8"))
         self.assertEqual(validate_manifest(example), [])
+        self.assertFalse(any(f.severity == "error" for f in _missing(example)))
         self.assertEqual(load_schema()["$id"], "https://knownrobot.com/schema/robot-skill/1.0.json")
+        self.assertEqual(load_schema(), json.loads(Path("embodied-registry/schema/robot-skill.schema.json").read_text(encoding="utf-8")))
 
     def test_invalid_manifest_fails(self):
         invalid = dict(COMPLETE_MANIFEST, schema_version="0.1")

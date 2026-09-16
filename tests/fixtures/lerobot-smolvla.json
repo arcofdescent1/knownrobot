@@ -1,0 +1,10 @@
+{
+  "type": "smolvla",
+  "input_features": {
+    "observation.state": {"type": "STATE", "shape": [6]},
+    "observation.images.camera1": {"type": "VISUAL", "shape": [3, 256, 256]},
+    "observation.images.camera2": {"type": "VISUAL", "shape": [3, 256, 256]},
+    "observation.images.camera3": {"type": "VISUAL", "shape": [3, 256, 256]}
+  },
+  "output_features": {"action": {"type": "ACTION", "shape": [6]}}
+}

@@ -1,0 +1,51 @@
+name: Independent sprint evidence review
+description: Publish an attributable evidence review without granting registry verification status.
+title: "Sprint review: [sprint / team]"
+labels: ["reproduction-sprint", "evidence"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Only a named independent reviewer in the public sprint roster can satisfy the review gate. Review real evidence, not just manifest structure. After preparing the review record, personally post the exact generated REVIEW token as a standalone line in a comment on this issue. The operating record links that attributable comment. This does not certify safety or grant a registry verification status.
+  - type: input
+    id: identity
+    attributes:
+      label: Sprint ID, team ID and your assigned reviewer handle
+    validations:
+      required: true
+  - type: input
+    id: evidence
+    attributes:
+      label: Public evidence issue and evidence snapshot digest
+      description: Copy the exact reviewed snapshot digest from the operating record or sprint check output.
+    validations:
+      required: true
+  - type: dropdown
+    id: decision
+    attributes:
+      label: Decision
+      options: ["accepted", "changes_requested"]
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Substantive rationale and required corrections
+      description: Explain what evidence you inspected, whether claims match it, limitations and specific required changes. A failed/blocked attempt can be accepted as an accurate outcome, not a reproduced policy.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Independent evidence checks
+      options:
+        - label: I am not part of this sprint's evaluated teams or source publication and have disclosed any organizational or other conflict to the event lead.
+          required: true
+        - label: I checked the full pinned policy revision and immutable pre-trial configuration against the agreed protocol.
+          required: true
+        - label: I inspected the complete ledger, planned/completed/success counts, stops, interventions, exclusions and deviations.
+          required: true
+        - label: I inspected the manifest and evidence links and identified missing or contradictory evidence in my rationale.
+          required: true
+        - label: I checked that decisive failures link to improvement issues and that no outcome is silently omitted.
+          required: true

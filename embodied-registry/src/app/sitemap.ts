@@ -1,12 +1,17 @@
 import type { MetadataRoute } from "next";
 import { fieldNotes } from "@/lib/field-notes";
+import { publicPages, siteOrigin, isPreview } from "@/lib/seo";
+import { listEvaluations } from "@/lib/evaluations";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const origin = "https://knownrobot.com";
-  const updated = new Date("2026-09-15T00:00:00-06:00");
-  const routes = ["", "/validator", "/sprints", "/thesis", "/field-notes", "/participate"];
+export const dynamic = "force-dynamic";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  if (isPreview()) return [];
+  const result = await listEvaluations({ query: "", status: "", page: 1 });
+  const routes = publicPages.filter(path => path !== "/" || result.state === "live");
   return [
-    ...routes.map((route) => ({ url: `${origin}${route}`, lastModified: updated })),
-    ...fieldNotes.map((note) => ({ url: `${origin}/field-notes/${note.slug}`, lastModified: updated })),
+    ...routes.map(route => ({ url: `${siteOrigin}${route}` })),
+    ...fieldNotes.map(note => ({ url: `${siteOrigin}/field-notes/${note.slug}` })),
+    // Older records remain crawlable through registry pagination and evidence links.
+    ...(result.state === "live" ? result.data.records.map(record => ({ url: `${siteOrigin}/evaluations/${record.id}` })) : []),
   ];
 }

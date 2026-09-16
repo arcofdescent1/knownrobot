@@ -3,13 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { fieldNotes, getFieldNote } from "@/lib/field-notes";
+import { pageMetadata } from "@/lib/seo";
 
 export function generateStaticParams() { return fieldNotes.map(({ slug }) => ({ slug })); }
+export const dynamicParams = false;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const note = getFieldNote((await params).slug);
-  if (!note) return {};
-  return { title: `${note.title} — Known Robot`, description: note.summary };
+  if (!note) return { title: "Field note not found — Known Robot", robots: { index: false, follow: true } };
+  return pageMetadata(`/field-notes/${note.slug}`, `${note.title} — Known Robot`, note.summary, { article: true });
 }
 
 export default async function FieldNotePage({ params }: { params: Promise<{ slug: string }> }) {

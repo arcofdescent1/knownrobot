@@ -1,0 +1,30 @@
+name: Sprint commitments
+on:
+  pull_request:
+    paths: ['embodied-registry/src/data/**', 'embodied-registry/src/lib/sprint*', 'embodied-registry/scripts/sprint*', '.github/workflows/sprint*']
+  push:
+    branches: [main]
+    paths: ['embodied-registry/src/data/**', 'embodied-registry/src/lib/sprint*', 'embodied-registry/scripts/sprint*', '.github/workflows/sprint*']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: embodied-registry
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: embodied-registry/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run sprint:verify
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SPRINT_BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}

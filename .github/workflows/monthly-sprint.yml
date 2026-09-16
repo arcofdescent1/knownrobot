@@ -21,7 +21,7 @@ jobs:
             const cycle = next.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
             const title = `Select ${cycle} Reproduction Sprint policy`;
             const existing = await github.paginate(github.rest.issues.listForRepo, {
-              owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: 'sprint-operations', per_page: 100
+              owner: context.repo.owner, repo: context.repo.repo, state: 'all', labels: 'sprint-operations', per_page: 100
             });
             if (existing.some(issue => issue.title === title)) return;
             await github.rest.issues.create({

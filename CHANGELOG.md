@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.0 — release candidate
+
+- Give public routes self-canonical URLs and matching social metadata; exclude demos, filtered results, exports, errors and preview builds from indexing, with rendered-production and preview-build regression checks.
+
+- Reject impossible trial counts, invalid calendar dates, nonfinite values, malformed shapes, and contradictory dependency pins.
+- Unify complete validation requirements; retain an explicit structural/semantic draft-validation level.
+- Save manifests beside the target policy, preserve existing inputs, require explicit overwrite, and use atomic writes.
+- Keep stdout manifests and stderr diagnostics separate.
+- Resolve dependency versions, fingerprint declarations/locks, detect real LeRobot root feature conventions, and report missing evidence without guessing.
+- Compare declared target configurations conservatively, including semantic feature contracts; never conflate matches with independent reproduction.
+- Add real metadata fixtures, expanded regression coverage, schema parity, and cross-platform installed-wheel CI.
+- Add permanent public evidence pages and JSON exports, genuine empty/error/loading states, explicit opt-in examples, database-derived statistics, global search/pagination, and matching-snapshot trust labels.
+- Add evidence-linked live badges, CSL citations, portable evaluator/reviewer/source credits, optional source-linked manifest attribution, and existing publisher/hardware-creator credit through a protected public view.
+- Add a reusable isolated/no-write GitHub Action with failed-run diagnostic artifacts and cross-platform CI coverage.
+- Add public correction/dispute/appeal procedures and forms, and explicitly confirmed, expiring adapter-maintenance records without invented owners.
+
 ## 1.1.0 — 2026-09-15
 
 - Rebranded Embodied Registry as Known Robot.

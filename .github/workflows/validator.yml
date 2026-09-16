@@ -6,10 +6,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.10", "3.12"]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -19,3 +20,26 @@ jobs:
       - run: python -m pip install -e .
       - run: python -m unittest discover -s tests -v
       - run: robot-skill --version
+      - name: Exercise reusable Action against a real complete manifest
+        uses: ./
+        with:
+          path: embodied-registry/schema
+          manifest: example.robot-skill.json
+          mode: validate
+          level: complete
+      - run: python -m pip wheel . --no-deps --wheel-dir dist
+      - name: Verify installed wheel outside checkout
+        shell: bash
+        run: |
+          python -m venv "$RUNNER_TEMP/knownrobot-wheel"
+          if [ -f "$RUNNER_TEMP/knownrobot-wheel/Scripts/python.exe" ]; then
+            wheel_python="$RUNNER_TEMP/knownrobot-wheel/Scripts/python.exe"
+          else
+            wheel_python="$RUNNER_TEMP/knownrobot-wheel/bin/python"
+          fi
+          "$wheel_python" -m pip install dist/knownrobot-1.2.0-py3-none-any.whl
+          mkdir -p "$RUNNER_TEMP/knownrobot-smoke"
+          cp embodied-registry/schema/example.robot-skill.json "$RUNNER_TEMP/knownrobot-smoke/manifest.json"
+          cd "$RUNNER_TEMP/knownrobot-smoke"
+          "$wheel_python" -m robot_skill --version
+          "$wheel_python" -m robot_skill validate manifest.json --format json

@@ -1,13 +1,20 @@
 name: Sprint compatibility evidence
 description: Record a successful run, blocked attempt, or compatibility failure during a Reproduction Sprint.
-title: "Sprint 01 evidence: [team] / [configuration]"
+title: "Sprint evidence: [sprint / team] / [configuration]"
 labels: ["reproduction-sprint", "evidence"]
 body:
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint ID, roster team ID and agreed protocol digest
+      description: Copy from the public operating record at knownrobot.com/sprints/status.json.
+    validations:
+      required: true
   - type: dropdown
     id: outcome
     attributes:
       label: Outcome
-      options: ["Completed evaluation", "Policy ran but task failed", "Blocked by incompatibility", "Unsafe to continue", "Could not obtain required artifact"]
+      options: ["Completed evaluation", "Policy ran but task failed", "Blocked by incompatibility", "Unsafe to continue", "Could not obtain required artifact", "Withdrawn — explain why"]
     validations:
       required: true
   - type: input
@@ -53,6 +60,13 @@ body:
     validations:
       required: true
   - type: textarea
+    id: ledger
+    attributes:
+      label: Immutable complete trial ledger and resulting improvement issues
+      description: Link a full commit-pinned ledger including every attempted trial, resets, timeout, success, interventions, exclusions and deviations. For blocked/unsafe/withdrawn outcomes link the zero-trial ledger and a public improvement issue for each decisive failure.
+    validations:
+      required: true
+  - type: textarea
     id: evidence
     attributes:
       label: Supporting public evidence
@@ -70,4 +84,3 @@ body:
           required: true
         - label: This submission contains no credentials, personal data, serial numbers, or confidential facility information.
           required: true
-

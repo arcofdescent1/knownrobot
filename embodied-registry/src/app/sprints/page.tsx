@@ -1,78 +1,70 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { SiteHeader } from "@/components/site-header";
+import { sprint, currentSprintView } from "@/lib/sprints";
+import { teamDigest, protocolDigest } from "@/lib/sprint-contract";
 
-export const metadata: Metadata = {
-  title: "Reproduction Sprints — Known Robot",
-  description: "Join a two-week, multi-hardware reproduction study and publish compatibility evidence with the robotics community.",
-};
-
-const applyUrl = "https://github.com/arcofdescent1/knownrobot/issues/new?template=sprint-application.yml";
-const evidenceUrl = "https://github.com/arcofdescent1/knownrobot/issues/new?template=sprint-evidence.yml";
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = pageMetadata("/sprints", "Reproduction Sprints — Known Robot", "A public, accountable reproduction study: committed teams, frozen protocol, independent evidence review and joint reports.");
+const repo = "https://github.com/arcofdescent1/knownrobot";
+const date = (value: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Denver", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(value));
 
 export default function SprintsPage() {
+  const { state, applicationsOpen } = currentSprintView();
   return <>
     <SiteHeader />
     <main className="sprints-page">
       <section className="sprint-hero">
-        <div className="sprint-status"><i></i> Applications open · closes September 18</div>
-        <p className="kicker">REPRODUCTION SPRINT 01 · SEPT 21–OCT 4</p>
+        <div className="sprint-status">{state.status}</div>
+        <p className="kicker">REPRODUCTION {sprint.id.toUpperCase()}</p>
         <h1>One policy.<br/>Different hardware.<br/><em>Public evidence.</em></h1>
-        <p className="editorial-deck">Three to five teams get two weeks to reproduce the same ACT pick-and-place policy. Successful, failed, blocked, and unsafe-to-continue attempts all become part of one reviewed report.</p>
-        <div className="sprint-hero-actions"><a className="primary-link sprint-apply" href={applyUrl}>Apply with your configuration ↗</a><a href="/reproduction-sprints.ics">Add both sessions to calendar ↓</a></div>
+        <p className="editorial-deck">Three to five teams. Two weeks. Successful, failed, blocked and unsafe attempts preserved in a reviewed joint report. Dates remain provisional until the readiness gate passes and the event lead starts the sprint.</p>
+        <div className="sprint-hero-actions">
+          <a className="primary-link sprint-apply" href={applicationsOpen ? `${repo}/issues/new?template=sprint-application.yml` : `${repo}/discussions/2`}>{applicationsOpen ? "Apply with your configuration ↗" : "Discuss the next sprint ↗"}</a>
+          <a href="/reproduction-sprints.ics">Download session calendar ↓</a>
+        </div>
       </section>
-
-      <section className="sprint-brief" aria-labelledby="brief-title">
-        <div className="brief-heading"><p className="section-number">01 / THE ARTIFACT</p><h2 id="brief-title">ACT SO-101 Pick-and-Place</h2><p>A public LeRobot policy trained for cube pick-and-place at 30 Hz. The immutable Hub revision will be frozen when teams are announced.</p></div>
-        <dl className="artifact-facts">
-          <div><dt>Policy</dt><dd><a href="https://huggingface.co/legalaspro/act-so101-pick-place-cube-30hz-dec7-v2">legalaspro / act-so101…v2 ↗</a></dd></div>
-          <div><dt>Architecture</dt><dd>Action Chunking with Transformers</dd></div>
-          <div><dt>Declared robot</dt><dd>SO-101 · 30 Hz</dd></div>
-          <div><dt>Training data</dt><dd><a href="https://huggingface.co/datasets/legalaspro/so101-pick-and-place-cube-lerobot-30hz">SO-101 pick-and-place cube ↗</a></dd></div>
-          <div><dt>License</dt><dd>Apache-2.0</dd></div>
-          <div><dt>Comparison</dt><dd>Compatibility, not a leaderboard</dd></div>
-        </dl>
+      <section className="sprint-brief" aria-labelledby="readiness">
+        <div className="brief-heading"><p className="section-number">01 / READINESS · NO IMPLIED COMMITMENTS</p><h2 id="readiness">{state.ready ? "Readiness requirements met" : "Kickoff is not yet confirmed"}</h2><p>{sprint.teams.length} named teams; {sprint.reviewers.length} named reviewers. A calendar date is not proof of readiness.</p></div>
+        {state.blockers.length > 0 && <ul>{state.blockers.map(b => <li key={b}>{b}</li>)}</ul>}
+        <p>Event lead: {sprint.lead ? <a href={sprint.lead.comment}>@{sprint.lead.handle} · public commitment ↗</a> : "Not appointed"}</p>
+        <p>Reviewers: {sprint.reviewers.length ? sprint.reviewers.map(r => <a key={r.handle} href={r.comment}>@{r.handle} · independent review commitment ↗ </a>) : "No confirmed independent reviewers"}</p>
+        <p><a href="/sprints/status.json">Inspect the machine-readable operating record →</a></p>
       </section>
-
+      <section className="sprint-contract" aria-labelledby="roster">
+        <div><p className="section-number">02 / PUBLIC ROSTER</p><h2 id="roster">Actual commitments, not expressions of interest.</h2></div>
+        {!sprint.teams.length ? <p>No teams have publicly confirmed participation yet. Applications are not counted as commitments.</p> : <div className="contract-grid">{sprint.teams.map(t => <article key={t.id}>
+          <h3>{t.name}</h3><p>@{t.lead.handle} · {t.physical ? "Physical hardware" : "Simulation"}</p><p>{t.configuration}</p>
+          <p>Assigned independent reviewer: @{t.reviewer}</p>
+          <p><a href={t.configurationUrl}>Configuration record ↗</a> · <a href={t.application}>Application ↗</a> · <a href={t.lead.comment}>Signed commitment ↗</a></p>
+          <p>Commitment digest: <code className="sprint-digest">{teamDigest(sprint, t)}</code></p>
+          {t.evidence ? <><p>{t.evidence.outcome} · {t.evidence.successes}/{t.evidence.completed} successes · {t.evidence.planned} planned</p><p><a href={t.evidence.url}>Evidence ↗</a> · <a href={t.evidence.manifest}>Immutable manifest ↗</a> · <a href={t.evidence.trials}>All trial outcomes ↗</a></p>
+            {t.evidence.reviews.map(r => <p key={r.comment}><a href={r.comment}>@{r.reviewer}: {r.decision.replaceAll("_", " ")} ↗</a> — {r.rationale}</p>)}
+            {t.evidence.failures.map(f => <p key={f.improvement}>{f.description} · <a href={f.improvement}>Resulting improvement ↗</a></p>)}
+          </> : <p>Evidence not submitted — outcome remains outstanding.</p>}
+        </article>)}</div>}
+      </section>
+      <section className="sprint-brief">
+        <div className="brief-heading"><p className="section-number">03 / IMMUTABLE ARTIFACT</p><h2>{sprint.title}</h2><p>Selected source revision is pinned. This does not imply the publisher endorses the study or that the proposed protocol has been agreed.</p></div>
+        <p><a href={`https://huggingface.co/${sprint.policy.repository}/tree/${sprint.policy.revision}`}>{sprint.policy.repository} ↗</a></p>
+        <p>Commit: <code className="sprint-digest">{sprint.policy.revision}</code></p>
+        <p>Framework: ACT / LeRobot. Declared target: SO-101 manipulation. Compatibility is not safety certification.</p>
+      </section>
+      <section className="sprint-contract" aria-labelledby="protocol">
+        <div><p className="section-number">04 / PROPOSED PROTOCOL</p><h2 id="protocol">Agree before counted trials.</h2><p>Consent binds the policy revision, entire protocol, schedule and each team&apos;s declared configuration. Changes invalidate old commitments.</p><p>Protocol digest: <code className="sprint-digest">{protocolDigest(sprint)}</code></p></div>
+        <div className="contract-grid">{Object.entries(sprint.protocol).map(([key, value]) => <article key={key}><h3>{key[0].toUpperCase() + key.slice(1)}</h3><p>{value}</p></article>)}</div>
+      </section>
       <section className="sprint-timeline">
-        <p className="section-number">02 / SHARED CLOCK · AMERICA/DENVER</p>
-        <h2>Two weeks from protocol freeze to evidence.</h2>
-        <ol>
-          <li className="current"><time>SEP 08–18</time><strong>Applications</strong><span>Teams declare their hardware, sensors, constraints, and publishable commitment.</span></li>
-          <li><time>SEP 20</time><strong>Selection + freeze</strong><span>Three to five diverse configurations are selected; the artifact revision is frozen.</span></li>
-          <li><time>SEP 21 · 10:00</time><strong>Public kickoff</strong><span>Task, reset, success predicate, safety boundary, and open questions are recorded.</span></li>
-          <li><time>SEP 21–OCT 04</time><strong>Independent runs</strong><span>Teams publish evidence as soon as they complete or become blocked.</span></li>
-          <li><time>OCT 05–07</time><strong>Evidence review</strong><span>Reviewers check identity, configuration, counts, deviations, and links.</span></li>
-          <li><time>OCT 08 · 10:00</time><strong>Public results</strong><span>Teams compare failures, correct the record, and nominate product changes.</span></li>
-          <li><time>OCT 12</time><strong>Joint report</strong><span>Results, credits, compatibility failures, and resulting issues are published.</span></li>
-        </ol>
+        <p className="section-number">05 / SHARED CLOCK · AMERICA/DENVER</p><h2>Every milestone has an accountable gate.</h2>
+        <ol>{Object.entries(sprint.schedule).map(([key, value]) => <li key={key}><time dateTime={value}>{date(value)}</time><strong>{({ applicationsOpen: "Applications open", applicationsClose: "Applications close", freeze: "Roster + protocol freeze", kickoff: "Kickoff — only if ready", evidence: "Every team outcome due", review: "Independent review due", results: "Public results session", report: "Joint report + improvement issues" } as Record<string, string>)[key]}</strong><span>{key === "freeze" || key === "kickoff" ? "Requires three committed teams, two physical setups, named lead and independent reviewers, and matching consent." : "Tracked in the public operating record; dates never auto-complete work."}</span></li>)}</ol>
       </section>
-
-      <section className="sprint-contract">
-        <div><p className="section-number">03 / PARTICIPATION CONTRACT</p><h2>What every selected team commits to.</h2></div>
-        <div className="contract-grid">
-          <article><span>01</span><h3>Declare first</h3><p>Publish the robot, gripper, cameras, calibration method, compute, versions, rate, task reset, and success rule before counted trials.</p></article>
-          <article><span>02</span><h3>Report every outcome</h3><p>Submit planned, completed, and successful trial counts. Identify interventions, exclusions, deviations, and the first decisive failure.</p></article>
-          <article><span>03</span><h3>Keep evidence portable</h3><p>Commit a <code>robot-skill.yaml</code> beside the policy or evaluation artifact and link an immutable revision.</p></article>
-          <article><span>04</span><h3>Operate safely</h3><p>Own your risk assessment and emergency stop. No people enter the operating envelope, and uncertain motion ends the attempt.</p></article>
-        </div>
-      </section>
-
-      <section className="outcome-map">
-        <div><p className="section-number">04 / NOTHING DISAPPEARS</p><h2>Failure is a first-class result.</h2><p>A team does not need a successful task completion to finish the sprint. The joint report preserves where the workflow stopped and why.</p></div>
-        <div>
-          {[["Completed", "Trials and comparable evidence"],["Task failed", "Policy ran; success predicate was not met"],["Incompatible", "A declared contract prevented execution"],["Unsafe", "Team stopped before risking hardware or people"]].map(([name,copy])=><div key={name}><i></i><strong>{name}</strong><span>{copy}</span></div>)}
-        </div>
-      </section>
-
       <section className="sprint-links">
-        <div><p className="kicker">RUN WITH US</p><h2>Bring a configuration that teaches the group something.</h2><p>Applications are selected for hardware and sensing diversity, not expected success. At least two teams will run physical hardware.</p></div>
-        <div>
-          <a className="primary-link lime" href={applyUrl}>Apply by September 18 ↗</a>
-          <a href={evidenceUrl}>Submit sprint evidence →</a>
-          <a href="https://github.com/arcofdescent1/knownrobot/discussions/2">Join the sprint discussion →</a>
-          <a href="https://github.com/arcofdescent1/knownrobot/blob/main/community/sprints/README.md">Read the operating handbook →</a>
-          <a href="https://meet.jit.si/KnownRobotSprint01">Open the public session room →</a>
+        <div><p className="kicker">06 / CLOSE THE LOOP</p><h2>Reviewed failures become product improvements.</h2><p>Outstanding outcomes: {state.evidencePending.join(", ") || (sprint.teams.length ? "None" : "No teams confirmed")}. Outstanding reviews: {state.reviewPending.join(", ") || (sprint.teams.length ? "None" : "No evidence yet")}.</p>
+          <p>{sprint.session ? <a href={sprint.session.notes}>Public results-session notes ↗</a> : "Results session not recorded."}</p>
+          <p>{sprint.report ? <a href={sprint.report.url}>Joint report with credits and corrections ↗</a> : "Joint report not published."}</p>
+          {sprint.cancelled && <p>Cancellation: {sprint.cancelled.reason} · <a href={sprint.cancelled.confirmation.comment}>Lead&apos;s decision ↗</a></p>}
         </div>
+        <div><a href={`${repo}/issues/new?template=sprint-evidence.yml`}>Submit evidence, including failed attempts →</a><a href={`${repo}/issues/new?template=sprint-review.yml`}>Assigned reviewer: publish a review →</a><a href={`${repo}/discussions/2`}>Sprint discussion →</a><a href={`${repo}/blob/main/community/sprints/README.md`}>Operating handbook and confirmation procedure →</a><a href={`${repo}/issues?q=label%3Asprint-operations`}>Accountable operations and improvements →</a></div>
       </section>
     </main>
   </>;

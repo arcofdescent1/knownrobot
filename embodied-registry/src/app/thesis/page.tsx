@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = { title: "Project thesis — Known Robot", description: "The initial community, problem, boundaries, and measurable Phase 0 thesis for Known Robot." };
+export const metadata: Metadata = pageMetadata("/thesis", "Project thesis — Known Robot", "The initial community, problem, boundaries, and measurable Phase 0 thesis for Known Robot.");
 
 export default function ThesisPage() {
   return <main><SiteHeader/><article className="editorial-page">

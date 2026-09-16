@@ -1,6 +1,6 @@
 # Sprint 01: ACT SO-101 Pick-and-Place
 
-## Frozen artifact
+## Selected immutable artifact — protocol agreement pending
 
 - Policy: `legalaspro/act-so101-pick-place-cube-30hz-dec7-v2`
 - Source: https://huggingface.co/legalaspro/act-so101-pick-place-cube-30hz-dec7-v2
@@ -10,7 +10,7 @@
 - Declared training rate: 30 Hz
 - License: Apache-2.0
 
-The immutable Hub revision is recorded at kickoff after the application window closes. Teams must use that frozen revision in their manifests and evidence submissions.
+The selected Hub revision is `19b56a188f1c9ec578ddd07c058b12dd980b23ff`. Teams must use that full commit in manifests and evidence. Source: https://huggingface.co/legalaspro/act-so101-pick-place-cube-30hz-dec7-v2/tree/19b56a188f1c9ec578ddd07c058b12dd980b23ff. The executable operating record and proposed protocol are in `embodied-registry/src/data/sprint-01.json`; the public roster and readiness gate are at https://knownrobot.com/sprints. No teams or reviewers are currently confirmed.
 
 ## Task and comparison question
 
@@ -29,7 +29,7 @@ This is a compatibility study, not a competition. Results from different physica
 - Public results session: October 8, 2026 at 10:00
 - Joint report: October 12, 2026
 
-Kickoff and results use the public room https://meet.jit.si/KnownRobotSprint01. The room opens ten minutes before each session. Decisions and corrections are also recorded in the public sprint discussion.
+These dates are provisional until the readiness gate passes and the named lead confirms the start. If readiness is not met, publicly postpone and renew schedule consent. A proposed public room is https://meet.jit.si/KnownRobotSprint01; attendance and room operation are not yet confirmed. Decisions and corrections are recorded in public issues and session notes.
 
 ## Eligibility and selection
 
@@ -45,7 +45,9 @@ A successful trial begins with the cube and target region in the team’s declar
 
 ## Owners
 
-- Event lead: Known Robot maintainers
-- Evidence reviewer: Known Robot maintainers, with a second independent reviewer requested from accepted teams before kickoff
+- Event lead: not yet appointed or publicly confirmed
+- Evidence reviewers: no independent reviewers publicly confirmed
+
+Before kickoff, confirm three to five teams, at least two physical setups, three materially different configurations, a named lead and two independent reviewers. Every person posts a protocol/configuration-bound public consent token; see the [operating runbook](../../docs/sprint-operations.md). Independent reviewers cannot be drawn from participating teams. Missing commitments are release-visible blockers, not implied endorsements.
 
 The policy publisher is not represented as a sponsor or verifier. Selection does not imply endorsement by Hugging Face, LeRobot, or the artifact author.

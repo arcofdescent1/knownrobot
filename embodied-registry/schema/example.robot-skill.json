@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "skill": { "name": "SO-101 cube transfer", "version": "1.0.0", "license": "apache-2.0", "source": { "type": "huggingface", "repository": "example/so101-cube-transfer", "revision": "7e2fa9c4" } },
+  "skill": { "name": "SO-101 cube transfer", "version": "1.0.0", "license": "apache-2.0", "source": { "type": "huggingface", "repository": "example/so101-cube-transfer", "revision": "7e2fa9c47e2fa9c47e2fa9c47e2fa9c47e2fa9c4" } },
   "policy": { "framework": "lerobot", "framework_version": "0.4.0", "architecture": "act", "checkpoint": "policy.safetensors" },
   "hardware": { "robot_family": "SO-101", "gripper": "standard-gripper", "sensors": [{ "type": "rgb", "name": "wrist", "calibration": "calibration/wrist.json" }] },
-  "runtime": { "control_frequency_hz": 30, "observation_shape": { "observation.images.wrist": [3, 480, 640], "observation.state": [6] }, "action_shape": { "action": [6] }, "dependencies": ["pyproject.toml"], "accelerator": "cuda" },
-  "dataset": { "repository": "example/so101-cube-transfer-dataset", "revision": "a8d106b7", "schema": { "observation.images.wrist": "video", "observation.state": "float32[6]", "action": "float32[6]" }, "license": "apache-2.0" },
+  "runtime": { "control_frequency_hz": 30, "observation_shape": { "observation.images.wrist": [3, 480, 640], "observation.state": [6] }, "action_shape": { "action": [6] }, "dependencies": ["lerobot==0.4.0", "torch==2.7.1"], "accelerator": "cuda" },
+  "dataset": { "repository": "example/so101-cube-transfer-dataset", "revision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "schema": { "observation.images.wrist": "video", "observation.state": "float32[6]", "action": "float32[6]" }, "license": "apache-2.0" },
   "compatibility": [{ "robot_family": "SO-101", "status": "compatible", "evidence": "evaluation/cube-transfer-2026-08-14.json", "adapter": null }],
   "evaluations": [{ "benchmark": "cube-transfer-v1", "trials": 100, "successes": 87, "evaluator": "Example Lab", "date": "2026-08-14", "environment": "tabletop-v1", "evidence": "evaluation/cube-transfer-2026-08-14.json" }]
 }

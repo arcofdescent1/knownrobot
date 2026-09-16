@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = {
-  title: "robot-skill validator — Known Robot",
-  description: "Inspect a robot-policy repository, generate a portable manifest, and find the evidence another team would need to reproduce it.",
-};
+export const metadata: Metadata = pageMetadata("/validator", "robot-skill validator — Known Robot", "Inspect a robot-policy repository, generate a portable manifest, and find the evidence another team would need to reproduce it.");
 
-const install = "pipx install git+https://github.com/arcofdescent1/knownrobot.git@v1.1.0";
+const install = "pipx install .  # from the Known Robot 1.2.0 checkout";
 
 export default function ValidatorPage() {
   return <>
@@ -15,7 +13,7 @@ export default function ValidatorPage() {
     <main className="validator-page">
       <section className="validator-hero">
         <div>
-          <p className="kicker">OPEN UTILITY · VERSION 1.0</p>
+          <p className="kicker">OPEN UTILITY · VERSION 1.2.0 RELEASE CANDIDATE</p>
           <h1>Find what is missing before the robot moves.</h1>
           <p className="editorial-deck">Run one command inside an existing policy repository. The validator inventories reproducibility evidence, writes a portable <code>robot-skill.yaml</code>, and tells you exactly what another team would still need.</p>
         </div>
@@ -43,7 +41,7 @@ export default function ValidatorPage() {
             ["Hardware", "Robot family, gripper, sensors, calibration references"],
             ["Runtime", "Control frequency, observation and action shapes"],
             ["Dataset", "Repository, revision, feature schema, license"],
-            ["Dependencies", "Detected lockfiles and environment declarations"],
+            ["Dependencies", "Resolved package versions and hashed declarations"],
             ["Source", "Repository type, immutable revision, artifact version"],
             ["Compatibility", "Supported, unsupported, and untested hardware"],
             ["Evaluation", "Benchmark, trials, successes, evaluator, evidence"],
@@ -57,16 +55,20 @@ export default function ValidatorPage() {
         <div className="behavior-grid">
           <div><strong>Exit 0</strong><p>The scan ran. In default mode, an incomplete draft is still written so contributors can improve it.</p></div>
           <div><strong>Exit 1</strong><p>The path, manifest, or filesystem could not be read. No misleading output is written.</p></div>
-          <div><strong>Exit 2</strong><p>Strict mode found missing required evidence or the existing manifest violated the schema.</p></div>
+          <div><strong>Exit 2</strong><p>Invalid evidence always fails. Strict or complete validation also fails on missing metadata; target comparison fails on mismatches or unknowns.</p></div>
           <div><strong>JSON diagnostics</strong><p><code>--format json</code> returns stable finding codes, paths, severities, and a summary for CI.</p></div>
         </div>
+        <p>Use <code>--target ./target.yaml --no-write --format json</code> to compare declared configurations. Equal shapes alone are not sufficient: feature semantics and calibration matter. A match never establishes safe physical transfer or independent reproduction.</p>
       </section>
 
       <section className="validator-actions">
         <div><p className="kicker">STANDARDIZE IN THE OPEN</p><h2>Use the format without joining a platform.</h2><p>The schema, example, implementation, and tests are public. Keep the manifest with your policy and review it like code.</p></div>
         <div>
-          <a className="primary-link lime" href="https://github.com/arcofdescent1/knownrobot/tree/v1.1.0#robot-skill-validator">Read the CLI guide ↗</a>
-          <a href="https://raw.githubusercontent.com/arcofdescent1/knownrobot/v1.1.0/embodied-registry/schema/robot-skill.schema.json">Download schema 1.0 ↗</a>
+          <a className="primary-link lime" href="https://github.com/arcofdescent1/knownrobot/blob/main/docs/validator.md">Read the CLI guide ↗</a>
+          <a href="/schema/robot-skill/1.0.json">Download schema 1.0 ↗</a>
+          <a href="https://github.com/arcofdescent1/knownrobot/blob/main/docs/distribution.md">Reusable GitHub Action and portable credit guide ↗</a>
+          <Link href="/adapters">Inspect adapter ownership →</Link>
+          <Link href="/corrections">Corrections and disputes →</Link>
           <Link href="/participate">Report a transfer failure →</Link>
         </div>
       </section>

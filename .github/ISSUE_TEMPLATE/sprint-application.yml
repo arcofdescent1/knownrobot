@@ -1,12 +1,19 @@
 name: Reproduction Sprint application
 description: Apply as a team for the current two-week policy reproduction sprint.
-title: "Sprint 01 application: [team name]"
+title: "Sprint application: [sprint / team name]"
 labels: ["reproduction-sprint", "application"]
 body:
   - type: markdown
     attributes:
       value: |
-        Apply by September 18, 2026 for Known Robot Sprint 01. Applications are public. Do not include email addresses, credentials, serial numbers, private facility details, or safety-sensitive information.
+        Check https://knownrobot.com/sprints for the current deadline and proposed protocol. Applications are public and do not count as confirmed participation. Selected team leads must post the exact configuration-bound consent token described in the operating handbook. Do not include email addresses, credentials, serial numbers, private facility details, or safety-sensitive information.
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint ID and public GitHub team lead
+      description: For example sprint-01 / @your-handle. This person must personally confirm participation.
+    validations:
+      required: true
   - type: input
     id: team
     attributes:
@@ -40,13 +47,13 @@ body:
     attributes:
       label: Team commitments
       options:
-        - label: We can attend or review the September 21 kickoff material.
+        - label: We can attend or review the scheduled kickoff material and agree the frozen protocol before counted trials.
           required: true
         - label: We will publish a robot-skill manifest, including an incomplete or failed result.
           required: true
         - label: We will file compatibility failures as they occur and respond during the two-week window.
           required: true
-        - label: We permit Embodied Registry to include our public evidence and team name in the joint report.
+        - label: We permit Known Robot to include our public evidence and team name in the joint report.
           required: true
         - label: We will operate our hardware under our own safety procedures, with an emergency stop and no people in the operating envelope.
           required: true

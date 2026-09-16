@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "CommonJS", "moduleResolution": "node",
+    "rootDir": "..", "outDir": "../.test-build", "strict": true, "resolveJsonModule": true,
+    "esModuleInterop": true, "skipLibCheck": true
+  },
+  "include": ["../src/lib/evidence-contract.ts", "../src/lib/registry-reader.ts", "../src/lib/demo-data.ts", "../src/lib/sprint-contract.ts", "../src/lib/sprint-calendar.ts", "../src/lib/distribution.ts", "../src/lib/adapter-contract.ts", "../src/lib/seo.ts"]
+}

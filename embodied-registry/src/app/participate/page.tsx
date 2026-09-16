@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = { title: "Participate — Known Robot", description: "Share a robot-policy transfer experience or apply as a founding Known Robot design partner." };
+export const metadata: Metadata = pageMetadata("/participate", "Participate — Known Robot", "Share a robot-policy transfer experience or apply as a founding Known Robot design partner.");
 
 const repo = "https://github.com/arcofdescent1/knownrobot";
 

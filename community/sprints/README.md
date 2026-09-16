@@ -1,6 +1,8 @@
 # Reproduction Sprint operating handbook
 
-Known Robot runs one two-week public reproduction study each month. Every sprint uses one immutable policy revision, a declared task, three to five materially different hardware configurations, and a joint report that includes failures.
+Known Robot plans a monthly two-week public reproduction study. No sprint starts merely because its date arrives. Every sprint requires an immutable policy revision, agreed protocol, three to five committed teams with materially different configurations, and named independent reviewers. The current roster and readiness blockers are published at https://knownrobot.com/sprints.
+
+The complete [operating-record, consent, automation and release runbook](../../docs/sprint-operations.md) describes the implemented workflow and exact commands. It is required reading for event leads and reviewers.
 
 ## Roles
 
@@ -9,13 +11,13 @@ Known Robot runs one two-week public reproduction study each month. Every sprint
 - **Team lead:** owns hardware safety, submits one manifest and evidence issue, and responds to clarification requests.
 - **Adapter maintainer:** reviews changes that translate observation or action contracts; this role may be held by a team lead.
 
-The event lead and evidence reviewer must be named in the sprint brief before applications open. A policy author may participate but may not be the sole evidence reviewer.
+The event lead and at least two evidence reviewers must personally confirm their roles before kickoff. Reviewers must be independent of participating teams and the source publisher; organizational conflicts require human checks. Applications alone do not establish participation. No owners are inferred from the phrase “Known Robot maintainers.”
 
 ## Monthly gates
 
 1. **Selection:** choose a public artifact with an immutable revision, a feasible low-cost embodiment, and a testable task.
 2. **Recruitment:** accept three to five teams based on configuration diversity and ability to publish evidence—not on expected success.
-3. **Kickoff:** freeze the protocol and document open questions. Any later change is versioned and disclosed.
+3. **Kickoff:** freeze the protocol and pre-trial configurations with matching consent; the named event lead explicitly starts the ready cohort. Stop and separately label changed cohorts rather than rewriting an active protocol or pooling counts.
 4. **Execution:** teams file a public evidence issue as soon as they finish or become blocked. Failures are not held until the end.
 5. **Review:** the reviewer checks arithmetic, artifact identity, declared configuration, intervention counts, and evidence links.
 6. **Results:** hold a public session, record corrections, and distinguish completed, failed, blocked, and unsafe-to-continue attempts.
@@ -26,7 +28,7 @@ The event lead and evidence reviewer must be named in the sprint brief before ap
 - Counts include every trial begun under the declared protocol.
 - Exclusions, resets, human interventions, and protocol changes are explicit.
 - Success percentages are derived from success and trial counts.
-- “Reproduced” requires a team independent of the policy publisher.
+- A sprint review is not registry verification. “Reproduced” requires the separately authorized, attributable independent review process.
 - A blocked or unsafe attempt is a publishable result.
 - Videos illustrate behavior but do not replace manifests, counts, or logs.
 - Private data, credentials, device serial numbers, facility layouts, and exploitable safety details stay private.

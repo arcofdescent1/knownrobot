@@ -1,31 +1,31 @@
-import { demoEvaluations } from "./demo-data";
+import "server-only";
+import { cache } from "react";
 import { getPublicSupabaseClient } from "./supabase/server";
-import type { EvaluationSummary, VerificationStatus } from "./types";
+import { emptyRegistry, type RegistryFilters, type RegistryResult } from "./evidence-contract";
+import { readRegistry, readEvaluation, type DetailResult } from "./registry-reader";
+import { demoRecord } from "./demo-data";
 
-type EvaluationRow = {
-  id: string; slug: string; skill_name: string; author_name: string; robot_family: string;
-  framework: string; success_rate: number; trial_count: number; reproduction_count: number;
-  verification_status: VerificationStatus;
-};
+const readPublicList = cache(async (query: string, status: string, page: number): Promise<RegistryResult> => {
+  const filters = { query, status, page };
+  if (process.env.KNOWNROBOT_REGISTRY_MODE === "demo") {
+    const matches = (!filters.query || [demoRecord.skill.name, demoRecord.hardware.robot_family].join(" ").toLowerCase().includes(filters.query.toLowerCase())) && (!filters.status || filters.status === "self_tested");
+    return { state: "demo", filters, data: { total: matches ? 1 : 0, stats: { evaluations: 1, hardware: 1, contributors: 1 }, records: matches && filters.page === 1 ? [demoRecord] : [] } };
+  }
+  try {
+    const client = getPublicSupabaseClient();
+    if (!client) return { state: "unconfigured", data: emptyRegistry, filters };
+    return await readRegistry(client, filters);
+  } catch { return { state: "unavailable", data: emptyRegistry, filters }; }
+});
 
-export async function listEvaluations(): Promise<{ evaluations: EvaluationSummary[]; demo: boolean }> {
-  const supabase = getPublicSupabaseClient();
-  if (!supabase) return { evaluations: demoEvaluations, demo: true };
-
-  const { data, error } = await supabase
-    .from("evaluation_summaries")
-    .select("id,slug,skill_name,author_name,robot_family,framework,success_rate,trial_count,reproduction_count,verification_status")
-    .order("published_at", { ascending: false })
-    .limit(30);
-
-  if (error || !data?.length) return { evaluations: demoEvaluations, demo: true };
-  return {
-    demo: false,
-    evaluations: (data as EvaluationRow[]).map((row) => ({
-      id: row.id, slug: row.slug, skill: row.skill_name, author: row.author_name,
-      robot: row.robot_family, framework: row.framework, successRate: row.success_rate,
-      trialLabel: row.reproduction_count > 1 ? `${row.reproduction_count} reproductions` : `${row.trial_count} trials`,
-      status: row.verification_status,
-    })),
-  };
+export function listEvaluations(filters: RegistryFilters): Promise<RegistryResult> {
+  return readPublicList(filters.query, filters.status, filters.page);
 }
+
+export const getEvaluation = cache(async (id: string): Promise<DetailResult> => {
+  if (process.env.KNOWNROBOT_REGISTRY_MODE === "demo") return id === demoRecord.id ? { state: "demo", record: demoRecord, related: [] } : { state: "missing" };
+  try {
+    const client = getPublicSupabaseClient();
+    return client ? await readEvaluation(client, id) : { state: "unconfigured" };
+  } catch { return { state: "unavailable" }; }
+});

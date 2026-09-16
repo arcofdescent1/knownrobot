@@ -1,0 +1,28 @@
+name: Registry release checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: embodied-registry
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: embodied-registry/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run adapters:verify
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run test:smoke
+      - run: npm run test:preview

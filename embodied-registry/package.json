@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "tsc -p tests/tsconfig.json && node --test tests/registry.test.cjs tests/sprint.test.cjs tests/distribution.test.cjs",
+    "adapters:verify": "tsc -p tests/tsconfig.json && node scripts/adapter-ownership.cjs",
+    "sprint:check": "tsc -p tests/tsconfig.json && node scripts/sprint-operations.cjs check",
+    "sprint:verify": "tsc -p tests/tsconfig.json && node scripts/sprint-operations.cjs verify",
+    "sprint:operate": "tsc -p tests/tsconfig.json && node scripts/sprint-operations.cjs operate",
+    "test:smoke": "node tests/production-smoke.cjs",
+    "test:preview": "node tests/preview-smoke.cjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

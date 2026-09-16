@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { fieldNotes } from "@/lib/field-notes";
 
-export const metadata: Metadata = { title: "Field notes — Known Robot", description: "Public, evidence-linked notes on robot-policy transfer and reproducibility." };
+export const metadata: Metadata = pageMetadata("/field-notes", "Field notes — Known Robot", "Public, evidence-linked notes on robot-policy transfer and reproducibility.");
 
 export default function FieldNotesPage() {
   return <main><SiteHeader/><article className="editorial-page"><header className="editorial-hero"><p className="kicker">PUBLIC RESEARCH · SERIES 01</p><h1>Field notes from the transfer gap.</h1><p className="editorial-deck">Our baseline claims are published before interviews so practitioners can challenge them. After each five conversations, we will revise the evidence, preserve material disagreements, and record what changed.</p><div className="method-note"><strong>Method</strong><span>These first three notes synthesize public documentation, issue reports, and research—not private interviews. Sources and inference are labeled.</span></div></header>

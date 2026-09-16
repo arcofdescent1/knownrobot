@@ -1,7 +1,13 @@
-import type { EvaluationSummary } from "./types";
+import manifest from "../../schema/example.robot-skill.json";
+import { evidenceRecordSchema } from "./evidence-contract";
 
-export const demoEvaluations: EvaluationSummary[] = [
-  { id: "demo-cable", slug: "bimanual-cable-routing", skill: "Bimanual cable routing", author: "Atlas Lab", robot: "ALOHA 2", framework: "LeRobot · ACT", successRate: 91.2, trialLabel: "3 reproductions", status: "reproduced" },
-  { id: "demo-package", slug: "deformable-package-pick", skill: "Deformable package pick", author: "Open Manipulation", robot: "SO-101", framework: "LeRobot · SmolVLA", successRate: 87, trialLabel: "100 trials", status: "runner_verified" },
-  { id: "demo-drawer", slug: "drawer-object-retrieve", skill: "Drawer open + object retrieve", author: "Northstar Robotics", robot: "Franka FR3", framework: "ROS 2 · Diffusion", successRate: 78.6, trialLabel: "2 reproductions", status: "self_tested" },
-];
+// Explicit format example only. Never substituted for missing live records.
+export const demoRecord = evidenceRecordSchema.parse({
+  id: "example-so101", published_at: "2026-09-16T00:00:00Z",
+  evaluation: { success_rate: 87, trial_count: 100, result_digest: "illustrative-only", runtime: { outcome: "Illustrative result, not a real robot evaluation", failures: ["Example: object slipped during grasp"] }, evidence: [], review_version: 0 },
+  submitter: { id: "example-contributor", handle: null, display_name: "Illustrative contributor" },
+  skill: { id: "example-policy", slug: "example-so101", name: "SO-101 cube transfer — format example", summary: "Fictional record demonstrating the portable evidence format.", source_url: "", source_revision: manifest.skill.source.revision, framework: "lerobot", license: "apache-2.0", manifest },
+  hardware: { id: "example-hardware", robot_family: "SO-101", configuration: manifest.hardware },
+  benchmark: { id: "example-task", name: "Illustrative cube transfer", version: "1", protocol: { reset: "Example: place cube at a marked start position", success_predicate: "Example: cube remains in destination zone", intervention_policy: "Example: interventions count as failures" }, source_url: null },
+  verification_status: "self_tested", review_consistent: true, reviews: []
+});

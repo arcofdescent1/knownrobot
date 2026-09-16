@@ -1,0 +1,42 @@
+name: Hardware adapter ownership
+description: Propose a real, bounded maintenance commitment with tests and public accountability.
+title: "Adapter ownership: [adapter / robot family]"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A submission is a proposal, not confirmed maintenance. Read https://knownrobot.com/adapters and docs/distribution.md. Each named maintainer must personally post the exact generated ownership token in a public issue comment after the proposed record is prepared. Do not claim independent evaluation or safety certification from maintenance status.
+  - type: input
+    id: names
+    attributes:
+      label: Adapter name, robot family and public maintainer handles
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source repository, full immutable revision and license
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Supported hardware and software contract, scope and known limitations
+      description: Include robot/gripper/cameras, observations/actions, rate, version constraints and what you will not maintain.
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Immutable contract, tests/evidence links and public support/handoff issue
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Maintenance commitment
+      options:
+        - label: I can maintain this declared scope, respond publicly to failures and record breaking changes, handoffs or retirement.
+          required: true
+        - label: I will confirm the exact record personally and renew within 90 days or allow the ownership confirmation to expire.
+          required: true

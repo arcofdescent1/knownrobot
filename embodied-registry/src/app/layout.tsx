@@ -9,8 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://knownrobot.com"),
   title: "Known Robot — Evidence for robot skills",
   description: "A trusted, open registry for reproducible robot skills, hardware compatibility, and real-world evaluation evidence.",
-  alternates: { canonical: "/" },
-  openGraph: { type: "website", siteName: "Known Robot", title: "Known Robot", description: "Know what works before the robot moves.", url: "https://knownrobot.com" },
+  openGraph: { type: "website", siteName: "Known Robot", title: "Known Robot", description: "Know what works before the robot moves." },
   twitter: { card: "summary_large_image", title: "Known Robot", description: "Know what works before the robot moves." },
 };
 

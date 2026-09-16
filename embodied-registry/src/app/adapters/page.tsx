@@ -1,0 +1,13 @@
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
+import { SiteHeader } from "@/components/site-header";
+import { adapters } from "@/lib/adapters";
+import { adapterState } from "@/lib/adapter-contract";
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = pageMetadata("/adapters", "Hardware adapter ownership — Known Robot", "Publicly confirmed adapter maintainers, supported contracts, immutable tests and support channels.");
+export default function AdaptersPage() {
+  return <><SiteHeader /><main className="evidence-page"><header className="editorial-hero"><p className="kicker">ACCOUNTABLE COMPATIBILITY</p><h1>Hardware adapters.</h1><p>A hardware-profile creator is not automatically an adapter maintainer. Ownership requires a named person, defined support scope, pinned implementation, inspectable tests and public confirmation.</p></header>
+    {!adapters.length ? <section className="empty-state"><h2>No confirmed adapter owners yet</h2><p>We do not imply that SO-100, SO-101 or another robot family has maintained compatibility without an actual commitment.</p></section> : adapters.map(a => <section key={a.id}><h2>{a.name}</h2><p>{a.robotFamily} · {adapterState(a)}</p><p>{a.scope}</p><p>Limitations: {a.limitations}</p><p>License: {a.license}</p><p>{a.maintainers.map(m => <a key={m.handle} href={m.comment}>@{m.handle} · public ownership confirmation ↗ </a>)}</p><p><a href={`${a.repository}/tree/${a.revision}`}>Pinned implementation ↗</a> · <a href={a.contract}>Supported contract ↗</a> · <a href={a.tests}>Tests and evidence ↗</a> · <a href={a.supportIssue}>Support / handoff issue ↗</a></p><p>Confirmation expires <time dateTime={a.expiresAt}>{a.expiresAt.slice(0,10)}</time>. This is a maintenance commitment, not independent robot evaluation or safety certification.</p></section>)}
+    <section><h2>Claim a real, bounded responsibility</h2><p>Propose ownership with source revision, robot/gripper/sensor and software constraints, tests, known limitations and a support issue. Each proposed maintainer personally confirms the contract digest in a public comment. Repository maintainers check the claim and merge the record; a form submission is not confirmed ownership.</p><p>Renew within 90 days, disclose breaking changes and record handoffs or retirement publicly. Expired confirmations are never displayed as current maintenance.</p><a href="https://github.com/arcofdescent1/knownrobot/issues/new?template=adapter-maintenance.yml">Propose adapter ownership →</a> · <a href="/adapters/record.json">Download portable ownership records →</a></section>
+  </main></>;
+}

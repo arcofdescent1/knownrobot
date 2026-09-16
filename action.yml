@@ -1,0 +1,61 @@
+name: Known Robot policy evidence
+description: Validate portable robot-policy metadata without running policy code or claiming physical reproduction.
+branding:
+  icon: check-circle
+  color: green
+inputs:
+  path:
+    description: Policy directory relative to the checked-out workspace
+    default: '.'
+  mode:
+    description: 'check (inspect repository) or validate (existing manifest)'
+    default: validate
+  manifest:
+    description: Existing manifest path relative to the policy directory
+    default: robot-skill.yaml
+  target:
+    description: Optional declared target profile relative to the policy directory
+    default: ''
+  level:
+    description: 'complete or structural (validate mode only)'
+    default: complete
+outputs:
+  exit-code:
+    description: 'Validator exit code: 0 pass, 2 incomplete/invalid, 1 operational error'
+    value: ${{ steps.validate.outputs.exit-code }}
+  report-path:
+    description: Diagnostics JSON in the isolated runner temporary directory
+    value: ${{ steps.validate.outputs.report-path }}
+  manifest-path:
+    description: Portable manifest copy in the isolated runner temporary directory, when valid
+    value: ${{ steps.validate.outputs.manifest-path }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v7
+      with:
+        python-version: '3.12'
+    - id: validate
+      shell: bash
+      env:
+        KR_ACTION_PATH: ${{ github.action_path }}
+        KR_POLICY_PATH: ${{ inputs.path }}
+        KR_MODE: ${{ inputs.mode }}
+        KR_MANIFEST: ${{ inputs.manifest }}
+        KR_TARGET: ${{ inputs.target }}
+        KR_LEVEL: ${{ inputs.level }}
+      run: python -I "$KR_ACTION_PATH/tools/action_runner.py"
+    - name: Preserve validator evidence even when validation fails
+      if: ${{ always() && steps.validate.outputs.report-directory != '' }}
+      uses: actions/upload-artifact@v6
+      with:
+        name: knownrobot-${{ github.job }}-${{ github.run_attempt }}-${{ steps.validate.outputs.artifact-id }}
+        path: ${{ steps.validate.outputs.report-directory }}
+        if-no-files-found: error
+        retention-days: 30
+    - name: Enforce validation gate
+      if: ${{ always() }}
+      shell: bash
+      env:
+        KR_EXIT_CODE: ${{ steps.validate.outputs.exit-code }}
+      run: python -I -c "import os,sys; value=os.environ.get('KR_EXIT_CODE',''); sys.exit(int(value) if value in ('0','1','2') else 1)"
