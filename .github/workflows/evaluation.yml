@@ -1,0 +1,29 @@
+name: Measured simulator evaluation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  simulator:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install '.[evaluation]'
+      - run: python -m unittest discover -s tests -v
+        env:
+          KNOWNROBOT_REQUIRE_SIM_TESTS: '1'
+      - run: robot-skill evaluate --help
+      - run: robot-skill verify-evaluation --help
+      - run: python -m pip wheel . --no-deps --wheel-dir dist
+      - run: python -m pip install --force-reinstall --no-deps dist/knownrobot-1.3.0-py3-none-any.whl
+      - name: Installed-wheel actual simulation outside checkout
+        working-directory: ${{ runner.temp }}
+        run: python "$GITHUB_WORKSPACE/tests/installed_evaluation_smoke.py" "$GITHUB_WORKSPACE/embodied-registry/schema/example.robot-skill.json"

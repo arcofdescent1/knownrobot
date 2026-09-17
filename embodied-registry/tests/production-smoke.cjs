@@ -90,7 +90,15 @@ async function main() {
     assert.ok(sprintHtml.includes('https://knownrobot.com/sprints'));
     const status = await fetch(origin + '/sprints/status.json');
     assert.equal(status.status, 200); assert.equal(status.headers.get('cache-control'), 'no-store');
-    assert.equal((await status.json()).state.ready, false);
+    const operating = await status.json();
+    assert.equal(operating.state.ready, false);
+    assert.equal(operating.proof.established, false);
+    assert.equal(operating.proof.confirmed_teams, 0);
+    const receipt = await fetch(origin + '/release.json');
+    assert.equal(receipt.status, 200);
+    assert.equal(receipt.headers.get('cache-control'), 'no-store');
+    assert.equal((await receipt.json()).format, 'knownrobot-release-receipt/1.0');
+    assert.equal((await fetch(`${origin}/evaluations/${liveId}/compatibility.json?page=0`)).status, 400);
     const calendar = await fetch(origin + '/reproduction-sprints.ics');
     assert.equal(calendar.status, 200); assert.match(calendar.headers.get('content-type'), /text\/calendar/);
     assert.equal((await calendar.text()).match(/STATUS:TENTATIVE/g).length, 2);
@@ -114,12 +122,16 @@ async function main() {
     const manifest = await fetch(origin + '/evaluations/example-so101/manifest.json');
     assert.equal((await manifest.json()).schema_version, '1.0');
     assert.equal((await fetch(origin + '/evaluations/nonexistent/record.json')).status, 404);
-    for (const exportPath of ['badge.svg', 'citation.json', 'credits.json']) assert.equal((await fetch(`${origin}/evaluations/example-so101/${exportPath}`)).status, 404);
+    for (const exportPath of ['badge.svg', 'citation.json', 'credits.json', 'compatibility.json']) assert.equal((await fetch(`${origin}/evaluations/example-so101/${exportPath}`)).status, 404);
   });
   console.log('PASS: example detail pages, noindex, manifest, complete record, and missing IDs');
   const api = http.createServer((request, response) => {
     if (request.url.startsWith('/live/')) {
       response.writeHead(200, { 'Content-Type': 'application/json' });
+      if (request.url.includes('public_policy_attempts')) {
+        response.end(JSON.stringify({ identity: { policy:'a'.repeat(64), hardware:'b'.repeat(64), protocol:'c'.repeat(64) }, page:1, total:0, records:[] }));
+        return;
+      }
       response.end(JSON.stringify(request.url.includes('public_registry_page') ? { total: 1, stats: { evaluations: 1, hardware: 1, contributors: 1 }, records: [liveRecord] } : request.url.includes('skill_id=') || !request.url.includes(liveId) ? [] : [{ record: liveRecord }]));
       return;
     }
@@ -144,6 +156,12 @@ async function main() {
       assert.ok(sitemap.includes(`<loc>https://knownrobot.com/evaluations/${liveId}</loc>`));
       assert.ok(!sitemap.includes('badge.svg')); assert.ok(!sitemap.includes('lastmod'));
       const page = await (await fetch(`${origin}/evaluations/${liveId}`)).text();
+      assert.ok(page.includes('What does the evidence say for this configuration?'));
+      const answerResponse = await fetch(`${origin}/evaluations/${liveId}/compatibility.json`);
+      assert.equal(answerResponse.status, 200);
+      const answer = await answerResponse.json();
+      assert.equal(answer.format, 'knownrobot-compatibility-answer/1.0');
+      assert.equal(answer.comparable_records_on_page, 0, 'Unknown execution and missing timeout are not comparable evidence');
       for (const section of ['Contribution credits', 'Test source author', 'Test registry publisher', 'CSL JSON', 'README / model-card badge']) assert.ok(page.includes(section), section);
       const badge = await fetch(`${origin}/evaluations/${liveId}/badge.svg`);
       assert.equal(badge.status, 200); assert.match(badge.headers.get('content-type'), /image\/svg\+xml/);

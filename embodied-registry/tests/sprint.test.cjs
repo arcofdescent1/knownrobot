@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { sprintSchema, sprintState, commitments, protocolDigest, teamDigest, evidenceDigest, hash, assertSprintTransition } = require("../.test-build/src/lib/sprint-contract.js");
 const { sprintCalendar } = require("../.test-build/src/lib/sprint-calendar.js");
+const { communityProof } = require("../.test-build/src/lib/community-proof.js");
 const { tasks, verify, operate } = require("../scripts/sprint-operations.cjs");
 const source = require("../src/data/sprint-01.json");
 const fixture = () => structuredClone(source);
@@ -33,6 +34,28 @@ test("real record has no invented participants and never auto-starts", () => {
   const s = sprintSchema.parse(source);
   assert.equal(sprintState(s, new Date("2026-09-16")).ready, false);
   assert.equal(sprintState(s, new Date("2026-11-01")).status, "Not started — readiness requirements unmet");
+});
+test("community proof distinguishes reviewed blocked reports from measured reproduction loops", () => {
+  assert.equal(communityProof(sprintSchema.parse(source)).established, false);
+  const s = ready(); start(s); outcomes(s);
+  s.session = { notes: immutable, confirmation: confirmation(s.lead.handle, hash({ protocol: protocolDigest(s), notes: immutable })) };
+  s.report = { url: immutable, confirmation: confirmation(s.lead.handle, hash({ protocol: protocolDigest(s), url: immutable, evidence: s.teams.map(t => t.evidence) })) };
+  const now = new Date("2026-10-13");
+  assert.equal(communityProof(sprintSchema.parse(s), now).operating_status, "Completed");
+  assert.equal(communityProof(s, now).established, false);
+  assert.equal(communityProof(s, now).reviewed_measured_teams, 0);
+  for (const team of s.teams) {
+    team.evidence.outcome = "failed"; team.evidence.completed = 10;
+    const { reviews, ...snapshot } = team.evidence;
+    reviews.push({ ...reviews[0], comment: confirmation("reviewer-one", sha).comment, snapshot: structuredClone(snapshot), evidenceDigest: evidenceDigest(team.evidence), rationale: "Reviewed ten measured failures, not a transfer success claim." });
+  }
+  s.report.confirmation.digest = commitments(s).find(c => c.role === "REPORT").expected;
+  const proof = communityProof(sprintSchema.parse(s), now);
+  assert.equal(proof.established, true);
+  assert.equal(proof.reviewed_measured_teams, 3);
+  assert.equal(proof.reviewed_measured_physical_teams, 2);
+  s.teams[0].evidence.reviews.push({ ...s.teams[0].evidence.reviews.at(-1), decision: "changes_requested" });
+  assert.equal(communityProof(s, now).established, false);
 });
 test("readiness requires diversity, hardware, independent reviewers and fresh consent", () => {
   const s = ready(); assert.equal(sprintState(sprintSchema.parse(s)).ready, true);

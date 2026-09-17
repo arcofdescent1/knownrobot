@@ -1,0 +1,43 @@
+begin;
+update public.profiles set display_name='Identity tester' where id='00000000-0000-0000-0000-000000000001';
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+select public.create_identity_team('identity-test','Identity test','Disposable test team') as team \gset
+select verification_test.assert_true((select role='owner' from public.organization_members where organization_id=:'team' and profile_id=auth.uid()),'Team creation atomically grants exactly the creator ownership');
+select verification_test.denied('update public.profiles set handle=''new-handle'' where id=auth.uid()','P0001','Claimed handles cannot change');
+select verification_test.denied(format('select public.manage_identity_team(''leave'',%L)',:'team'),'P0001','Owner must transfer before leaving');
+select public.manage_identity_team('invite',:'team','user-2','admin');
+select verification_test.assert_true(not exists(select 1 from public.organization_members where organization_id=:'team' and profile_id='00000000-0000-0000-0000-000000000002'),'Invitation does not silently create membership');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+select public.manage_identity_team('accept',:'team');
+select verification_test.denied(format('select public.manage_identity_team(''invite'',%L,''user-3'',''admin'')',:'team'),'P0001','Admins cannot grant admin roles');
+select verification_test.denied(format('select public.manage_identity_team(''transfer'',%L,''user-1'')',:'team'),'P0001','Admins cannot transfer ownership');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+select public.manage_identity_team('transfer',:'team','user-2');
+select verification_test.assert_true((select count(*)=1 from public.organization_members where organization_id=:'team' and role='owner'),'Ownership transfer leaves exactly one owner');
+select jsonb_build_object('name','Test policy','summary','Realistic test metadata for authorization only','source_url','https://example.com/policy','source_revision',repeat('a',40),'framework','LeRobot','license','MIT','robot_family','SO-101','benchmark_name','Test benchmark','benchmark_version','1','manifest','{"framework":"LeRobot"}'::jsonb,'configuration','{"robot":"SO-101"}'::jsonb,'protocol','{"trials":10}'::jsonb,'runtime','{"outcome":"completed"}'::jsonb,'evidence','[{"label":"Trial evidence","url":"https://example.com/trials"}]'::jsonb,'trial_count',10,'success_count',7,'verification_status','verified')::text as payload \gset
+select jsonb_set(:'payload'::jsonb,'{manifest}',(select manifest from verification_test.manifest_fixture))::text as payload \gset
+select public.submit_identity_evaluation('55000000-0000-0000-0000-000000000013',jsonb_set(jsonb_set(jsonb_set(:'payload'::jsonb,'{source_url}','"https://huggingface.co/Test/Policy"'::jsonb),'{manifest,skill,source,type}','"huggingface"'::jsonb),'{manifest,skill,source,repository}','"Test/Policy"'::jsonb),true,true);
+select verification_test.assert_true(exists(select 1 from public.public_registry_records where id='55000000-0000-0000-0000-000000000013'),'Portable HF repository identifiers resolve consistently at publication');
+select verification_test.denied(format('select public.submit_identity_evaluation(''55000000-0000-0000-0000-000000000010'',%L::jsonb,false,true)',jsonb_set(:'payload'::jsonb,'{manifest}','{"policy":"ACT"}'::jsonb)), '22023','Direct RPC rejects a structurally invalid draft');
+select public.submit_identity_evaluation('55000000-0000-0000-0000-000000000011',jsonb_set(:'payload'::jsonb,'{manifest,dataset,revision}','null'::jsonb),false,true);
+select verification_test.denied('select public.publish_identity_draft(''55000000-0000-0000-0000-000000000011'')','22023','Incomplete private draft cannot bypass publication contract');
+select verification_test.denied(format('select public.submit_identity_evaluation(''55000000-0000-0000-0000-000000000012'',%L::jsonb,true,true)',jsonb_set(:'payload'::jsonb,'{license}','"Apache-2.0"'::jsonb)), '22023','Publication rejects contradictory license metadata');
+select public.submit_identity_evaluation('55000000-0000-0000-0000-000000000001',:'payload'::jsonb,false,true);
+select public.submit_identity_evaluation('55000000-0000-0000-0000-000000000001',:'payload'::jsonb,false,true);
+select verification_test.assert_true((select verification_status='self_tested' and success_rate=70 and published_at is null from public.evaluations where id='55000000-0000-0000-0000-000000000001'),'Submission strips forged verification and preserves private draft');
+reset role;
+set local role anon;
+select set_config('request.jwt.claim.sub','',true);
+select verification_test.assert_true(not exists(select 1 from public.evaluations where id='55000000-0000-0000-0000-000000000001'),'Anonymous readers cannot see account drafts');
+select verification_test.denied('select public.publish_identity_draft(''55000000-0000-0000-0000-000000000001'')','42501','Anonymous publication denied');
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',true);
+select verification_test.denied('select public.publish_identity_draft(''55000000-0000-0000-0000-000000000001'')','P0001','Another account cannot publish a draft');
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',true);
+select public.publish_identity_draft('55000000-0000-0000-0000-000000000001');
+reset role;
+set local role anon;
+select verification_test.assert_true(exists(select 1 from public.public_registry_records where id='55000000-0000-0000-0000-000000000001'),'Consented publication creates a public attributable record');
+rollback;

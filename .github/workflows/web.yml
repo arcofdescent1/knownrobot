@@ -24,5 +24,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - run: npm run lint
       - run: npm run build
+      - run: npm run release:check
       - run: npm run test:smoke
       - run: npm run test:preview

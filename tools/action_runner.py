@@ -25,7 +25,7 @@ def validate(python: Path, workspace: Path, options: dict[str, str], reports: Pa
     if not policy.is_dir():
         raise ValueError("Policy directory does not exist")
     mode, level = options["mode"], options["level"]
-    if mode not in ("check", "validate") or level not in ("complete", "structural"):
+    if mode not in ("check", "validate") or level not in ("complete", "structural", "publishable"):
         raise ValueError("Unknown mode or validation level")
     command = [str(python), "-I", "-m", "robot_skill", mode]
     if mode == "check":

@@ -23,6 +23,17 @@ export const registryPageSchema = z.object({ total: z.number().int().nonnegative
   stats: z.object({ evaluations: z.number().int().nonnegative(), hardware: z.number().int().nonnegative(), contributors: z.number().int().nonnegative() }),
   records: z.array(evidenceRecordSchema) });
 export type EvidenceRecord = z.infer<typeof evidenceRecordSchema>;
+export function isSimulation(record: EvidenceRecord) {
+  return record.evaluation.runtime.execution === "simulation" || record.hardware.configuration.execution === "simulation";
+}
+const graphKey = z.string().regex(/^[a-f0-9]{64}$/).nullable();
+export const policyAttemptsSchema = z.object({
+  identity: z.object({ policy: graphKey, hardware: graphKey, protocol: graphKey }),
+  page: z.number().int().min(1).max(100000),
+  total: z.number().int().nonnegative(),
+  records: z.array(z.object({ record: evidenceRecordSchema, same_hardware: z.boolean(), same_protocol: z.boolean() })).max(30),
+});
+export type PolicyAttempts = z.infer<typeof policyAttemptsSchema>;
 export type RegistryPage = z.infer<typeof registryPageSchema>;
 export type RegistryFilters = { query: string; status: string; page: number };
 export type RegistryResult = { state: "live" | "demo" | "unconfigured" | "unavailable"; data: RegistryPage; filters: RegistryFilters };

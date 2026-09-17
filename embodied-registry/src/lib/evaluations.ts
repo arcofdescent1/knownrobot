@@ -22,10 +22,10 @@ export function listEvaluations(filters: RegistryFilters): Promise<RegistryResul
   return readPublicList(filters.query, filters.status, filters.page);
 }
 
-export const getEvaluation = cache(async (id: string): Promise<DetailResult> => {
-  if (process.env.KNOWNROBOT_REGISTRY_MODE === "demo") return id === demoRecord.id ? { state: "demo", record: demoRecord, related: [] } : { state: "missing" };
+export const getEvaluation = cache(async (id: string, page = 1): Promise<DetailResult> => {
+  if (process.env.KNOWNROBOT_REGISTRY_MODE === "demo") return id === demoRecord.id ? { state: "demo", record: demoRecord, related: [], graph: null } : { state: "missing" };
   try {
     const client = getPublicSupabaseClient();
-    return client ? await readEvaluation(client, id) : { state: "unconfigured" };
+    return client ? await readEvaluation(client, id, page) : { state: "unconfigured" };
   } catch { return { state: "unavailable" }; }
 });

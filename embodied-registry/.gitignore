@@ -44,3 +44,4 @@ next-env.d.ts
 .vercel
 /.test-build/
 /supabase/.temp/
+/src/data/release.generated.json

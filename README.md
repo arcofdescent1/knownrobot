@@ -42,6 +42,25 @@ See the [public validator guide](https://knownrobot.com/validator), [JSON Schema
 
 The inspector reads only the supplied directory. It never executes policy code, imports the target repository, contacts a registry, or sends telemetry. Python 3.10–3.12 is supported on Linux, macOS, and Windows.
 
+## Measured local evaluation
+
+Version 1.3.0 adds a separate, explicitly enabled simulation runner:
+
+```sh
+python -m pip install '.[evaluation]'
+robot-skill evaluate evaluation.yaml --allow-execution --output evidence/run-01
+robot-skill verify-evaluation evidence/run-01
+```
+
+It executes actual policies in Fetch pick-and-place or reach simulations, records
+every seeded attempt and failure, measures inference latency, and exports portable
+evidence and eligible registry submissions. NumPy MLP archives are non-pickled;
+Python policy factories additionally require `--trust-policy` and a reviewed,
+isolated local environment. No physical robot or hosted execution is provided.
+Simulation success is not SO-101 compatibility, physical safety, or independent
+verification. See the [evaluation guide](docs/evaluation.md) for configuration,
+execution boundaries, protocols, evidence integrity and publication.
+
 ## Monthly Reproduction Sprints
 
 The community runs one two-week, multi-hardware reproduction study each month. Every sprint freezes one public policy revision, recruits three to five materially different configurations, publishes failures as they occur, holds a public results session, and produces a reviewed joint report.

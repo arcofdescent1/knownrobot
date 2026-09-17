@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = pageMetadata("/validator", "Robot Policy Validator for LeRobot — Known Robot", "Check LeRobot policy metadata, compare declared hardware configurations, and generate robot-skill.yaml for GitHub or Hugging Face. CLI quickstart and CI guide.");
 
-const install = "pipx install .  # from the Known Robot 1.2.0 checkout";
+const install = "pipx install .  # from the Known Robot 1.3.0 checkout";
 
 export default function ValidatorPage() {
   return <>
@@ -13,7 +13,7 @@ export default function ValidatorPage() {
     <main className="validator-page">
       <section className="validator-hero">
         <div>
-          <p className="kicker">OPEN UTILITY · VERSION 1.2.0 RELEASE CANDIDATE</p>
+          <p className="kicker">OPEN UTILITY · VERSION 1.3.0</p>
           <h1>Validate robot-policy reproducibility.</h1>
           <p className="editorial-deck">Check a LeRobot policy repository before attempting reproduction on an SO-100 or SO-101 arm. The validator inventories reproducibility evidence, writes a portable <code>robot-skill.yaml</code>, and identifies missing metadata. Configuration comparison does not prove physical transfer or safe operation.</p>
         </div>
@@ -59,6 +59,17 @@ export default function ValidatorPage() {
           <div><strong>JSON diagnostics</strong><p><code>--format json</code> returns stable finding codes, paths, severities, and a summary for CI.</p></div>
         </div>
         <p>Use <code>--target ./target.yaml --no-write --format json</code> to compare declared configurations. Equal shapes alone are not sufficient: feature semantics and calibration matter. A match never establishes safe physical transfer or independent reproduction.</p>
+      </section>
+
+      <section className="behavior-section" id="measured-evaluation">
+        <p className="section-number">04 / MEASURED SIMULATION</p>
+        <h2>Run the policy. Preserve every outcome.</h2>
+        <p>The separate local evaluator executes actual policy inference in <code>FetchPickAndPlace-v4</code> or <code>FetchReach-v4</code> using Gymnasium Robotics and MuJoCo. It records seeded resets, observations, actions, final simulator success signals, failures and inference latency. This is Fetch simulation evidence—not SO-101 physical compatibility or safety certification.</p>
+        <pre className="evidence-json"><code>{`python -m pip install '.[evaluation]'\nrobot-skill evaluate evaluation.yaml --allow-execution --output evidence/run-01\nrobot-skill verify-evaluation evidence/run-01`}</code></pre>
+        <p>Use a real Fetch manifest and actual policy artifact. Your YAML/JSON configuration declares <code>format: knownrobot-evaluation/1.0</code>, <code>environment</code>, planned <code>trials</code>, initial <code>seed</code>, <code>max_steps</code>, <code>trial_timeout_seconds</code>, a relative <code>manifest</code> path and a <code>policy</code> object containing <code>kind</code>, relative <code>path</code> and the actual file <code>sha256</code>.</p>
+        <p>Policies may be NumPy MLP archives or reviewed local Python factories. Python execution additionally requires <code>--trust-policy</code>: arbitrary policy code is not sandboxed. Use an isolated environment without secrets or attached hardware. Metadata validation still never executes code.</p>
+        <p>Bundles include the complete trial ledger, execution traces, input hashes, package versions and checksum inventory. Failed trials are retained. Integrity checks do not establish independent verification. Add <code>--evidence-url</code> with your chosen HTTPS bundle location to generate an eligible <code>submission.json</code>; publish the complete evidence in your existing repository and review attribution before submission.</p>
+        <p><a href="https://github.com/arcofdescent1/knownrobot/blob/main/docs/evaluation.md">Complete evaluation configuration, policy interface and publication guide ↗</a> · <Link href="/submit">Submit measured evidence →</Link></p>
       </section>
 
       <section className="validator-actions">

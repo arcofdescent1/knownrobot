@@ -1,4 +1,8 @@
-# robot-skill 1.2.0
+# robot-skill metadata validation
+
+Release 1.3.0 also provides a separate [measured simulation runner](evaluation.md).
+The execution boundaries below still apply to `check` and `validate`; execution
+requires the distinct `evaluate --allow-execution` command.
 
 This release fixes validator correctness and adds conservative target comparison.
 The manifest schema remains 1.0; the packaged and public schema are identical and
@@ -9,7 +13,7 @@ dependency filenames no longer count as complete reproducibility metadata.
 
 From a checkout of this release, `pipx install .` installs the `robot-skill` command
 in an isolated environment. Distributors can build with `python -m pip wheel .
---no-deps` and install the resulting `knownrobot-1.2.0-py3-none-any.whl`. Python
+--no-deps` and install the resulting `knownrobot-1.3.0-py3-none-any.whl`. Python
 3.10–3.12 is supported; CI runs the suite and installed-wheel smoke test across
 Linux, macOS, and Windows.
 
@@ -49,7 +53,7 @@ document on stdout. No invalid manifest is written.
 
 Default `check` allows a semantically valid incomplete draft (exit 0). Invalid
 structure or semantics always exits 2. `check --strict` and default `validate`
-exit 2 for incomplete metadata. `validate --level structural` intentionally allows
+exit 2 for incomplete metadata. `validate --level publishable` enforces the shared registry publication contract, including immutable dataset provenance, named feature mappings and a resolved dependency environment. Conditional requirements must be resolved for the actual target environment before publication. An explicitly empty sensor array is valid for state-only simulation. Publication completeness is not independent verification or a safety certification. `validate --level structural` intentionally allows
 incomplete metadata while still rejecting impossible results. Input, parsing, and
 output errors exit 1. Supplying `--target` exits 2 for mismatches or unknowns.
 

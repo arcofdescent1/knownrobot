@@ -48,7 +48,7 @@ def _nested(data: Any, paths: Iterable[str]) -> Any:
     return None
 
 
-def _load_existing(path: Path) -> dict[str, Any]:
+def _load_existing(path: Path, *, limit: int = 1_000_000) -> dict[str, Any]:
     class ManifestLoader(yaml.SafeLoader):
         def compose_node(self, parent, index):
             if self.check_event(yaml.events.AliasEvent):
@@ -72,7 +72,7 @@ def _load_existing(path: Path) -> dict[str, Any]:
         return unique_pairs([(loader.construct_object(key), loader.construct_object(value)) for key, value in node.value])
     ManifestLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, mapping)
     try:
-        data = json.loads(_read_text(path), object_pairs_hook=unique_pairs) if path.suffix == ".json" else yaml.load(_read_text(path), Loader=ManifestLoader)
+        data = json.loads(_read_text(path, limit), object_pairs_hook=unique_pairs) if path.suffix == ".json" else yaml.load(_read_text(path, limit), Loader=ManifestLoader)
     except (json.JSONDecodeError, yaml.YAMLError, RecursionError) as exc:
         raise ValueError(f"could not parse {path.name}: {exc}") from exc
     if not isinstance(data, dict):

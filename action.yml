@@ -17,7 +17,7 @@ inputs:
     description: Optional declared target profile relative to the policy directory
     default: ''
   level:
-    description: 'complete or structural (validate mode only)'
+    description: 'complete, structural or publishable (validate mode only)'
     default: complete
 outputs:
   exit-code:

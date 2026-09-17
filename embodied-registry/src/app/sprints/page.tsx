@@ -3,6 +3,7 @@ import { pageMetadata } from "@/lib/seo";
 import { SiteHeader } from "@/components/site-header";
 import { sprint, currentSprintView } from "@/lib/sprints";
 import { teamDigest, protocolDigest } from "@/lib/sprint-contract";
+import { communityProof } from "@/lib/community-proof";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMetadata("/sprints", "Reproduction Sprints — Known Robot", "A public, accountable reproduction study: committed teams, frozen protocol, independent evidence review and joint reports.");
@@ -11,6 +12,7 @@ const date = (value: string) => new Intl.DateTimeFormat("en-US", { timeZone: "Am
 
 export default function SprintsPage() {
   const { state, applicationsOpen } = currentSprintView();
+  const proof = communityProof(sprint);
   return <>
     <SiteHeader />
     <main className="sprints-page">
@@ -32,6 +34,7 @@ export default function SprintsPage() {
         <p><a href="/sprints/status.json">Inspect the machine-readable operating record →</a></p>
       </section>
       <section className="sprint-contract" aria-labelledby="roster">
+        <div><h2>Measured community proof</h2><p>{proof.established ? "Reviewed measured community loop established" : "Measured community loop not yet established"}. {proof.reviewed_measured_teams}/3 reviewed measured teams; {proof.reviewed_measured_physical_teams}/2 reviewed physical teams.</p><p>A completed report of blocked attempts is useful community work, but not proof of measured policy execution. Distinct participants are not automatically proven independent organizations.</p><ul>{proof.blockers.map(blocker => <li key={blocker}>{blocker}</li>)}</ul></div>
         <div><p className="section-number">02 / PUBLIC ROSTER</p><h2 id="roster">Actual commitments, not expressions of interest.</h2></div>
         {!sprint.teams.length ? <p>No teams have publicly confirmed participation yet. Applications are not counted as commitments.</p> : <div className="contract-grid">{sprint.teams.map(t => <article key={t.id}>
           <h3>{t.name}</h3><p>@{t.lead.handle} · {t.physical ? "Physical hardware" : "Simulation"}</p><p>{t.configuration}</p>

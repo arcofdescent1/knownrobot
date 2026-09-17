@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "required": ["skill.version", "skill.license", "skill.source.repository", "skill.source.revision", "policy.framework", "policy.framework_version", "policy.architecture", "hardware.robot_family", "hardware.gripper", "runtime.control_frequency_hz", "runtime.observation_shape", "runtime.action_shape", "runtime.dependencies", "dataset.repository", "dataset.revision", "dataset.schema"],
+  "patterns": {
+    "skill.source.revision": "^(?:sha256:)?(?:[a-f0-9]{40}|[a-f0-9]{64})$",
+    "dataset.revision": "^(?:sha256:)?(?:[a-f0-9]{40}|[a-f0-9]{64})$",
+    "policy.framework_version": "^[0-9]+(?:\\.[0-9]+)+(?:[a-zA-Z0-9.+-]*)$"
+  },
+  "mappings": ["runtime.observation_shape", "runtime.action_shape", "dataset.schema"],
+  "dependency_pattern": "^(?:file:[^\\s#]+#sha256:[a-f0-9]{64}|[A-Za-z0-9][A-Za-z0-9._-]*(?:\\[[A-Za-z0-9,._-]+\\])?\\s*==\\s*[0-9]+(?:\\.[0-9]+)*(?:(?:a|b|rc|\\.post|\\.dev)[0-9]+)*(?:\\+[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*)?|[A-Za-z0-9][A-Za-z0-9._-]*(?:\\[[A-Za-z0-9,._-]+\\])?\\s+@\\s+(?:git\\+)?https://[^\\s;]+(?:@|sha256=)(?:[a-f0-9]{40}|[a-f0-9]{64})(?:[&#][^\\s;]*)?)$"
+}

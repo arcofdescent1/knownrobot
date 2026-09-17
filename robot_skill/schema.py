@@ -42,7 +42,7 @@ def validate_manifest(manifest: dict[str, Any]) -> list[Finding]:
         entries = shapes.values() if isinstance(shapes, dict) else [shapes]
         for shape in entries:
             dimensions = shape.get("shape") if isinstance(shape, dict) else shape
-            if not isinstance(dimensions, list) or not dimensions or any(type(d) is not int or d < 1 for d in dimensions):
+            if not isinstance(dimensions, list) or not dimensions or any(type(d) not in (int, float) or not math.isfinite(d) or d < 1 or int(d) != d for d in dimensions):
                 findings.append(Finding("runtime.invalid_shape", "Feature shapes must contain positive integer dimensions.", f"runtime.{field}"))
                 break
     dataset = manifest["dataset"]["schema"]
@@ -50,24 +50,18 @@ def validate_manifest(manifest: dict[str, Any]) -> list[Finding]:
         for key, feature in dataset.items():
             if isinstance(feature, dict):
                 dimensions = feature.get("shape")
-                if dimensions is not None and (not isinstance(dimensions, list) or any(type(d) is not int or d < 1 for d in dimensions)):
+                if dimensions is not None and (not isinstance(dimensions, list) or any(type(d) not in (int, float) or not math.isfinite(d) or d < 1 or int(d) != d for d in dimensions)):
                     findings.append(Finding("semantic.invalid", "Dataset shapes must contain positive integer dimensions.", f"dataset.schema.{key}"))
             elif not isinstance(feature, (str, list)):
                 findings.append(Finding("semantic.invalid", "Dataset features must declare a dtype/shape or named feature descriptor.", f"dataset.schema.{key}"))
-    from packaging.requirements import Requirement, InvalidRequirement
-    from packaging.utils import canonicalize_name
     versions = {}
     for dependency in manifest["runtime"]["dependencies"]:
-        try:
-            parsed = Requirement(dependency)
-        except InvalidRequirement:
-            continue
-        specs = list(parsed.specifier)
-        if len(specs) == 1 and specs[0].operator == "==" and "*" not in specs[0].version:
-            key = (canonicalize_name(parsed.name), str(parsed.marker))
-            if key in versions and versions[key] != specs[0].version:
+        pin = re.fullmatch(r"([A-Za-z0-9][A-Za-z0-9._-]*)(?:\[[A-Za-z0-9,._-]+\])?\s*==\s*([^*;\s]+)(?:\s*;\s*(.*))?", dependency)
+        if pin:
+            key = (re.sub(r"[-_.]+", "-", pin[1].lower()), re.sub(r"\s+", "", pin[3] or "").replace("'", '"'))
+            if key in versions and versions[key] != pin[2]:
                 findings.append(Finding("semantic.invalid", "Conflicting versions for the same dependency and marker.", "runtime.dependencies"))
-            versions[key] = specs[0].version
+            versions[key] = pin[2]
     return findings
 
 

@@ -37,9 +37,10 @@ jobs:
           else
             wheel_python="$RUNNER_TEMP/knownrobot-wheel/bin/python"
           fi
-          "$wheel_python" -m pip install dist/knownrobot-1.2.0-py3-none-any.whl
+          "$wheel_python" -m pip install dist/knownrobot-1.3.0-py3-none-any.whl
           mkdir -p "$RUNNER_TEMP/knownrobot-smoke"
           cp embodied-registry/schema/example.robot-skill.json "$RUNNER_TEMP/knownrobot-smoke/manifest.json"
           cd "$RUNNER_TEMP/knownrobot-smoke"
           "$wheel_python" -m robot_skill --version
           "$wheel_python" -m robot_skill validate manifest.json --format json
+          "$wheel_python" -m robot_skill validate manifest.json --level publishable --format json

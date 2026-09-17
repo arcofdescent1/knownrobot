@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["schema_version", "skill", "policy", "hardware", "runtime", "dataset", "compatibility", "evaluations"],
   "properties": {
+    "artifact_path": { "type": "string", "maxLength": 1024, "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*//)(?!.*[/]$)[^\\s\\\\]*$" },
     "schema_version": { "const": "1.0" },
     "attribution": { "type": "array", "maxItems": 100, "items": { "type": "object", "required": ["name", "role", "source_url"], "properties": { "name": { "type": "string", "minLength": 1, "pattern": "\\S" }, "role": { "enum": ["policy-author", "dataset-author", "adapter-author", "evaluation-author"] }, "source_url": { "type": "string", "format": "uri", "pattern": "^https://[^/?#@\\s]+(?:[/?#]|$)" } }, "additionalProperties": false } },
     "skill": { "type": "object", "required": ["name", "version", "source"], "properties": { "name": { "type": "string", "minLength": 1 }, "version": { "type": ["string", "null"] }, "license": { "type": ["string", "null"] }, "source": { "type": "object", "required": ["type", "repository", "revision"], "properties": { "type": { "enum": ["github", "huggingface", "oci", "local"] }, "repository": { "type": ["string", "null"] }, "revision": { "type": ["string", "null"] } }, "additionalProperties": false } }, "additionalProperties": false },

@@ -26,6 +26,13 @@ test("citations credit the evaluator without inventing policy authors or a DOI",
   assert.equal(c.version, r.evaluation.result_digest); assert.deepEqual(c.issued["date-parts"], [[2026, 9, 16]]);
   assert.equal(contributionCredits(r).publisher, null); assert.equal(contributionCredits(r).reviewers.length, 0);
 });
+test("simulation evidence stays explicit in shareable badges and citations", () => {
+  const r = record(); r.evaluation.runtime.execution="simulation";
+  assert.match(evidenceBadge(r),/Simulation · Self-reported/);
+  assert.match(citation(r).title,/simulation evaluation/);
+  delete r.evaluation.runtime.execution; r.hardware.configuration.execution="simulation";
+  assert.match(evidenceBadge(r),/Simulation/);
+});
 test("source authors require explicit attributable declarations and safe links", () => {
   const r = record(); r.skill.manifest.attribution = [{ name: "Original author", role: "policy-author", source_url: "https://example.org/paper" }];
   assert.equal(declaredSourceCredits(r).length, 1);

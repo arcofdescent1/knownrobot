@@ -7,6 +7,8 @@ from pathlib import Path
 import shutil
 import subprocess
 import uuid
+import json
+import copy
 
 
 def main() -> None:
@@ -21,9 +23,45 @@ def main() -> None:
     try:
         # Roles are cluster-global. A dedicated test cluster is required.
         subprocess.run(db + ["-f", str(root / "tests/bootstrap.sql")], check=True)
-        for migration in sorted((root / "migrations").glob("*.sql")):
+        migrations = sorted((root / "migrations").glob("*.sql"))
+        graph_migration = "202609180001_compatibility_graph.sql"
+        for migration in migrations:
+            if migration.name == graph_migration:
+                # Seed reviewed legacy records before applying the additive graph
+                # migration, so backfill is tested against real review snapshots.
+                subprocess.run(db + ["-v", "keep_fixture=1", "-f", str(root / "tests/verification.sql")], check=True)
+                subprocess.run(db + ["-c", "CREATE TABLE verification_test.before_graph AS SELECT "
+                    "r.id, r.record FROM public.public_registry_records r"], check=True)
+                fixture = json.loads((root.parent / "schema/example.robot-skill.json").read_text())
+                fixture["skill"]["source"] = {"type": "local", "repository": "https://example.com/policy", "revision": "a" * 40}
+                fixture["skill"]["license"] = "MIT"
+                encoded = json.dumps(fixture).replace("'", "''")
+                subprocess.run(db + ["-c", f"CREATE TABLE verification_test.manifest_fixture AS SELECT '{encoded}'::jsonb AS manifest; GRANT SELECT ON verification_test.manifest_fixture TO authenticated,anon"], check=True)
             subprocess.run(db + ["-f", str(migration)], check=True)
-        subprocess.run(db + ["-v", "keep_fixture=1", "-f", str(root / "tests/verification.sql")], check=True)
+        subprocess.run(db + ["-c", "SELECT verification_test.assert_true("
+            "NOT EXISTS (SELECT 1 FROM verification_test.before_graph old "
+            "FULL JOIN public.public_registry_records current USING(id) WHERE old.record IS DISTINCT FROM current.record),"
+            "'Graph backfill preserves exact published records and reviewed snapshots'); "
+            "SELECT verification_test.assert_true((SELECT count(*) FROM public.evaluation_graph)="
+            "(SELECT count(*) FROM public.evaluations),'Graph backfill includes every legacy evaluation')"], check=True)
+        subprocess.run(db + ["-f", str(root / "tests/identity.sql")], check=True)
+        subprocess.run(db + ["-f", str(root / "tests/compatibility_graph.sql")], check=True)
+        baseline = json.loads((root.parent / "schema/example.robot-skill.json").read_text())
+        for case in json.loads((root.parents[1] / "robot_skill/manifest-contract.cases.json").read_text()):
+            manifest = copy.deepcopy(baseline)
+            for path, replacement in case["changes"]:
+                keys = path.split(".")
+                target = manifest
+                for key in keys[:-1]:
+                    target = target[int(key)] if isinstance(target, list) else target[key]
+                if isinstance(target, list):
+                    target[int(keys[-1])] = replacement
+                else:
+                    target[keys[-1]] = replacement
+            encoded = json.dumps(manifest).replace("'", "''")
+            for complete, expected in [(False, case["valid"]), (True, case["complete"])]:
+                sql = "SELECT verification_test.assert_true((public.robot_manifest_errors('%s'::jsonb,%s)='[]'::jsonb)=%s,'Manifest vector: %s')" % (encoded, str(complete).lower(), str(expected).lower(), case["name"].replace("'", "''"))
+                subprocess.run(db + ["-c", sql], check=True)
         actor = "00000000-0000-0000-0000-000000000002"
         evaluation = "40000000-0000-0000-0000-000000000001"
         first_sql = f"""BEGIN;

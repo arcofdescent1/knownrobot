@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { evidenceRecordSchema, registryPageSchema, emptyRegistry, type RegistryFilters, type RegistryResult, type EvidenceRecord } from "./evidence-contract";
+import { evidenceRecordSchema, registryPageSchema, policyAttemptsSchema, emptyRegistry, type RegistryFilters, type RegistryResult, type EvidenceRecord, type PolicyAttempts } from "./evidence-contract";
 
-export type DetailResult = { state: "live" | "demo"; record: EvidenceRecord; related: EvidenceRecord[] } | { state: "missing" | "unconfigured" | "unavailable" };
+export type DetailResult = { state: "live" | "demo"; record: EvidenceRecord; related: EvidenceRecord[]; graph: PolicyAttempts | null } | { state: "missing" | "unconfigured" | "unavailable" };
 
 export async function readRegistry(client: SupabaseClient, filters: RegistryFilters): Promise<RegistryResult> {
   try {
@@ -12,17 +12,20 @@ export async function readRegistry(client: SupabaseClient, filters: RegistryFilt
   } catch { return { state: "unavailable", data: emptyRegistry, filters }; }
 }
 
-export async function readEvaluation(client: SupabaseClient, id: string): Promise<DetailResult> {
+export async function readEvaluation(client: SupabaseClient, id: string, page = 1): Promise<DetailResult> {
   if (!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(id)) return { state: "missing" };
+  if (!Number.isInteger(page) || page < 1 || page > 100000) return { state: "unavailable" };
   try {
-    const { data, error } = await client.from("public_registry_records").select("record").eq("id", id).maybeSingle().retry(false);
+    const [{ data, error }, related] = await Promise.all([
+      client.from("public_registry_records").select("record").eq("id", id).maybeSingle().retry(false),
+      client.rpc("public_policy_attempts", { p_id: id, p_page: page }).retry(false),
+    ]);
     if (error) return { state: "unavailable" };
     if (!data) return { state: "missing" };
     const parsed = evidenceRecordSchema.safeParse(data.record);
     if (!parsed.success) return { state: "unavailable" };
-    const related = await client.from("public_registry_records").select("record").eq("skill_id", parsed.data.skill.id).neq("id", id).order("published_at", { ascending: false }).limit(30).retry(false);
     if (related.error) return { state: "unavailable" };
-    const records = evidenceRecordSchema.array().safeParse((related.data ?? []).map(row => row.record));
-    return records.success ? { state: "live", record: parsed.data, related: records.data } : { state: "unavailable" };
+    const graph = policyAttemptsSchema.safeParse(related.data);
+    return graph.success && graph.data.page === page ? { state: "live", record: parsed.data, related: graph.data.records.map(attempt => attempt.record), graph: graph.data } : { state: "unavailable" };
   } catch { return { state: "unavailable" }; }
 }

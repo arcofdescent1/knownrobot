@@ -1,9 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getPublicSupabaseClient } from "./lib/supabase/server";
+import { refreshIdentity } from "./lib/supabase/session-proxy";
 
 // Check existence before loading.tsx streams a 200. Use only the public view:
 // private records and missing records must remain indistinguishable.
 export async function proxy(request: NextRequest) {
+  if (!request.nextUrl.pathname.startsWith("/evaluations/")) return refreshIdentity(request);
   const id = request.nextUrl.pathname.split("/")[2];
   if (id === "missing" || process.env.KNOWNROBOT_REGISTRY_MODE === "demo") return NextResponse.next();
   const missing = () => {
@@ -26,4 +28,4 @@ export async function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = { matcher: ["/evaluations/:id"] };
+export const config = { matcher: ["/evaluations/:id", "/account/:path*", "/submit/:path*", "/auth/:path*"] };
