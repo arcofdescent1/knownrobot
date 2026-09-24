@@ -1,6 +1,7 @@
-# robot-skill metadata validation
+# robot-skill metadata validation and external assessment
 
-Release 1.3.0 also provides a separate [measured simulation runner](evaluation.md).
+Release 1.4.0 adds a provenance-bound Hugging Face assessment workflow. Release
+1.3.0 also provides a separate [measured simulation runner](evaluation.md).
 The execution boundaries below still apply to `check` and `validate`; execution
 requires the distinct `evaluate --allow-execution` command.
 
@@ -13,7 +14,7 @@ dependency filenames no longer count as complete reproducibility metadata.
 
 From a checkout of this release, `pipx install .` installs the `robot-skill` command
 in an isolated environment. Distributors can build with `python -m pip wheel .
---no-deps` and install the resulting `knownrobot-1.3.0-py3-none-any.whl`. Python
+--no-deps` and install the resulting `knownrobot-1.4.0-py3-none-any.whl`. Python
 3.10–3.12 is supported; CI runs the suite and installed-wheel smoke test across
 Linux, macOS, and Windows.
 
@@ -24,6 +25,51 @@ robot-skill validate ./policy/robot-skill.yaml
 robot-skill validate ./policy/robot-skill.yaml --level structural
 robot-skill check ./policy --output - --format json
 ```
+
+## Non-executing Hugging Face assessment
+
+`assess-hf` turns one immutable model revision into a reviewable bundle without
+downloading checkpoint weights or executing policy code:
+
+```bash
+robot-skill assess-hf aadarshram/act_pusht \
+  --revision 6d403b142934aaef61fc07f5eec1515c4325751f \
+  --output assessments/aadarshram-act-pusht
+robot-skill verify-assessment assessments/aadarshram-act-pusht
+```
+
+Omit `--revision` only when intentionally assessing the repository's current
+HEAD. The command resolves it through the Hugging Face model API and records the
+returned full commit; a branch name or abbreviated SHA is never accepted as a
+pin. Supplying a revision verifies that the API resolves exactly that commit.
+
+The output directory must not exist. It contains:
+
+- `assessment.json`: the publication-ready external assessment record;
+- `manifest.json`: the generated portable manifest with verified Hugging Face
+  repository and commit provenance;
+- `checksums.json`: SHA-256 bindings for the canonical manifest and source-file
+  inventory; and
+- `source/`: the exact allowlisted metadata bytes used by the inspector.
+
+`verify-assessment` recomputes every binding, checks the retained metadata bytes,
+and confirms that the assessment, manifest, inventory and source revision agree.
+Integrity checking does not establish correctness, compatibility, evaluation or
+independent reproduction.
+
+For repository administrators, `--catalog
+embodied-registry/src/data/external-policy-assessments.json` appends the validated
+record to the data-driven public catalog. The catalog automatically supplies the
+listing, detail page, JSON downloads and sitemap URL. Existing slugs and existing
+provider/repository/revision identities are rejected; the catalog is written
+atomically. A normal reviewed code release is still required to publish the
+source-controlled catalog.
+
+Network access is restricted to `https://huggingface.co`. The fixed allowlist is
+limited to model cards, policy/training/dataset configuration, pre/postprocessor
+configuration and dependency declarations or locks. Each file is limited to 1 MB
+and the combined snapshot to 8 MB. Safetensors, pickle files, Python policy code,
+media and arbitrary sibling paths are never requested.
 
 The default output belongs to the supplied policy directory. Existing manifests
 are inspected in place, preserving comments and formatting. Explicit output paths

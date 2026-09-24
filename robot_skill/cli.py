@@ -25,6 +25,15 @@ def _parser() -> argparse.ArgumentParser:
     check.add_argument("--format", choices=("text", "json"), default="text", help="diagnostic output format")
     check.add_argument("--no-write", action="store_true", help="inspect without writing a manifest")
     check.add_argument("--strict", action="store_true", help="return exit code 2 when required evidence is missing")
+    assess = subparsers.add_parser("assess-hf", help="create a provenance-bound, non-executing assessment of a Hugging Face policy")
+    assess.add_argument("repository", help="Hugging Face model repository in owner/name form")
+    assess.add_argument("--revision", help="full 40-character commit SHA; current HEAD is resolved and pinned when omitted")
+    assess.add_argument("--output", "-o", required=True, help="new assessment-bundle directory; existing paths are never overwritten")
+    assess.add_argument("--title", help="public assessment title")
+    assess.add_argument("--summary", help="public assessment summary")
+    assess.add_argument("--catalog", help="atomically append the record to an existing Known Robot assessment catalog")
+    verify_assessment = subparsers.add_parser("verify-assessment", help="verify an external-assessment bundle, source snapshot and provenance binding")
+    verify_assessment.add_argument("bundle")
     validate = subparsers.add_parser("validate", help="validate an existing robot-skill YAML or JSON manifest")
     validate.add_argument("manifest", nargs="?", default="robot-skill.yaml")
     validate.add_argument("--format", choices=("text", "json"), default="text")
@@ -85,6 +94,20 @@ def _print_result(result, output_format: str, stream=None) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
+        if args.command == "verify-assessment":
+            from .assessment import verify_assessment_bundle
+            print(json.dumps(verify_assessment_bundle(Path(args.bundle)), indent=2, allow_nan=False))
+            return 0
+        if args.command == "assess-hf":
+            from .assessment import create_huggingface_assessment
+            record = create_huggingface_assessment(args.repository, args.revision, Path(args.output),
+                                                   title=args.title, summary=args.summary,
+                                                   catalog=Path(args.catalog) if args.catalog else None)
+            print(json.dumps({"status": record["assessment"]["status"], "record_type": record["record_type"],
+                              "slug": record["slug"], "source": record["source"], "binding": record["binding"],
+                              "output": str(Path(args.output).expanduser().resolve()),
+                              "catalog_updated": bool(args.catalog)}, indent=2, allow_nan=False))
+            return 0
         if args.command == "verify-evaluation":
             from .evaluation import verify_bundle
             print(json.dumps(verify_bundle(Path(args.bundle)), indent=2))

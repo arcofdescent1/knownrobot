@@ -44,7 +44,21 @@ The inspector reads only the supplied directory. It never executes policy code, 
 
 ## Measured local evaluation
 
-Version 1.3.0 adds a separate, explicitly enabled simulation runner:
+Version 1.4.0 adds a non-executing, provenance-bound Hugging Face assessment workflow:
+
+```bash
+robot-skill assess-hf aadarshram/act_pusht \
+  --revision 6d403b142934aaef61fc07f5eec1515c4325751f \
+  --output assessments/aadarshram-act-pusht
+robot-skill verify-assessment assessments/aadarshram-act-pusht
+```
+
+It downloads only allowlisted metadata, pins the full model commit in the manifest,
+retains file hashes and source bytes, and produces a publication-ready assessment
+record. It never downloads weights or executes policy code. See
+[`docs/validator.md`](docs/validator.md) for bundle and catalog publication details.
+
+Version 1.3.0 added a separate, explicitly enabled simulation runner:
 
 ```sh
 python -m pip install '.[evaluation]'

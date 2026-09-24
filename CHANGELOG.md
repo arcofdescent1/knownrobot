@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0 — 2026-09-24
+
+- Add `robot-skill assess-hf` for immutable, metadata-only Hugging Face assessments.
+- Bind generated manifests and allowlisted source snapshots with SHA-256 inventories.
+- Add `robot-skill verify-assessment` for offline bundle integrity checking.
+- Add optional atomic publication into the data-driven Known Robot assessment catalog.
+- Reject mutable or abbreviated revisions, untrusted repository identifiers, duplicate catalog identities, oversized metadata and non-allowlisted artifacts.
+
 ## 1.2.0 — release candidate
 
 - Give public routes self-canonical URLs and matching social metadata; exclude demos, filtered results, exports, errors and preview builds from indexing, with rendered-production and preview-build regression checks.

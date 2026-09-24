@@ -6,16 +6,16 @@ import { StructuredData } from "@/components/structured-data";
 
 export const metadata: Metadata = pageMetadata("/validator", "Robot Policy Validator for LeRobot — Known Robot", "Check LeRobot policy metadata, compare declared hardware configurations, and generate robot-skill.yaml for GitHub or Hugging Face. CLI quickstart and CI guide.");
 
-const install = "pipx install .  # from the Known Robot 1.3.0 checkout";
+const install = "pipx install .  # from the Known Robot 1.4.0 checkout";
 
 export default function ValidatorPage() {
   return <>
     <SiteHeader />
     <main className="validator-page">
-      <StructuredData value={{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Known Robot robot-skill validator", url: "https://knownrobot.com/validator", applicationCategory: "DeveloperApplication", operatingSystem: "Windows, macOS, Linux", softwareVersion: "1.3.0", description: "Open-source command-line validator for LeRobot policy reproducibility metadata and robot-skill.yaml manifests.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, license: "https://www.apache.org/licenses/LICENSE-2.0", codeRepository: "https://github.com/arcofdescent1/knownrobot" }}/>
+      <StructuredData value={{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Known Robot robot-skill validator", url: "https://knownrobot.com/validator", applicationCategory: "DeveloperApplication", operatingSystem: "Windows, macOS, Linux", softwareVersion: "1.4.0", description: "Open-source command-line validator for LeRobot policy reproducibility metadata and robot-skill.yaml manifests.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, license: "https://www.apache.org/licenses/LICENSE-2.0", codeRepository: "https://github.com/arcofdescent1/knownrobot" }}/>
       <section className="validator-hero">
         <div>
-          <p className="kicker">OPEN UTILITY · VERSION 1.3.0</p>
+          <p className="kicker">OPEN UTILITY · VERSION 1.4.0</p>
           <h1>Validate robot-policy reproducibility.</h1>
           <p className="editorial-deck">Check a LeRobot policy repository before attempting reproduction on an SO-100 or SO-101 arm. The validator inventories reproducibility evidence, writes a portable <code>robot-skill.yaml</code>, and identifies missing metadata. Configuration comparison does not prove physical transfer or safe operation.</p>
         </div>
@@ -72,6 +72,14 @@ export default function ValidatorPage() {
         <p>Policies may be NumPy MLP archives or reviewed local Python factories. Python execution additionally requires <code>--trust-policy</code>: arbitrary policy code is not sandboxed. Use an isolated environment without secrets or attached hardware. Metadata validation still never executes code.</p>
         <p>Bundles include the complete trial ledger, execution traces, input hashes, package versions and checksum inventory. Failed trials are retained. Integrity checks do not establish independent verification. Add <code>--evidence-url</code> with your chosen HTTPS bundle location to generate an eligible <code>submission.json</code>; publish the complete evidence in your existing repository and review attribution before submission.</p>
         <p><a href="https://github.com/arcofdescent1/knownrobot/blob/main/docs/evaluation.md">Complete evaluation configuration, policy interface and publication guide ↗</a> · <Link href="/submit">Submit measured evidence →</Link></p>
+      </section>
+
+      <section className="behavior-section" id="external-assessment">
+        <p className="section-number">05 / EXTERNAL ASSESSMENT</p>
+        <h2>Pin, inspect and publish without executing.</h2>
+        <p>The admin workflow resolves or verifies a full Hugging Face commit, downloads only allowlisted metadata, inserts verified repository provenance into the generated manifest, hashes every inspected file and emits a publication-ready assessment bundle.</p>
+        <pre className="evidence-json"><code>{`robot-skill assess-hf aadarshram/act_pusht \\\n+  --revision 6d403b142934aaef61fc07f5eec1515c4325751f \\\n+  --output assessments/aadarshram-act-pusht`}</code></pre>
+        <p>Add <code>--catalog embodied-registry/src/data/external-policy-assessments.json</code> to atomically append a new source revision to the data-driven public catalog. Existing slugs and source revisions are rejected. Checkpoint weights and policy code are never downloaded or executed.</p>
       </section>
 
       <section className="validator-actions">
