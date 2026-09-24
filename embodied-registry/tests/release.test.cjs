@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { receipt, releaseSourceAccepted } = require('../scripts/release-receipt.cjs');
+const { receipt, releaseSourceAccepted, releaseReceiptMatches } = require('../scripts/release-receipt.cjs');
 test('source-upload receipts preserve unknown cleanliness, exclude secrets and normalize text', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'knownrobot-release-test-'));
   const app = path.join(directory, 'embodied-registry');
@@ -37,4 +37,16 @@ test('release gate accepts only clean Git or commit-bound Vercel source snapshot
   assert.equal(releaseSourceAccepted({ scope:'application_snapshot_without_git', dirty:null, revision:'a'.repeat(40) }, { VERCEL:'1' }), true);
   assert.equal(releaseSourceAccepted({ scope:'application_snapshot_without_git', dirty:null, revision:null }, { VERCEL:'1' }), false);
   assert.equal(releaseSourceAccepted({ scope:'application_snapshot_without_git', dirty:null, revision:'a'.repeat(40) }, {}), false);
+});
+
+test('post-build snapshot checks preserve the pre-build digest while binding the commit', () => {
+  const revision = 'b'.repeat(40);
+  const built = { scope:'application_snapshot_without_git', dirty:null, revision, source_tree_sha256:'before-build' };
+  const current = { ...built, source_tree_sha256:'after-framework-build' };
+  assert.equal(releaseReceiptMatches(built, current, { VERCEL:'1', VERCEL_GIT_COMMIT_SHA:revision }), true);
+  assert.equal(releaseReceiptMatches(built, current, { VERCEL:'1', VERCEL_GIT_COMMIT_SHA:'c'.repeat(40) }), false);
+  assert.equal(releaseReceiptMatches(built, current, { VERCEL_GIT_COMMIT_SHA:revision }), false);
+  const clean = { scope:'git_repository', dirty:false, revision, source_tree_sha256:'same' };
+  assert.equal(releaseReceiptMatches(clean, { ...clean }, {}), true);
+  assert.equal(releaseReceiptMatches(clean, { ...clean, source_tree_sha256:'changed' }, {}), false);
 });
