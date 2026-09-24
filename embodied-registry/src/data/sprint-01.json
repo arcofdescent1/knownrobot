@@ -1,21 +1,21 @@
 {
   "id": "sprint-01",
   "title": "ACT SO-101 Pick-and-Place",
-  "updatedAt": "2026-09-16T00:00:00Z",
-  "calendarVersion": 1,
+  "updatedAt": "2026-09-24T00:00:00Z",
+  "calendarVersion": 2,
   "policy": {
     "repository": "legalaspro/act-so101-pick-place-cube-30hz-dec7-v2",
     "revision": "19b56a188f1c9ec578ddd07c058b12dd980b23ff"
   },
   "schedule": {
-    "applicationsOpen": "2026-09-08T00:00:00-06:00",
-    "applicationsClose": "2026-09-18T17:00:00-06:00",
-    "freeze": "2026-09-20T17:00:00-06:00",
-    "kickoff": "2026-09-21T10:00:00-06:00",
-    "evidence": "2026-10-04T23:59:00-06:00",
-    "review": "2026-10-07T17:00:00-06:00",
-    "results": "2026-10-08T10:00:00-06:00",
-    "report": "2026-10-12T17:00:00-06:00"
+    "applicationsOpen": "2026-09-24T00:00:00-06:00",
+    "applicationsClose": "2027-01-15T17:00:00-07:00",
+    "freeze": "2027-01-22T17:00:00-07:00",
+    "kickoff": "2027-01-25T10:00:00-07:00",
+    "evidence": "2027-02-14T23:59:00-07:00",
+    "review": "2027-02-21T17:00:00-07:00",
+    "results": "2027-02-25T10:00:00-07:00",
+    "report": "2027-03-05T17:00:00-07:00"
   },
   "protocol": {
     "task": "Pick a tabletop cube and release it fully inside a declared target region.",

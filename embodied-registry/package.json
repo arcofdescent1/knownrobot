@@ -7,7 +7,7 @@
     "build": "node scripts/release-receipt.cjs && next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node scripts/sync-manifest-contract.cjs --check && tsc -p tests/tsconfig.json && node --test tests/registry.test.cjs tests/sprint.test.cjs tests/distribution.test.cjs tests/release.test.cjs",
+    "test": "node scripts/sync-manifest-contract.cjs --check && tsc -p tests/tsconfig.json && node --test tests/registry.test.cjs tests/sprint.test.cjs tests/distribution.test.cjs tests/release.test.cjs tests/external-assessment.test.cjs",
     "adapters:verify": "tsc -p tests/tsconfig.json && node scripts/adapter-ownership.cjs",
     "sprint:check": "tsc -p tests/tsconfig.json && node scripts/sprint-operations.cjs check",
     "sprint:proof": "tsc -p tests/tsconfig.json && node scripts/community-proof.cjs",

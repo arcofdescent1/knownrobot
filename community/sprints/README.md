@@ -1,6 +1,6 @@
 # Reproduction Sprint operating handbook
 
-Known Robot plans a monthly two-week public reproduction study. No sprint starts merely because its date arrives. Every sprint requires an immutable policy revision, agreed protocol, three to five committed teams with materially different configurations, and named independent reviewers. The current roster and readiness blockers are published at https://knownrobot.com/sprints.
+KnownRobot plans public reproduction studies when their readiness gates are met; it does not force a monthly cadence before a real participant network exists. No sprint starts merely because its date arrives. Every sprint requires an immutable policy revision, agreed protocol, three to five committed teams with materially different configurations, and named independent reviewers. The current roster and readiness blockers are published at https://knownrobot.com/sprints.
 
 The complete [operating-record, consent, automation and release runbook](../../docs/sprint-operations.md) describes the implemented workflow and exact commands. It is required reading for event leads and reviewers.
 

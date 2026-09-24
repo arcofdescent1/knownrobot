@@ -13,7 +13,7 @@ export function RegistryClient({ result }: { result: RegistryResult }) {
       </aside>
       <div className="content">
         {state === "demo" && <div className="demo-ribbon" role="note">DEMONSTRATION ONLY · Fictional example, not published robot evidence. Statistics below count examples.</div>}
-        <div className="intro"><div><p className="kicker">OPEN ROBOT SKILL INDEX</p><h1>LeRobot policy compatibility.<br />Evidence before motion.</h1><p className="lede">Reproduce robot policies on low-cost manipulation arms, starting with SO-100 and SO-101. Inspect the configuration, protocol, evidence, failures, and independent review behind each published claim.</p></div>
+        <div className="intro"><div><p className="kicker">OPEN ROBOT SKILL INDEX</p><h1>LeRobot policy compatibility.<br />Evidence before motion.</h1><p className="lede">Reproduce robot policies on low-cost manipulation arms, starting with SO-100 and SO-101. Inspect the configuration, protocol, evidence, failures, and independent review behind each published claim.</p><p><Link href="/robot-policy-compatibility">Learn how to check whether a policy matches your robot →</Link></p></div>
           {connected && <div className="network-stat" aria-label={state === "demo" ? "Example statistics" : "Published registry statistics"}><div><strong>{data.stats.evaluations}</strong><span>evaluations</span></div><div><strong>{data.stats.hardware}</strong><span>hardware profiles</span></div><div><strong>{data.stats.contributors}</strong><span>contributors</span></div></div>}
         </div>
         {connected ? <>

@@ -4,6 +4,7 @@ export type FieldNote = {
   title: string;
   summary: string;
   published: string;
+  datePublished: string;
   readTime: string;
   sections: { heading: string; paragraphs: string[]; bullets?: string[] }[];
   sources: { label: string; href: string }[];
@@ -16,6 +17,7 @@ export const fieldNotes: FieldNote[] = [
     title: "Five reasons robot policies fail to transfer",
     summary: "A baseline synthesis of public LeRobot reports and cross-embodiment research, published before our first interview cycle so practitioners can challenge it.",
     published: "September 8, 2026",
+    datePublished: "2026-09-08",
     readTime: "6 min",
     sections: [
       { heading: "Transfer is a configuration problem before it is a model problem", paragraphs: ["A policy is usually discussed as though its weights contain the whole behavior. In practice, behavior emerges from a policy combined with calibration, sensor placement, action conventions, control timing, dependencies, and the physical task definition. A mismatch in any one layer can invalidate the result.", "Public LeRobot reports show that even calibration files and identifiers can determine whether an otherwise valid workflow moves safely. That makes configuration provenance part of the executable artifact, not supplementary documentation."] },
@@ -39,6 +41,7 @@ export const fieldNotes: FieldNote[] = [
     title: "What is missing from most robot-policy repositories",
     summary: "A practical inventory of the evidence needed to decide whether reproducing a policy is feasible before purchasing hardware or spending a week integrating it.",
     published: "September 8, 2026",
+    datePublished: "2026-09-08",
     readTime: "5 min",
     sections: [
       { heading: "A repository is not yet a reproducibility record", paragraphs: ["Source code and model weights are necessary, but they do not answer the decision a practitioner actually faces: will this specific artifact run on my specific setup, and what result should I expect?", "The missing information generally falls into six contracts. Each should be explicit, versioned, and separable from prose."] },
@@ -58,6 +61,7 @@ export const fieldNotes: FieldNote[] = [
     title: "The minimum reproducibility record for manipulation research",
     summary: "A deliberately small proposed record that can live beside an existing GitHub or Hugging Face repository without forcing anyone onto a new platform.",
     published: "September 8, 2026",
+    datePublished: "2026-09-08",
     readTime: "7 min",
     sections: [
       { heading: "Start with the smallest record that can disprove a claim", paragraphs: ["A first specification should not attempt to describe every robot. It should capture enough information to tell two genuinely different experiments apart and make failures diagnosable.", "The record belongs in the contributor’s existing repository. A registry should index and verify it, not demand custody of the policy."] },
@@ -79,6 +83,7 @@ export const fieldNotes: FieldNote[] = [
     title: "What the first robot-skill validator cannot infer",
     summary: "Release notes from turning the proposed reproducibility record into a working local inspector—and the evidence automation must not pretend to know.",
     published: "September 8, 2026",
+    datePublished: "2026-09-08",
     readTime: "4 min",
     sections: [
       { heading: "Automation should expose uncertainty", paragraphs: ["Version 1.0 can inventory configuration files, dependency declarations, repository identity, common framework and architecture markers, robot names, dataset references, shapes, sensors, and control frequency. It writes what it finds into a portable manifest.", "It deliberately uses null values and explicit findings when evidence is missing. Guessing a gripper, framework version, calibration, or success rate would make a clean-looking record less trustworthy than an incomplete one."] },

@@ -33,14 +33,14 @@ function outcomes(s) {
 test("real record has no invented participants and never auto-starts", () => {
   const s = sprintSchema.parse(source);
   assert.equal(sprintState(s, new Date("2026-09-16")).ready, false);
-  assert.equal(sprintState(s, new Date("2026-11-01")).status, "Not started — readiness requirements unmet");
+  assert.equal(sprintState(s, new Date("2026-11-01")).status, "Recruiting — kickoff not confirmed");
 });
 test("community proof distinguishes reviewed blocked reports from measured reproduction loops", () => {
   assert.equal(communityProof(sprintSchema.parse(source)).established, false);
   const s = ready(); start(s); outcomes(s);
   s.session = { notes: immutable, confirmation: confirmation(s.lead.handle, hash({ protocol: protocolDigest(s), notes: immutable })) };
   s.report = { url: immutable, confirmation: confirmation(s.lead.handle, hash({ protocol: protocolDigest(s), url: immutable, evidence: s.teams.map(t => t.evidence) })) };
-  const now = new Date("2026-10-13");
+  const now = new Date("2027-03-06");
   assert.equal(communityProof(sprintSchema.parse(s), now).operating_status, "Completed");
   assert.equal(communityProof(s, now).established, false);
   assert.equal(communityProof(s, now).reviewed_measured_teams, 0);
@@ -77,14 +77,14 @@ test("invalid lifecycle authority, duplicate leads and self review fail validati
 });
 test("complete lifecycle preserves blocked attempts, review credits and improvement issues", () => {
   const s = ready(); start(s);
-  assert.equal(sprintState(s, new Date("2026-09-23")).status, "Running");
-  assert.equal(sprintState(s, new Date("2026-10-06")).status, "Awaiting team outcomes");
+  assert.equal(sprintState(s, new Date("2027-01-26")).status, "Running");
+  assert.equal(sprintState(s, new Date("2027-02-16")).status, "Awaiting team outcomes");
   outcomes(s);
-  assert.equal(sprintState(s, new Date("2026-10-08")).status, "Awaiting results session");
+  assert.equal(sprintState(s, new Date("2027-02-22")).status, "Awaiting results session");
   s.session = { notes: immutable, confirmation: confirmation(s.lead.handle, hash({ protocol: protocolDigest(s), notes: immutable })) };
-  assert.equal(sprintState(s, new Date("2026-10-09")).status, "Awaiting joint report");
+  assert.equal(sprintState(s, new Date("2027-02-26")).status, "Awaiting joint report");
   s.report = { url: immutable, confirmation: confirmation(s.lead.handle, hash({ protocol: protocolDigest(s), url: immutable, evidence: s.teams.map(t => t.evidence) })) };
-  assert.equal(sprintState(sprintSchema.parse(s), new Date("2026-10-13")).status, "Completed");
+  assert.equal(sprintState(sprintSchema.parse(s), new Date("2027-03-06")).status, "Completed");
 });
 test("latest review can reopen evidence; changed evidence invalidates earlier review", () => {
   const s = ready(); start(s); outcomes(s);
@@ -107,7 +107,7 @@ test("semantic counts, immutable links and milestone order fail closed", () => {
 test("calendar uses stable IDs, UTC and tentative status until actual start", () => {
   const s = fixture(); const text = sprintCalendar(s, new Date("2026-09-16"));
   assert.match(text, /UID:sprint01-kickoff@knownrobot.com/);
-  assert.match(text, /DTSTART:20260921T160000Z/);
+  assert.match(text, /DTSTART:20270125T170000Z/);
   assert.equal(text.match(/STATUS:TENTATIVE/g).length, 2);
   for (const line of text.split("\r\n")) assert.ok(Buffer.byteLength(line) <= 75);
   const r = ready(); start(r);
@@ -125,10 +125,10 @@ test("public confirmation is authenticated by exact URL, human author and token"
   await assert.rejects(verify(s, async () => { throw new Error("API unavailable"); }), /API unavailable/);
 });
 test("operating loop covers seven gates with stable idempotency markers", () => {
-  const s = fixture(); const due = tasks(s, new Date("2026-11-01"));
+  const s = fixture(); const due = tasks(s, new Date("2027-03-10"));
   assert.deepEqual(due.map(t => t.stage), ["recruit", "freeze", "kickoff", "evidence", "review", "results", "report"]);
   assert.equal(due.every(t => !t.done), true);
-  assert.deepEqual(tasks(s, new Date("2026-11-02")).map(t => t.marker), due.map(t => t.marker));
+  assert.deepEqual(tasks(s, new Date("2027-03-11")).map(t => t.marker), due.map(t => t.marker));
 });
 test("corrections preserve attributable snapshots without invalidating historical consent", () => {
   const s = ready(); start(s); outcomes(s);
@@ -152,7 +152,7 @@ test("confirmed lead can cancel before teams are recruited", () => {
 test("issue loop resumes closed unmet gates and is idempotent on repeated runs", async () => {
   const originalToken = process.env.GITHUB_TOKEN; process.env.GITHUB_TOKEN = "test-only-not-a-real-token";
   try {
-    const s = fixture(); const now = new Date("2026-11-01");
+    const s = fixture(); const now = new Date("2027-03-10");
     const issues = [{ number: 1, state: "closed", body: tasks(s, now)[0].marker }];
     let writes = 0;
     const request = async (url, options) => {

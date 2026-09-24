@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
 import { SiteHeader } from "@/components/site-header";
 
-export const metadata: Metadata = pageMetadata("/participate", "Participate — Known Robot", "Share a robot-policy transfer experience or apply as a founding Known Robot design partner.");
+export const metadata: Metadata = pageMetadata("/participate", "Get Help Reproducing a LeRobot Policy — Known Robot", "Bring a real SO-100 or SO-101 policy transfer attempt. KnownRobot will help document compatibility assumptions, failures and reproducible evaluation evidence.");
 
 const repo = "https://github.com/arcofdescent1/knownrobot";
 

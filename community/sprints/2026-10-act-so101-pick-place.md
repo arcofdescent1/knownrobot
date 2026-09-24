@@ -18,18 +18,18 @@ The task is tabletop cube pick-and-place using the source policy and the team’
 
 This is a compatibility study, not a competition. Results from different physical setups are not combined into a single success-rate leaderboard.
 
-## Dates — America/Denver
+## Rescheduled dates — America/Denver
 
-- Applications open: September 8, 2026
-- Applications close: September 18, 2026 at 17:00
-- Teams announced and artifact frozen: September 20, 2026
-- Public kickoff: September 21, 2026 at 10:00
-- Independent run window: September 21–October 4, 2026
-- Evidence review: October 5–7, 2026
-- Public results session: October 8, 2026 at 10:00
-- Joint report: October 12, 2026
+- Applications reopened: September 24, 2026
+- Applications close: January 15, 2027 at 17:00
+- Teams announced and artifact frozen: January 22, 2027 at 17:00
+- Public kickoff: January 25, 2027 at 10:00
+- Independent run window: January 25–February 14, 2027
+- Evidence review: February 15–21, 2027
+- Public results session: February 25, 2027 at 10:00
+- Joint report: March 5, 2027 at 17:00
 
-These dates are provisional until the readiness gate passes and the named lead confirms the start. If readiness is not met, publicly postpone and renew schedule consent. A proposed public room is https://meet.jit.si/KnownRobotSprint01; attendance and room operation are not yet confirmed. Decisions and corrections are recorded in public issues and session notes.
+The original September–October 2026 schedule passed without the minimum roster and was not started. No teams, trials, reviews or results are implied by this rescheduling. These replacement dates remain provisional until the readiness gate passes and the named lead confirms the start. If readiness is not met, publicly postpone and renew schedule consent. A proposed public room is https://meet.jit.si/KnownRobotSprint01; attendance and room operation are not yet confirmed. Decisions and corrections are recorded in public issues and session notes.
 
 ## Eligibility and selection
 

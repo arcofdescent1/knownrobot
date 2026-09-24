@@ -61,11 +61,11 @@ Simulation success is not SO-101 compatibility, physical safety, or independent
 verification. See the [evaluation guide](docs/evaluation.md) for configuration,
 execution boundaries, protocols, evidence integrity and publication.
 
-## Monthly Reproduction Sprints
+## Reproduction Sprints
 
-The community runs one two-week, multi-hardware reproduction study each month. Every sprint freezes one public policy revision, recruits three to five materially different configurations, publishes failures as they occur, holds a public results session, and produces a reviewed joint report.
+KnownRobot will run a multi-hardware reproduction study when its readiness gate is met, rather than forcing a monthly cadence before a real participant network exists. Each sprint freezes one public policy revision, recruits three to five materially different configurations, publishes failures as they occur, holds a public results session, and produces a reviewed joint report.
 
-[Sprint 01: ACT SO-101 Pick-and-Place](https://knownrobot.com/sprints) has a proposed September 21–October 4 run window, October 8 results session and October 12 report deadline. These dates are provisional: kickoff requires a named lead, three confirmed teams, two physical setups, independent reviewers and exact protocol/configuration consent. Check the public roster and readiness status rather than assuming the invitation means the sprint has started.
+[Sprint 01: ACT SO-101 Pick-and-Place](https://knownrobot.com/sprints) has been rescheduled after the original readiness gate was not met. Applications now close January 15, 2027; the proposed run window is January 25–February 14, with a February 25 results session and March 5 report deadline. These dates remain provisional: kickoff requires a named lead, three confirmed teams, two physical setups, independent reviewers and exact protocol/configuration consent. Check the public roster and readiness status rather than assuming the invitation means the sprint has started.
 
 The [operating runbook](docs/sprint-operations.md) covers public commitments, named reviewer assignments, immutable evidence, corrections, calendar updates and the daily seven-gate issue workflow. Run `npm run sprint:check` from `embodied-registry` to inspect current blockers; `npm run sprint:verify` checks attributable public comment consent. No demonstration participants are substituted for missing commitments.
 

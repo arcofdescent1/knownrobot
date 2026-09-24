@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { fieldNotes } from "@/lib/field-notes";
 import { publicPages, siteOrigin, isPreview } from "@/lib/seo";
 import { listEvaluations } from "@/lib/evaluations";
+import { externalPolicyAssessments } from "@/lib/external-assessment";
 
 export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -11,6 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...routes.map(route => ({ url: `${siteOrigin}${route}` })),
     ...fieldNotes.map(note => ({ url: `${siteOrigin}/field-notes/${note.slug}` })),
+    ...externalPolicyAssessments.map(record => ({ url: `${siteOrigin}/assessments/${record.slug}`, lastModified: record.assessment.assessed_at })),
     // Older records remain crawlable through registry pagination and evidence links.
     ...(result.state === "live" ? result.data.records.map(record => ({ url: `${siteOrigin}/evaluations/${record.id}` })) : []),
   ];

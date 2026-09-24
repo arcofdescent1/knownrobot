@@ -4,5 +4,5 @@
     "rootDir": "..", "outDir": "../.test-build", "strict": true, "resolveJsonModule": true,
     "esModuleInterop": true, "skipLibCheck": true
   },
-  "include": ["../src/lib/evidence-contract.ts", "../src/lib/registry-reader.ts", "../src/lib/demo-data.ts", "../src/lib/sprint-contract.ts", "../src/lib/sprint-calendar.ts", "../src/lib/distribution.ts", "../src/lib/adapter-contract.ts", "../src/lib/seo.ts", "../src/lib/identity-contract.ts", "../src/lib/identity-reader.ts", "../src/lib/community-proof.ts", "../src/lib/compatibility-answer.ts"]
+  "include": ["../src/lib/evidence-contract.ts", "../src/lib/registry-reader.ts", "../src/lib/demo-data.ts", "../src/lib/sprint-contract.ts", "../src/lib/sprint-calendar.ts", "../src/lib/distribution.ts", "../src/lib/adapter-contract.ts", "../src/lib/seo.ts", "../src/lib/identity-contract.ts", "../src/lib/identity-reader.ts", "../src/lib/community-proof.ts", "../src/lib/compatibility-answer.ts", "../src/lib/external-assessment.ts", "../src/data/external-policy-assessments.json"]
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { StructuredData } from "@/components/structured-data";
 
 export const metadata: Metadata = pageMetadata("/validator", "Robot Policy Validator for LeRobot — Known Robot", "Check LeRobot policy metadata, compare declared hardware configurations, and generate robot-skill.yaml for GitHub or Hugging Face. CLI quickstart and CI guide.");
 
@@ -11,6 +12,7 @@ export default function ValidatorPage() {
   return <>
     <SiteHeader />
     <main className="validator-page">
+      <StructuredData value={{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Known Robot robot-skill validator", url: "https://knownrobot.com/validator", applicationCategory: "DeveloperApplication", operatingSystem: "Windows, macOS, Linux", softwareVersion: "1.3.0", description: "Open-source command-line validator for LeRobot policy reproducibility metadata and robot-skill.yaml manifests.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, license: "https://www.apache.org/licenses/LICENSE-2.0", codeRepository: "https://github.com/arcofdescent1/knownrobot" }}/>
       <section className="validator-hero">
         <div>
           <p className="kicker">OPEN UTILITY · VERSION 1.3.0</p>
