@@ -10,6 +10,13 @@ const findingSchema = z.object({
   path: z.string().min(1),
   message: z.string().min(1),
 });
+const detectedFactSchema = z.object({ path: z.string().min(1), value: z.unknown() });
+const declarationSchema = detectedFactSchema.extend({ basis: z.string().min(1) });
+const upstreamClaimSchema = z.object({
+  category: z.enum(["task", "hardware", "training", "evaluation", "limitation", "intended_use", "other"]).optional(),
+  claim: z.string().min(1).max(1000), source_url: httpsUrl,
+  source_revision: commit.optional(), attribution: z.literal("Upstream model card"),
+});
 
 export const externalPolicyAssessmentSchema = z.object({
   record_type: z.literal("external_policy_assessment"),
@@ -37,11 +44,17 @@ export const externalPolicyAssessmentSchema = z.object({
     established_compatibility: z.literal(false),
     status: z.enum(["complete", "incomplete"]),
   }),
-  binding: z.object({ algorithm: z.literal("sha256"), manifest_sha256: sha256, inventory_sha256: sha256, source_revision: commit }).optional(),
+  binding: z.object({ algorithm: z.literal("sha256"), manifest_sha256: sha256, inventory_sha256: sha256, claims_sha256: sha256.optional(), source_revision: commit }).optional(),
   manifest: z.record(z.string(), z.unknown()),
   findings: z.object({ errors: z.array(findingSchema), warnings: z.array(findingSchema) }),
   inspected_files: z.array(z.object({ path: z.string().min(1), sha256, bytes: z.number().int().nonnegative() })).min(1),
-  upstream_claims: z.array(z.object({ claim: z.string().min(1), source_url: httpsUrl, attribution: z.literal("Upstream model card") })),
+  upstream_claims: z.array(upstreamClaimSchema),
+  evidence_classes: z.object({
+    validator_detected_facts: z.array(detectedFactSchema),
+    portable_manifest_declarations: z.array(declarationSchema),
+    upstream_attributed_claims: z.array(upstreamClaimSchema),
+    knownrobot_measured_results: z.array(z.never()).length(0),
+  }).optional(),
   limitations: z.array(z.string().min(1)).min(1),
 });
 

@@ -1,6 +1,7 @@
 # robot-skill metadata validation and external assessment
 
-Release 1.4.0 adds a provenance-bound Hugging Face assessment workflow. Release
+Release 1.5.0 adds durable diagnostic reports and typed upstream-claim authoring.
+Release 1.4.0 added a provenance-bound Hugging Face assessment workflow. Release
 1.3.0 also provides a separate [measured simulation runner](evaluation.md).
 The execution boundaries below still apply to `check` and `validate`; execution
 requires the distinct `evaluate --allow-execution` command.
@@ -14,7 +15,7 @@ dependency filenames no longer count as complete reproducibility metadata.
 
 From a checkout of this release, `pipx install .` installs the `robot-skill` command
 in an isolated environment. Distributors can build with `python -m pip wheel .
---no-deps` and install the resulting `knownrobot-1.4.0-py3-none-any.whl`. Python
+--no-deps` and install the resulting `knownrobot-1.5.0-py3-none-any.whl`. Python
 3.10–3.12 is supported; CI runs the suite and installed-wheel smoke test across
 Linux, macOS, and Windows.
 
@@ -24,7 +25,17 @@ robot-skill check ./policy --strict --no-write --format json
 robot-skill validate ./policy/robot-skill.yaml
 robot-skill validate ./policy/robot-skill.yaml --level structural
 robot-skill check ./policy --output - --format json
+robot-skill check ./policy --format assessment --output assessment.json
+robot-skill verify-report assessment.json --policy ./policy
 ```
+
+`--format assessment` writes one durable JSON document containing the exact
+manifest, all errors and warnings, validator version, provenance, SHA-256 file
+inventory, target comparison, explicit non-execution boundary and four distinct
+evidence classes. It requires a real output file; `--no-write` and stdout are
+rejected. Existing outputs are never replaced without `--force`, and writes are
+atomic. `verify-report` checks the report payload, manifest, inventory and every
+original inspected metadata file.
 
 ## Non-executing Hugging Face assessment
 
@@ -37,6 +48,25 @@ robot-skill assess-hf aadarshram/act_pusht \
   --output assessments/aadarshram-act-pusht
 robot-skill verify-assessment assessments/aadarshram-act-pusht
 ```
+
+Model-card claims use a separate, reviewed authoring file:
+
+```json
+{
+  "format": "knownrobot-upstream-claims/1.0",
+  "claims": [
+    {"category": "hardware", "claim": "The model card describes an SO-101 configuration."},
+    {"category": "evaluation", "claim": "The model card reports an upstream evaluation result."}
+  ]
+}
+```
+
+Pass it with `--claims upstream-claims.json`. Categories are limited to `task`,
+`hardware`, `training`, `evaluation`, `limitation`, `intended_use`, and `other`.
+Unknown fields and categories fail validation. The command supplies the pinned
+model-card URL, source revision and `Upstream model card` attribution; claim text
+is never converted into a validator detection or Known Robot result. The claims
+document is retained and SHA-256 bound into the assessment bundle.
 
 Omit `--revision` only when intentionally assessing the repository's current
 HEAD. The command resolves it through the Hugging Face model API and records the

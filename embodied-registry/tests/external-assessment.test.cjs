@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { externalPolicyAssessments, getExternalPolicyAssessment, publicAssessmentRecord } = require("../.test-build/src/lib/external-assessment.js");
+const { externalPolicyAssessmentSchema, externalPolicyAssessments, getExternalPolicyAssessment, publicAssessmentRecord } = require("../.test-build/src/lib/external-assessment.js");
 
 test("ships three pinned, attributable metadata-only assessments", () => {
   assert.equal(externalPolicyAssessments.length, 3);
@@ -35,4 +35,33 @@ test("public report states evidence boundaries and stable artifact URLs", () => 
   assert.match(report.notice, /did not author or execute/i);
   assert.equal(report.urls.manifest, `https://knownrobot.com/assessments/${record.slug}/manifest.json`);
   assert.equal(getExternalPolicyAssessment("missing"), null);
+});
+
+test("1.5 records keep all four evidence classes distinct and reject measured-result claims", () => {
+  const record = structuredClone(externalPolicyAssessments[0]);
+  const claim = {
+    category: "evaluation",
+    claim: "The upstream model card reports a result under its authors' setup.",
+    source_url: record.source.model_card_url,
+    source_revision: record.source.revision,
+    attribution: "Upstream model card",
+  };
+  record.binding = {
+    algorithm: "sha256",
+    manifest_sha256: "a".repeat(64),
+    inventory_sha256: "b".repeat(64),
+    claims_sha256: "c".repeat(64),
+    source_revision: record.source.revision,
+  };
+  record.upstream_claims = [claim];
+  record.evidence_classes = {
+    validator_detected_facts: [{ path: "policy.framework", value: "lerobot" }],
+    portable_manifest_declarations: [{ path: "skill.source.revision", value: record.source.revision, basis: "Pinned source revision" }],
+    upstream_attributed_claims: [claim],
+    knownrobot_measured_results: [],
+  };
+
+  assert.doesNotThrow(() => externalPolicyAssessmentSchema.parse(record));
+  record.evidence_classes.knownrobot_measured_results.push({ success_rate: 1 });
+  assert.throws(() => externalPolicyAssessmentSchema.parse(record));
 });

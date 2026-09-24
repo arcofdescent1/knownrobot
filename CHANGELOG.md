@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.0 — 2026-09-24
+
+- Add durable `check --format assessment --output FILE` reports containing the manifest, complete findings, validator version, file hashes, execution boundary, provenance and evidence-class lanes.
+- Add `verify-report` to verify report integrity and the original inspected metadata bytes.
+- Add validated, categorized upstream-claim authoring through `assess-hf --claims FILE`.
+- Bind attributed claims to the exact model-card revision and keep Known Robot measured results explicitly separate.
+- Display detections, declarations, upstream claims and Known Robot measurements separately on assessment pages.
+
 ## 1.4.0 — 2026-09-24
 
 - Add `robot-skill assess-hf` for immutable, metadata-only Hugging Face assessments.

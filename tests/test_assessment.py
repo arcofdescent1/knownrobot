@@ -80,6 +80,42 @@ class HuggingFaceAssessmentTests(unittest.TestCase):
                 create_huggingface_assessment("aadarshram/act_pusht", REVISION, root / "second",
                                               catalog=catalog, fetch=self.fetcher([]))
 
+    def test_claims_are_typed_attributed_pinned_and_integrity_bound(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            claims = root / "claims.json"
+            claims.write_text(json.dumps({"format": "knownrobot-upstream-claims/1.0", "claims": [
+                {"category": "hardware", "claim": "The model card describes an SO-101 configuration."},
+                {"category": "evaluation", "claim": "The model card reports an upstream evaluation result."},
+            ]}), encoding="utf-8")
+            output = root / "bundle"
+            record = create_huggingface_assessment("aadarshram/act_pusht", REVISION, output,
+                                                  claims=claims, fetch=self.fetcher([]))
+            self.assertEqual([item["category"] for item in record["upstream_claims"]], ["hardware", "evaluation"])
+            self.assertTrue(all(item["source_revision"] == REVISION and REVISION in item["source_url"] for item in record["upstream_claims"]))
+            self.assertEqual(record["evidence_classes"]["knownrobot_measured_results"], [])
+            self.assertEqual(record["evidence_classes"]["upstream_attributed_claims"], record["upstream_claims"])
+            self.assertEqual(verify_assessment_bundle(output)["status"], "integrity_checked")
+            document = json.loads((output / "claims.json").read_text(encoding="utf-8"))
+            document["claims"][0]["claim"] = "Tampered"
+            (output / "claims.json").write_text(json.dumps(document), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "claims document"):
+                verify_assessment_bundle(output)
+
+    def test_claims_reject_unknown_fields_and_categories(self):
+        invalid_documents = [
+            {"format": "knownrobot-upstream-claims/1.0", "claims": [{"category": "performance", "claim": "Claim"}]},
+            {"format": "knownrobot-upstream-claims/1.0", "claims": [{"category": "hardware", "claim": "Claim", "verified": True}]},
+        ]
+        for document in invalid_documents:
+            with self.subTest(document=document), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                claims = root / "claims.json"
+                claims.write_text(json.dumps(document), encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    create_huggingface_assessment("aadarshram/act_pusht", REVISION, root / "bundle",
+                                                  claims=claims, fetch=self.fetcher([]))
+
     def test_rejects_mutable_or_abbreviated_revision_before_network(self):
         for revision in ("main", "6d403b1", "A" * 40):
             with self.subTest(revision=revision), tempfile.TemporaryDirectory() as directory:

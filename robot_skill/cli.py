@@ -22,7 +22,7 @@ def _parser() -> argparse.ArgumentParser:
     check.add_argument("--output", "-o", help="output path (default: POLICY/robot-skill.yaml), or '-' for manifest-only stdout")
     check.add_argument("--force", action="store_true", help="atomically replace an existing output file")
     check.add_argument("--target", help="compare against a declared target YAML/JSON profile")
-    check.add_argument("--format", choices=("text", "json"), default="text", help="diagnostic output format")
+    check.add_argument("--format", choices=("text", "json", "assessment"), default="text", help="diagnostic output format; assessment writes a durable JSON report")
     check.add_argument("--no-write", action="store_true", help="inspect without writing a manifest")
     check.add_argument("--strict", action="store_true", help="return exit code 2 when required evidence is missing")
     assess = subparsers.add_parser("assess-hf", help="create a provenance-bound, non-executing assessment of a Hugging Face policy")
@@ -31,9 +31,13 @@ def _parser() -> argparse.ArgumentParser:
     assess.add_argument("--output", "-o", required=True, help="new assessment-bundle directory; existing paths are never overwritten")
     assess.add_argument("--title", help="public assessment title")
     assess.add_argument("--summary", help="public assessment summary")
+    assess.add_argument("--claims", help="validated JSON file of human-authored, categorized upstream model-card claim paraphrases")
     assess.add_argument("--catalog", help="atomically append the record to an existing Known Robot assessment catalog")
     verify_assessment = subparsers.add_parser("verify-assessment", help="verify an external-assessment bundle, source snapshot and provenance binding")
     verify_assessment.add_argument("bundle")
+    verify_report = subparsers.add_parser("verify-report", help="verify a durable validator report and its inspected policy metadata")
+    verify_report.add_argument("report")
+    verify_report.add_argument("--policy", required=True, help="policy directory whose inspected metadata must match the report")
     validate = subparsers.add_parser("validate", help="validate an existing robot-skill YAML or JSON manifest")
     validate.add_argument("manifest", nargs="?", default="robot-skill.yaml")
     validate.add_argument("--format", choices=("text", "json"), default="text")
@@ -94,6 +98,10 @@ def _print_result(result, output_format: str, stream=None) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
+        if args.command == "verify-report":
+            from .report import verify_validation_report
+            print(json.dumps(verify_validation_report(Path(args.report), Path(args.policy)), indent=2, allow_nan=False))
+            return 0
         if args.command == "verify-assessment":
             from .assessment import verify_assessment_bundle
             print(json.dumps(verify_assessment_bundle(Path(args.bundle)), indent=2, allow_nan=False))
@@ -102,7 +110,8 @@ def main(argv: list[str] | None = None) -> int:
             from .assessment import create_huggingface_assessment
             record = create_huggingface_assessment(args.repository, args.revision, Path(args.output),
                                                    title=args.title, summary=args.summary,
-                                                   catalog=Path(args.catalog) if args.catalog else None)
+                                                   catalog=Path(args.catalog) if args.catalog else None,
+                                                   claims=Path(args.claims) if args.claims else None)
             print(json.dumps({"status": record["assessment"]["status"], "record_type": record["record_type"],
                               "slug": record["slug"], "source": record["source"], "binding": record["binding"],
                               "output": str(Path(args.output).expanduser().resolve()),
@@ -147,6 +156,23 @@ def main(argv: list[str] | None = None) -> int:
             from .inspector import _load_existing
             result.target_comparison, findings = compare_target(result.manifest, _load_existing(Path(args.target)))
             result.findings.extend(findings)
+        if args.format == "assessment":
+            if args.no_write:
+                raise ValueError("--format assessment writes a durable report and cannot be combined with --no-write.")
+            if not args.output or args.output == "-":
+                raise ValueError("--format assessment requires --output with a JSON file path.")
+            from .assessment import _atomic_json
+            from .report import create_validation_report
+            report = create_validation_report(result)
+            output_path = Path(args.output).expanduser().resolve()
+            if output_path.exists() and not args.force:
+                raise ValueError(f"Output already exists: {output_path}. Use --force to atomically replace it.")
+            _atomic_json(output_path, report, replace=args.force)
+            print(json.dumps({"status": report["status"], "record_type": report["record_type"],
+                              "output": str(output_path), "binding": report["binding"],
+                              "summary": {"errors": len(report["findings"]["errors"]),
+                                          "warnings": len(report["findings"]["warnings"])}}, indent=2))
+            return 2 if not result.valid or ((args.strict or args.target) and not result.complete) else 0
         if not args.no_write and result.valid:
             output = args.output or str(result.root / "robot-skill.yaml")
             # Existing manifests are inputs, not disposable generated drafts.

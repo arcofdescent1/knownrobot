@@ -44,7 +44,21 @@ The inspector reads only the supplied directory. It never executes policy code, 
 
 ## Measured local evaluation
 
-Version 1.4.0 adds a non-executing, provenance-bound Hugging Face assessment workflow:
+Version 1.5.0 adds durable validator reports and typed upstream-claim authoring:
+
+```bash
+robot-skill check ./policy --format assessment --output assessment.json
+robot-skill verify-report assessment.json --policy ./policy
+robot-skill assess-hf owner/policy --revision FULL_40_CHARACTER_COMMIT \
+  --claims upstream-claims.json --output assessments/owner-policy
+```
+
+The durable report keeps the manifest, complete diagnostics, file hashes,
+provenance and non-execution boundary together. Upstream claims are categorized,
+attributed to the pinned model card and kept separate from validator detections,
+portable declarations and Known Robot-measured results.
+
+Version 1.4.0 added a non-executing, provenance-bound Hugging Face assessment workflow:
 
 ```bash
 robot-skill assess-hf aadarshram/act_pusht \

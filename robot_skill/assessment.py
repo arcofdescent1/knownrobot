@@ -23,6 +23,8 @@ COMMIT = re.compile(r"^[a-f0-9]{40}$")
 REPOSITORY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,95}/[A-Za-z0-9][A-Za-z0-9_.-]{0,95}$")
 MAX_FILE_BYTES = 1_000_000
 MAX_TOTAL_BYTES = 8_000_000
+MAX_CLAIMS_BYTES = 100_000
+CLAIM_CATEGORIES = frozenset({"task", "hardware", "training", "evaluation", "limitation", "intended_use", "other"})
 APPROVED_METADATA = frozenset({
     "README.md", "MODEL_CARD.md", "config.json", "policy_config.json", "train_config.json",
     "dataset_info.json", "meta/info.json", "configs/policy.json", "policy_preprocessor.json",
@@ -60,7 +62,7 @@ def _sha256(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def _atomic_json(path: Path, value: Any) -> None:
+def _atomic_json(path: Path, value: Any, *, replace: bool = True) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(value, ensure_ascii=False, allow_nan=False, indent=2) + "\n"
     descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}-", dir=path.parent)
@@ -69,7 +71,10 @@ def _atomic_json(path: Path, value: Any) -> None:
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
+        if replace:
+            os.replace(temporary, path)
+        else:
+            os.link(temporary, path)
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
@@ -107,9 +112,37 @@ def _findings_after_provenance(result, manifest: dict[str, Any]) -> list[Finding
     return [*retained, *_missing(manifest)]
 
 
+def _load_upstream_claims(path: Path | None, model_card_url: str, revision: str) -> list[dict[str, str]]:
+    if path is None:
+        return []
+    path = path.expanduser().resolve()
+    if not path.is_file() or path.stat().st_size > MAX_CLAIMS_BYTES:
+        raise ValueError(f"Claims file must exist and be no larger than {MAX_CLAIMS_BYTES} bytes: {path}")
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Could not parse claims file: {exc}") from exc
+    if not isinstance(document, dict) or set(document) != {"format", "claims"} or document.get("format") != "knownrobot-upstream-claims/1.0" or not isinstance(document.get("claims"), list):
+        raise ValueError("Claims file must contain only format knownrobot-upstream-claims/1.0 and a claims array.")
+    if len(document["claims"]) > 50:
+        raise ValueError("Claims file contains more than 50 claims.")
+    result: list[dict[str, str]] = []
+    for index, item in enumerate(document["claims"]):
+        if not isinstance(item, dict) or set(item) != {"category", "claim"}:
+            raise ValueError(f"Claim {index} must contain only category and claim.")
+        category, claim = item.get("category"), item.get("claim")
+        if category not in CLAIM_CATEGORIES:
+            raise ValueError(f"Claim {index} category must be one of: {', '.join(sorted(CLAIM_CATEGORIES))}.")
+        if not isinstance(claim, str) or not claim.strip() or len(claim) > 1_000 or any(ord(character) < 32 and character not in "\t\n\r" for character in claim):
+            raise ValueError(f"Claim {index} must be non-empty, no longer than 1000 characters and contain no control characters.")
+        result.append({"category": category, "claim": claim.strip(), "source_url": model_card_url,
+                       "source_revision": revision, "attribution": "Upstream model card"})
+    return result
+
+
 def create_huggingface_assessment(repository: str, revision: str | None, output: Path, *,
                                   title: str | None = None, summary: str | None = None,
-                                  catalog: Path | None = None, fetch: Fetch = _default_fetch,
+                                  catalog: Path | None = None, claims: Path | None = None, fetch: Fetch = _default_fetch,
                                   now: Callable[[], datetime] | None = None) -> dict[str, Any]:
     output = output.expanduser().resolve()
     if output.exists():
@@ -161,7 +194,18 @@ def create_huggingface_assessment(repository: str, revision: str | None, output:
         slug = re.sub(r"[^a-z0-9]+", "-", repository.lower()).strip("-") + f"-{commit[:7]}"
         source_url = f"{HF_ORIGIN}/{repository}"
         revision_url = f"{source_url}/tree/{commit}"
-        model_card_url = f"{source_url}/blob/{commit}/README.md"
+        model_card_name = "README.md" if "README.md" in available else "MODEL_CARD.md"
+        model_card_url = f"{source_url}/blob/{commit}/{model_card_name}"
+        upstream_claims = _load_upstream_claims(claims, model_card_url, commit)
+        from .report import detected_facts
+        validator_facts = detected_facts(result.manifest)
+        portable_declarations = [
+            {"path": "skill.source.type", "value": "huggingface", "basis": "Hugging Face model API"},
+            {"path": "skill.source.repository", "value": repository, "basis": "Hugging Face model API"},
+            {"path": "skill.source.revision", "value": commit, "basis": "Hugging Face model API"},
+            {"path": "skill.license", "value": license_name, "basis": "Hugging Face model-card metadata" if declared_license else "No upstream license declaration found"},
+        ]
+        claims_hash = _sha256(_json_bytes(upstream_claims))
         record = {
             "record_type": "external_policy_assessment", "schema_version": "1.0", "slug": slug,
             "title": title or f"{repository} — external metadata assessment",
@@ -173,9 +217,13 @@ def create_huggingface_assessment(repository: str, revision: str | None, output:
                            "assessed_at": timestamp, "executed_policy_code": False, "evaluated_policy": False,
                            "established_compatibility": False, "status": "complete" if not errors else "incomplete"},
             "binding": {"algorithm": "sha256", "manifest_sha256": manifest_hash,
-                        "inventory_sha256": inventory_hash, "source_revision": commit},
+                        "inventory_sha256": inventory_hash, "claims_sha256": claims_hash, "source_revision": commit},
             "manifest": manifest, "findings": {"errors": errors, "warnings": warnings},
-            "inspected_files": inventory, "upstream_claims": [],
+            "inspected_files": inventory, "upstream_claims": upstream_claims,
+            "evidence_classes": {"validator_detected_facts": validator_facts,
+                                 "portable_manifest_declarations": portable_declarations,
+                                 "upstream_attributed_claims": upstream_claims,
+                                 "knownrobot_measured_results": []},
             "limitations": ["Only allowlisted repository metadata was downloaded; weights were not downloaded and policy code was not executed.",
                             "Model-card statements are not converted into Known Robot measurements or compatibility claims.",
                             "A measured evaluation requires a separate evidence record with actual trials and attributable evidence."],
@@ -190,9 +238,10 @@ def create_huggingface_assessment(repository: str, revision: str | None, output:
             shutil.copyfile(source_file, destination)
         _atomic_json(bundle / "assessment.json", record)
         _atomic_json(bundle / "manifest.json", manifest)
+        _atomic_json(bundle / "claims.json", {"format": "knownrobot-upstream-claims/1.0", "claims": upstream_claims})
         _atomic_json(bundle / "checksums.json", {"format": "knownrobot-assessment-checksums/1.0", "source_revision": commit,
                                                   "manifest_sha256": manifest_hash, "inventory_sha256": inventory_hash,
-                                                  "files": inventory})
+                                                  "claims_sha256": claims_hash, "files": inventory})
         os.replace(bundle, output)
         if catalog is not None:
             append_assessment_catalog(catalog.expanduser().resolve(), record)
@@ -209,6 +258,7 @@ def verify_assessment_bundle(bundle: Path) -> dict[str, Any]:
         assessment = json.loads((bundle / "assessment.json").read_text(encoding="utf-8"))
         manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
         checksums = json.loads((bundle / "checksums.json").read_text(encoding="utf-8"))
+        claims_document = json.loads((bundle / "claims.json").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError(f"Invalid assessment bundle: {exc}") from exc
     if not isinstance(assessment, dict) or assessment.get("record_type") != "external_policy_assessment":
@@ -225,6 +275,11 @@ def verify_assessment_bundle(bundle: Path) -> dict[str, Any]:
         raise ValueError("Assessment inventory checksum mismatch.")
     if checksums.get("manifest_sha256") != binding.get("manifest_sha256") or checksums.get("inventory_sha256") != binding.get("inventory_sha256") or checksums.get("files") != inventory:
         raise ValueError("Checksum inventory does not match the assessment binding.")
+    claims = assessment.get("upstream_claims")
+    if not isinstance(claims, list) or claims_document != {"format": "knownrobot-upstream-claims/1.0", "claims": claims}:
+        raise ValueError("Attributed claims document does not match the assessment.")
+    if _sha256(_json_bytes(claims)) != binding.get("claims_sha256") or checksums.get("claims_sha256") != binding.get("claims_sha256"):
+        raise ValueError("Attributed claims checksum mismatch.")
     source_root = (bundle / "source").resolve()
     for item in inventory:
         if not isinstance(item, dict) or not isinstance(item.get("path"), str):
