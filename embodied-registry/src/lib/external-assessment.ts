@@ -17,6 +17,11 @@ const upstreamClaimSchema = z.object({
   claim: z.string().min(1).max(1000), source_url: httpsUrl,
   source_revision: commit.optional(), attribution: z.literal("Upstream model card"),
 });
+const artifactIntentSchema = z.enum(["task_policy", "base_policy", "training_checkpoint", "simulation_policy", "hardware_policy"]);
+export const artifactIntentLabels: Record<z.infer<typeof artifactIntentSchema>, string> = {
+  task_policy: "Task policy", base_policy: "Base policy", training_checkpoint: "Training checkpoint",
+  simulation_policy: "Simulation policy", hardware_policy: "Hardware policy",
+};
 
 export const externalPolicyAssessmentSchema = z.object({
   record_type: z.literal("external_policy_assessment"),
@@ -43,6 +48,8 @@ export const externalPolicyAssessmentSchema = z.object({
     evaluated_policy: z.literal(false),
     established_compatibility: z.literal(false),
     status: z.enum(["complete", "incomplete"]),
+    artifact_intents: z.array(artifactIntentSchema).min(1).max(5).refine(items => new Set(items).size === items.length, "Artifact intents must be unique"),
+    artifact_intent_notice: z.literal("Descriptive classification only; it is not a compatibility, performance, safety or deployment conclusion."),
   }),
   binding: z.object({ algorithm: z.literal("sha256"), manifest_sha256: sha256, inventory_sha256: sha256, claims_sha256: sha256.optional(), source_revision: commit }).optional(),
   manifest: z.record(z.string(), z.unknown()),

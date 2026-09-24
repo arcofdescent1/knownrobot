@@ -1,6 +1,7 @@
 # robot-skill metadata validation and external assessment
 
-Release 1.5.0 adds durable diagnostic reports and typed upstream-claim authoring.
+Release 1.6.0 adds descriptive artifact intent and append-only database publication.
+Release 1.5.0 added durable diagnostic reports and typed upstream-claim authoring.
 Release 1.4.0 added a provenance-bound Hugging Face assessment workflow. Release
 1.3.0 also provides a separate [measured simulation runner](evaluation.md).
 The execution boundaries below still apply to `check` and `validate`; execution
@@ -15,7 +16,7 @@ dependency filenames no longer count as complete reproducibility metadata.
 
 From a checkout of this release, `pipx install .` installs the `robot-skill` command
 in an isolated environment. Distributors can build with `python -m pip wheel .
---no-deps` and install the resulting `knownrobot-1.5.0-py3-none-any.whl`. Python
+--no-deps` and install the resulting `knownrobot-1.6.0-py3-none-any.whl`. Python
 3.10–3.12 is supported; CI runs the suite and installed-wheel smoke test across
 Linux, macOS, and Windows.
 
@@ -45,6 +46,7 @@ downloading checkpoint weights or executing policy code:
 ```bash
 robot-skill assess-hf aadarshram/act_pusht \
   --revision 6d403b142934aaef61fc07f5eec1515c4325751f \
+  --artifact-intent task_policy --artifact-intent simulation_policy \
   --output assessments/aadarshram-act-pusht
 robot-skill verify-assessment assessments/aadarshram-act-pusht
 ```
@@ -67,6 +69,33 @@ Unknown fields and categories fail validation. The command supplies the pinned
 model-card URL, source revision and `Upstream model card` attribution; claim text
 is never converted into a validator detection or Known Robot result. The claims
 document is retained and SHA-256 bound into the assessment bundle.
+
+Artifact intent is required and may be repeated. The allowed values are
+`task_policy`, `base_policy`, `training_checkpoint`, `simulation_policy`, and
+`hardware_policy`. These labels describe what the artifact is for; they never
+assert compatibility, performance, safety, evaluation success, or readiness.
+
+## Database publication lifecycle
+
+After `verify-assessment`, an administrator advances the same bundle through
+three explicit states:
+
+```bash
+robot-skill sync-assessment ./bundle --lifecycle draft --assessor-id ASSESSOR_UUID
+robot-skill sync-assessment ./bundle --lifecycle review --assessor-id ASSESSOR_UUID
+robot-skill sync-assessment ./bundle --lifecycle published --assessor-id ASSESSOR_UUID
+robot-skill export-assessments --output embodied-registry/src/data/external-policy-assessments.json
+```
+
+Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in the administrator's
+environment; credentials are never accepted as command-line arguments. New
+records must enter as drafts, lifecycle transitions cannot be skipped or
+reversed, reviewed content cannot change during publication, and published
+records cannot be updated or deleted. The unique provider/repository/revision
+identity prevents duplicate publications. The table has no evaluation,
+verification-status, trial, or compatibility relationship. The export command
+creates the source-controlled audit copy used as the site's availability
+fallback.
 
 Omit `--revision` only when intentionally assessing the repository's current
 HEAD. The command resolves it through the Hugging Face model API and records the

@@ -22,6 +22,8 @@ jobs:
       - run: robot-skill assess-hf --help
       - run: robot-skill verify-assessment --help
       - run: robot-skill verify-report --help
+      - run: robot-skill sync-assessment --help
+      - run: robot-skill export-assessments --help
       - run: robot-skill --version
       - name: Exercise reusable Action against a real complete manifest
         uses: ./
@@ -40,7 +42,7 @@ jobs:
           else
             wheel_python="$RUNNER_TEMP/knownrobot-wheel/bin/python"
           fi
-          "$wheel_python" -m pip install dist/knownrobot-1.5.0-py3-none-any.whl
+          "$wheel_python" -m pip install dist/knownrobot-1.6.0-py3-none-any.whl
           mkdir -p "$RUNNER_TEMP/knownrobot-smoke"
           cp embodied-registry/schema/example.robot-skill.json "$RUNNER_TEMP/knownrobot-smoke/manifest.json"
           cd "$RUNNER_TEMP/knownrobot-smoke"

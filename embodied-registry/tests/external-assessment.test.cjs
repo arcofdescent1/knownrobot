@@ -20,6 +20,8 @@ test("ships three pinned, attributable metadata-only assessments", () => {
     assert.equal(record.assessment.evaluated_policy, false);
     assert.equal(record.assessment.established_compatibility, false);
     assert.equal(record.assessment.status, "incomplete");
+    assert.ok(record.assessment.artifact_intents.length > 0);
+    assert.match(record.assessment.artifact_intent_notice, /descriptive classification only/i);
     assert.equal(record.manifest.evaluations.length, 0);
     assert.equal(record.manifest.compatibility.length, 0);
     assert.ok(record.findings.errors.length > 0);
@@ -37,7 +39,7 @@ test("public report states evidence boundaries and stable artifact URLs", () => 
   assert.equal(getExternalPolicyAssessment("missing"), null);
 });
 
-test("1.5 records keep all four evidence classes distinct and reject measured-result claims", () => {
+test("1.6 records keep artifact intent descriptive and all four evidence classes distinct", () => {
   const record = structuredClone(externalPolicyAssessments[0]);
   const claim = {
     category: "evaluation",

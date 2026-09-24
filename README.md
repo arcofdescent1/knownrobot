@@ -44,12 +44,13 @@ The inspector reads only the supplied directory. It never executes policy code, 
 
 ## Measured local evaluation
 
-Version 1.5.0 adds durable validator reports and typed upstream-claim authoring:
+Version 1.6.0 adds descriptive artifact intent and an append-only assessment publication lifecycle. Version 1.5.0 added durable validator reports and typed upstream-claim authoring:
 
 ```bash
 robot-skill check ./policy --format assessment --output assessment.json
 robot-skill verify-report assessment.json --policy ./policy
 robot-skill assess-hf owner/policy --revision FULL_40_CHARACTER_COMMIT \
+  --artifact-intent task_policy --artifact-intent hardware_policy \
   --claims upstream-claims.json --output assessments/owner-policy
 ```
 
@@ -57,6 +58,12 @@ The durable report keeps the manifest, complete diagnostics, file hashes,
 provenance and non-execution boundary together. Upstream claims are categorized,
 attributed to the pinned model card and kept separate from validator detections,
 portable declarations and Known Robot-measured results.
+
+After verification, an administrator can advance the same bundle through the
+database lifecycle with `sync-assessment`: first `draft`, then `review`, then
+`published`. The Supabase service-role key is read only from the
+`SUPABASE_SERVICE_ROLE_KEY` environment variable. `export-assessments` writes
+the published registry back to a reviewable JSON audit snapshot.
 
 Version 1.4.0 added a non-executing, provenance-bound Hugging Face assessment workflow:
 

@@ -1,36 +1,943 @@
 [
   {
-    "record_type": "external_policy_assessment",
-    "schema_version": "1.0",
     "slug": "aadarshram-act-pusht-6d403b1",
     "title": "ACT PushT — external metadata assessment",
+    "source": {
+      "author": "aadarshram",
+      "license": "Apache-2.0",
+      "provider": "huggingface",
+      "revision": "6d403b142934aaef61fc07f5eec1515c4325751f",
+      "repository": "aadarshram/act_pusht",
+      "revision_url": "https://huggingface.co/aadarshram/act_pusht/tree/6d403b142934aaef61fc07f5eec1515c4325751f",
+      "model_card_url": "https://huggingface.co/aadarshram/act_pusht/blob/6d403b142934aaef61fc07f5eec1515c4325751f/README.md",
+      "repository_url": "https://huggingface.co/aadarshram/act_pusht"
+    },
+    "binding": {
+      "algorithm": "sha256",
+      "claims_sha256": "8924f3a9ad5ddd899b2d5cb188ad1b0a3eef84847dc098b61309a3125344a843",
+      "manifest_sha256": "0b8a4310627b4d5250b91e1db536a5d642258f6f48e41e303b48a243674d358f",
+      "source_revision": "6d403b142934aaef61fc07f5eec1515c4325751f",
+      "inventory_sha256": "10e7bcfded375280ddb20a4eb885e77c6b89cc756311def31eabbf32b07dd4d6"
+    },
     "summary": "A non-executing assessment of a LeRobot ACT policy trained on the PushT dataset.",
-    "source": { "provider": "huggingface", "repository": "aadarshram/act_pusht", "revision": "6d403b142934aaef61fc07f5eec1515c4325751f", "repository_url": "https://huggingface.co/aadarshram/act_pusht", "revision_url": "https://huggingface.co/aadarshram/act_pusht/tree/6d403b142934aaef61fc07f5eec1515c4325751f", "model_card_url": "https://huggingface.co/aadarshram/act_pusht/blob/6d403b142934aaef61fc07f5eec1515c4325751f/README.md", "author": "aadarshram", "license": "Apache-2.0" },
-    "assessment": { "method": "metadata_only", "assessor": "Known Robot", "validator_version": "1.3.0", "assessed_at": "2026-09-24T15:30:00.000Z", "executed_policy_code": false, "evaluated_policy": false, "established_compatibility": false, "status": "incomplete" },
-    "manifest": { "schema_version": "1.0", "skill": { "name": "Aadarshram Act Pusht", "version": null, "source": { "type": "local", "repository": null, "revision": null } }, "policy": { "framework": "lerobot", "framework_version": null, "architecture": "act" }, "hardware": { "robot_family": null, "gripper": null, "sensors": [] }, "runtime": { "control_frequency_hz": null, "observation_shape": { "observation.image": { "type": "VISUAL", "shape": [3,96,96] }, "observation.state": { "type": "STATE", "shape": [2] } }, "action_shape": { "action": { "type": "ACTION", "shape": [2] } }, "dependencies": [] }, "dataset": { "repository": "lerobot/pusht", "revision": null, "schema": null }, "compatibility": [], "evaluations": [] },
-    "findings": { "errors": [{"severity":"error","path":"skill.version","message":"Artifact version is missing."},{"severity":"error","path":"skill.source.repository","message":"Source repository is missing from inspected metadata."},{"severity":"error","path":"skill.source.revision","message":"Immutable source revision is missing from inspected metadata."},{"severity":"error","path":"policy.framework_version","message":"Framework version is not pinned."},{"severity":"error","path":"hardware.robot_family","message":"Robot family is not declared."},{"severity":"error","path":"hardware.gripper","message":"Gripper is not declared."},{"severity":"error","path":"hardware.sensors","message":"Sensors are not declared."},{"severity":"error","path":"runtime.control_frequency_hz","message":"Control frequency is not declared."},{"severity":"error","path":"runtime.dependencies","message":"Runtime dependencies are not declared."},{"severity":"error","path":"dataset.revision","message":"Dataset revision is not pinned."},{"severity":"error","path":"dataset.schema","message":"Dataset schema is not declared."},{"severity":"error","path":"dependency.unresolved","message":"Resolved dependency evidence is missing."}], "warnings": [{"severity":"warning","path":"evaluations","message":"No measured evaluation was found."},{"severity":"warning","path":"compatibility","message":"No compatibility evidence was found."}] },
-    "inspected_files": [{"path":"README.md","sha256":"33142fae10336df5c9137f3da809476ecb821c871636b814086f3a23df9bef89","bytes":1953},{"path":"config.json","sha256":"541ce265150b3f45ee7c8d43d308facfc31a8e07f8d8bcb95bb5fc3df86bb981","bytes":1478},{"path":"train_config.json","sha256":"eab635d09399d34cdcd668942f3de5c31a7103eea0fbe6d296902e03cabbd4a6","bytes":4599},{"path":"policy_preprocessor.json","sha256":"39af97ab0d52b54f441fce4925a27b97fd2c20c67f17099d0c63c4746d5169f5","bytes":1145},{"path":"policy_postprocessor.json","sha256":"9ca3b5a1986e8b6d4f41238446eb7b3637776853102ae7f9e8ba29700e6a2e66","bytes":660}],
-    "upstream_claims": [{"claim":"The model card says the ACT policy was trained on the PushT dataset for 80,000 steps.","source_url":"https://huggingface.co/aadarshram/act_pusht/blob/6d403b142934aaef61fc07f5eec1515c4325751f/README.md","attribution":"Upstream model card"}],
-    "limitations": ["Only repository metadata was inspected; weights were not downloaded and policy code was not executed.","The pinned Hub revision is assessment provenance and was not inferred by the validator from the local metadata snapshot.","No success rate, safety claim, physical transfer claim or compatibility result is established."]
+    "findings": {
+      "errors": [
+        {
+          "code": "metadata.missing",
+          "path": "skill.version",
+          "message": "Declare the policy or artifact version.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "policy.framework_version",
+          "message": "Pin the framework version.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.robot_family",
+          "message": "Declare the robot family used or targeted.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.gripper",
+          "message": "Declare the end effector or gripper.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.sensors",
+          "message": "Describe every required sensor and its role.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "runtime.control_frequency_hz",
+          "message": "Declare the required control frequency in hertz.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "runtime.dependencies",
+          "message": "Provide a dependency lockfile or dependency declaration.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "dataset.revision",
+          "message": "Pin the immutable dataset revision.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "dataset.schema",
+          "message": "Describe the dataset feature schema.",
+          "severity": "error"
+        },
+        {
+          "code": "dependency.unresolved",
+          "path": "runtime.dependencies",
+          "message": "Record resolved package versions; a filename or file hash alone is not an environment lock.",
+          "severity": "error"
+        }
+      ],
+      "warnings": [
+        {
+          "code": "evidence.absent",
+          "path": "evaluations",
+          "message": "No evaluation result is recorded; compatibility remains unverified.",
+          "severity": "warning"
+        },
+        {
+          "code": "compatibility.absent",
+          "path": "compatibility",
+          "message": "No known compatible or incompatible configuration is recorded.",
+          "severity": "warning"
+        }
+      ]
+    },
+    "manifest": {
+      "skill": {
+        "name": "Act Pusht",
+        "source": {
+          "type": "huggingface",
+          "revision": "6d403b142934aaef61fc07f5eec1515c4325751f",
+          "repository": "aadarshram/act_pusht"
+        },
+        "license": "Apache-2.0",
+        "version": null
+      },
+      "policy": {
+        "framework": "lerobot",
+        "architecture": "act",
+        "framework_version": null
+      },
+      "dataset": {
+        "schema": null,
+        "revision": null,
+        "repository": "lerobot/pusht"
+      },
+      "runtime": {
+        "action_shape": {
+          "action": {
+            "type": "ACTION",
+            "shape": [
+              2
+            ]
+          }
+        },
+        "dependencies": [],
+        "observation_shape": {
+          "observation.image": {
+            "type": "VISUAL",
+            "shape": [
+              3,
+              96,
+              96
+            ]
+          },
+          "observation.state": {
+            "type": "STATE",
+            "shape": [
+              2
+            ]
+          }
+        },
+        "control_frequency_hz": null
+      },
+      "hardware": {
+        "gripper": null,
+        "sensors": [],
+        "robot_family": null
+      },
+      "evaluations": [],
+      "compatibility": [],
+      "schema_version": "1.0"
+    },
+    "assessment": {
+      "method": "metadata_only",
+      "status": "incomplete",
+      "assessor": "Known Robot",
+      "assessed_at": "2026-09-24T21:19:52.713195Z",
+      "artifact_intents": [
+        "simulation_policy",
+        "task_policy"
+      ],
+      "evaluated_policy": false,
+      "validator_version": "1.6.0",
+      "executed_policy_code": false,
+      "artifact_intent_notice": "Descriptive classification only; it is not a compatibility, performance, safety or deployment conclusion.",
+      "established_compatibility": false
+    },
+    "limitations": [
+      "Only allowlisted repository metadata was downloaded; weights were not downloaded and policy code was not executed.",
+      "Model-card statements are not converted into Known Robot measurements or compatibility claims.",
+      "A measured evaluation requires a separate evidence record with actual trials and attributable evidence."
+    ],
+    "record_type": "external_policy_assessment",
+    "schema_version": "1.0",
+    "inspected_files": [
+      {
+        "path": "README.md",
+        "bytes": 1953,
+        "sha256": "33142fae10336df5c9137f3da809476ecb821c871636b814086f3a23df9bef89"
+      },
+      {
+        "path": "config.json",
+        "bytes": 1478,
+        "sha256": "541ce265150b3f45ee7c8d43d308facfc31a8e07f8d8bcb95bb5fc3df86bb981"
+      },
+      {
+        "path": "policy_postprocessor.json",
+        "bytes": 660,
+        "sha256": "9ca3b5a1986e8b6d4f41238446eb7b3637776853102ae7f9e8ba29700e6a2e66"
+      },
+      {
+        "path": "policy_preprocessor.json",
+        "bytes": 1145,
+        "sha256": "39af97ab0d52b54f441fce4925a27b97fd2c20c67f17099d0c63c4746d5169f5"
+      },
+      {
+        "path": "train_config.json",
+        "bytes": 4599,
+        "sha256": "eab635d09399d34cdcd668942f3de5c31a7103eea0fbe6d296902e03cabbd4a6"
+      }
+    ],
+    "upstream_claims": [
+      {
+        "claim": "The model card states that the ACT policy was trained on the PushT dataset for 80,000 steps.",
+        "category": "training",
+        "source_url": "https://huggingface.co/aadarshram/act_pusht/blob/6d403b142934aaef61fc07f5eec1515c4325751f/README.md",
+        "attribution": "Upstream model card",
+        "source_revision": "6d403b142934aaef61fc07f5eec1515c4325751f"
+      }
+    ],
+    "evidence_classes": {
+      "validator_detected_facts": [
+        {
+          "path": "policy.framework",
+          "value": "lerobot"
+        },
+        {
+          "path": "policy.architecture",
+          "value": "act"
+        },
+        {
+          "path": "runtime.observation_shape",
+          "value": {
+            "observation.image": {
+              "type": "VISUAL",
+              "shape": [
+                3,
+                96,
+                96
+              ]
+            },
+            "observation.state": {
+              "type": "STATE",
+              "shape": [
+                2
+              ]
+            }
+          }
+        },
+        {
+          "path": "runtime.action_shape",
+          "value": {
+            "action": {
+              "type": "ACTION",
+              "shape": [
+                2
+              ]
+            }
+          }
+        },
+        {
+          "path": "dataset.repository",
+          "value": "lerobot/pusht"
+        }
+      ],
+      "upstream_attributed_claims": [
+        {
+          "claim": "The model card states that the ACT policy was trained on the PushT dataset for 80,000 steps.",
+          "category": "training",
+          "source_url": "https://huggingface.co/aadarshram/act_pusht/blob/6d403b142934aaef61fc07f5eec1515c4325751f/README.md",
+          "attribution": "Upstream model card",
+          "source_revision": "6d403b142934aaef61fc07f5eec1515c4325751f"
+        }
+      ],
+      "knownrobot_measured_results": [],
+      "portable_manifest_declarations": [
+        {
+          "path": "skill.source.type",
+          "basis": "Hugging Face model API",
+          "value": "huggingface"
+        },
+        {
+          "path": "skill.source.repository",
+          "basis": "Hugging Face model API",
+          "value": "aadarshram/act_pusht"
+        },
+        {
+          "path": "skill.source.revision",
+          "basis": "Hugging Face model API",
+          "value": "6d403b142934aaef61fc07f5eec1515c4325751f"
+        },
+        {
+          "path": "skill.license",
+          "basis": "Hugging Face model-card metadata",
+          "value": "Apache-2.0"
+        }
+      ]
+    }
   },
   {
-    "record_type": "external_policy_assessment", "schema_version": "1.0", "slug": "abdul004-so101-act-policy-v5-c14c7f4", "title": "SO-101 Ball-in-Cup ACT — external metadata assessment", "summary": "A non-executing assessment of an upstream policy documented for a physical SO-101 ball-in-cup task.",
-    "source": { "provider": "huggingface", "repository": "abdul004/so101_act_policy_v5", "revision": "c14c7f4108c07c0c04ec90b7f110213130c14a9f", "repository_url": "https://huggingface.co/abdul004/so101_act_policy_v5", "revision_url": "https://huggingface.co/abdul004/so101_act_policy_v5/tree/c14c7f4108c07c0c04ec90b7f110213130c14a9f", "model_card_url": "https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md", "author": "abdul004", "license": "Apache-2.0" },
-    "assessment": { "method": "metadata_only", "assessor": "Known Robot", "validator_version": "1.3.0", "assessed_at": "2026-09-24T15:35:00.000Z", "executed_policy_code": false, "evaluated_policy": false, "established_compatibility": false, "status": "incomplete" },
-    "manifest": { "schema_version":"1.0","skill":{"name":"Abdul004 So101 Act Policy V5","version":null,"source":{"type":"local","repository":null,"revision":null}},"policy":{"framework":"lerobot","framework_version":null,"architecture":"act"},"hardware":{"robot_family":null,"gripper":null,"sensors":[]},"runtime":{"control_frequency_hz":null,"observation_shape":{"observation.state":{"type":"STATE","shape":[6]},"observation.images.wrist":{"type":"VISUAL","shape":[3,480,640]},"observation.images.overhead":{"type":"VISUAL","shape":[3,480,640]}},"action_shape":{"action":{"type":"ACTION","shape":[6]}},"dependencies":[]},"dataset":{"repository":"abdul004/so101_ball_in_cup_v5","revision":null,"schema":null},"compatibility":[],"evaluations":[]},
-    "findings": { "errors": [{"severity":"error","path":"skill.version","message":"Artifact version is missing."},{"severity":"error","path":"skill.source.repository","message":"Source repository is missing from inspected metadata."},{"severity":"error","path":"skill.source.revision","message":"Immutable source revision is missing from inspected metadata."},{"severity":"error","path":"policy.framework_version","message":"Framework version is not pinned."},{"severity":"error","path":"hardware.robot_family","message":"Robot family was described by the model card but not declared in portable metadata."},{"severity":"error","path":"hardware.gripper","message":"Gripper is not declared."},{"severity":"error","path":"hardware.sensors","message":"Sensors were described by the model card but not declared in portable metadata."},{"severity":"error","path":"runtime.control_frequency_hz","message":"Control frequency is not declared."},{"severity":"error","path":"runtime.dependencies","message":"Runtime dependencies are not declared."},{"severity":"error","path":"dataset.revision","message":"Dataset revision is not pinned."},{"severity":"error","path":"dataset.schema","message":"Dataset schema is not declared."},{"severity":"error","path":"dependency.unresolved","message":"Resolved dependency evidence is missing."}], "warnings": [{"severity":"warning","path":"evaluations","message":"No Known Robot measured evaluation was performed."},{"severity":"warning","path":"compatibility","message":"No Known Robot compatibility result was established."}] },
-    "inspected_files": [{"path":"README.md","sha256":"a2cd03e862f53315278c6b7dceb45a0fb9232f3e898e56e9450d8fc821938a26","bytes":3670},{"path":"config.json","sha256":"98c5f453f9ede1d31597206b16745077cbc28ac1aaf939b1407872831063fd34","bytes":1715},{"path":"train_config.json","sha256":"532f0f412cf2fb3a132689eff2225999eb83cadee5750688aea51dbfd3ce4798","bytes":5394},{"path":"policy_preprocessor.json","sha256":"94f0567207c15ed824a173f69b0026b834246f608be8e48e76b8de9b019f2e80","bytes":1331},{"path":"policy_postprocessor.json","sha256":"648b415125a183dfd6cbc47c1dc04ab3f2d912654ef22a12ca5e8b93d7d85cdd","bytes":660}],
-    "upstream_claims": [{"claim":"The model card describes a 6-DOF SO-101 with overhead and wrist cameras for a ball-in-cup task.","source_url":"https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md","attribution":"Upstream model card"},{"claim":"The model card reports VLM scores and qualitative grasp, lift, transport and placement observations; Known Robot did not reproduce or verify them.","source_url":"https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md","attribution":"Upstream model card"}],
-    "limitations": ["Only repository metadata was inspected; weights were not downloaded and policy code was not executed.","All task, hardware and result descriptions remain claims attributed to the upstream model card.","This record is not physical evidence, an independent reproduction, a safety review or a compatibility result."]
+    "slug": "abdul004-so101-act-policy-v5-c14c7f4",
+    "title": "SO-101 Ball-in-Cup ACT — external metadata assessment",
+    "source": {
+      "author": "abdul004",
+      "license": "Apache-2.0",
+      "provider": "huggingface",
+      "revision": "c14c7f4108c07c0c04ec90b7f110213130c14a9f",
+      "repository": "abdul004/so101_act_policy_v5",
+      "revision_url": "https://huggingface.co/abdul004/so101_act_policy_v5/tree/c14c7f4108c07c0c04ec90b7f110213130c14a9f",
+      "model_card_url": "https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md",
+      "repository_url": "https://huggingface.co/abdul004/so101_act_policy_v5"
+    },
+    "binding": {
+      "algorithm": "sha256",
+      "claims_sha256": "6737e244298698ded14c4a39ba81b2852ba47dc4a3ac82a54c918701d7b78ba4",
+      "manifest_sha256": "cf28b550b621310e53e27349836c5ce2c3fe2caa673bd9b873df947efb5e47c3",
+      "source_revision": "c14c7f4108c07c0c04ec90b7f110213130c14a9f",
+      "inventory_sha256": "df03e43ce286ff0f303ad7d2052bdb5a2932c994cf4f1703b16dcc68f6489d00"
+    },
+    "summary": "A non-executing assessment of an upstream policy documented for a physical SO-101 ball-in-cup task.",
+    "findings": {
+      "errors": [
+        {
+          "code": "metadata.missing",
+          "path": "skill.version",
+          "message": "Declare the policy or artifact version.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "policy.framework_version",
+          "message": "Pin the framework version.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.robot_family",
+          "message": "Declare the robot family used or targeted.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.gripper",
+          "message": "Declare the end effector or gripper.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.sensors",
+          "message": "Describe every required sensor and its role.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "runtime.control_frequency_hz",
+          "message": "Declare the required control frequency in hertz.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "runtime.dependencies",
+          "message": "Provide a dependency lockfile or dependency declaration.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "dataset.revision",
+          "message": "Pin the immutable dataset revision.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "dataset.schema",
+          "message": "Describe the dataset feature schema.",
+          "severity": "error"
+        },
+        {
+          "code": "dependency.unresolved",
+          "path": "runtime.dependencies",
+          "message": "Record resolved package versions; a filename or file hash alone is not an environment lock.",
+          "severity": "error"
+        }
+      ],
+      "warnings": [
+        {
+          "code": "evidence.absent",
+          "path": "evaluations",
+          "message": "No evaluation result is recorded; compatibility remains unverified.",
+          "severity": "warning"
+        },
+        {
+          "code": "compatibility.absent",
+          "path": "compatibility",
+          "message": "No known compatible or incompatible configuration is recorded.",
+          "severity": "warning"
+        }
+      ]
+    },
+    "manifest": {
+      "skill": {
+        "name": "So101 Act Policy V5",
+        "source": {
+          "type": "huggingface",
+          "revision": "c14c7f4108c07c0c04ec90b7f110213130c14a9f",
+          "repository": "abdul004/so101_act_policy_v5"
+        },
+        "license": "Apache-2.0",
+        "version": null
+      },
+      "policy": {
+        "framework": "lerobot",
+        "architecture": "act",
+        "framework_version": null
+      },
+      "dataset": {
+        "schema": null,
+        "revision": null,
+        "repository": "abdul004/so101_ball_in_cup_v5"
+      },
+      "runtime": {
+        "action_shape": {
+          "action": {
+            "type": "ACTION",
+            "shape": [
+              6
+            ]
+          }
+        },
+        "dependencies": [],
+        "observation_shape": {
+          "observation.state": {
+            "type": "STATE",
+            "shape": [
+              6
+            ]
+          },
+          "observation.images.wrist": {
+            "type": "VISUAL",
+            "shape": [
+              3,
+              480,
+              640
+            ]
+          },
+          "observation.images.overhead": {
+            "type": "VISUAL",
+            "shape": [
+              3,
+              480,
+              640
+            ]
+          }
+        },
+        "control_frequency_hz": null
+      },
+      "hardware": {
+        "gripper": null,
+        "sensors": [],
+        "robot_family": null
+      },
+      "evaluations": [],
+      "compatibility": [],
+      "schema_version": "1.0"
+    },
+    "assessment": {
+      "method": "metadata_only",
+      "status": "incomplete",
+      "assessor": "Known Robot",
+      "assessed_at": "2026-09-24T21:19:54.712377Z",
+      "artifact_intents": [
+        "hardware_policy",
+        "task_policy"
+      ],
+      "evaluated_policy": false,
+      "validator_version": "1.6.0",
+      "executed_policy_code": false,
+      "artifact_intent_notice": "Descriptive classification only; it is not a compatibility, performance, safety or deployment conclusion.",
+      "established_compatibility": false
+    },
+    "limitations": [
+      "Only allowlisted repository metadata was downloaded; weights were not downloaded and policy code was not executed.",
+      "Model-card statements are not converted into Known Robot measurements or compatibility claims.",
+      "A measured evaluation requires a separate evidence record with actual trials and attributable evidence."
+    ],
+    "record_type": "external_policy_assessment",
+    "schema_version": "1.0",
+    "inspected_files": [
+      {
+        "path": "README.md",
+        "bytes": 3670,
+        "sha256": "a2cd03e862f53315278c6b7dceb45a0fb9232f3e898e56e9450d8fc821938a26"
+      },
+      {
+        "path": "config.json",
+        "bytes": 1715,
+        "sha256": "98c5f453f9ede1d31597206b16745077cbc28ac1aaf939b1407872831063fd34"
+      },
+      {
+        "path": "policy_postprocessor.json",
+        "bytes": 660,
+        "sha256": "648b415125a183dfd6cbc47c1dc04ab3f2d912654ef22a12ca5e8b93d7d85cdd"
+      },
+      {
+        "path": "policy_preprocessor.json",
+        "bytes": 1331,
+        "sha256": "94f0567207c15ed824a173f69b0026b834246f608be8e48e76b8de9b019f2e80"
+      },
+      {
+        "path": "train_config.json",
+        "bytes": 5394,
+        "sha256": "532f0f412cf2fb3a132689eff2225999eb83cadee5750688aea51dbfd3ce4798"
+      }
+    ],
+    "upstream_claims": [
+      {
+        "claim": "The model card describes a six-degree-of-freedom SO-101 configuration with overhead and wrist cameras for a ball-in-cup task.",
+        "category": "hardware",
+        "source_url": "https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md",
+        "attribution": "Upstream model card",
+        "source_revision": "c14c7f4108c07c0c04ec90b7f110213130c14a9f"
+      },
+      {
+        "claim": "The model card reports upstream VLM scores and qualitative task observations; Known Robot did not reproduce or verify them.",
+        "category": "evaluation",
+        "source_url": "https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md",
+        "attribution": "Upstream model card",
+        "source_revision": "c14c7f4108c07c0c04ec90b7f110213130c14a9f"
+      }
+    ],
+    "evidence_classes": {
+      "validator_detected_facts": [
+        {
+          "path": "policy.framework",
+          "value": "lerobot"
+        },
+        {
+          "path": "policy.architecture",
+          "value": "act"
+        },
+        {
+          "path": "runtime.observation_shape",
+          "value": {
+            "observation.state": {
+              "type": "STATE",
+              "shape": [
+                6
+              ]
+            },
+            "observation.images.wrist": {
+              "type": "VISUAL",
+              "shape": [
+                3,
+                480,
+                640
+              ]
+            },
+            "observation.images.overhead": {
+              "type": "VISUAL",
+              "shape": [
+                3,
+                480,
+                640
+              ]
+            }
+          }
+        },
+        {
+          "path": "runtime.action_shape",
+          "value": {
+            "action": {
+              "type": "ACTION",
+              "shape": [
+                6
+              ]
+            }
+          }
+        },
+        {
+          "path": "dataset.repository",
+          "value": "abdul004/so101_ball_in_cup_v5"
+        }
+      ],
+      "upstream_attributed_claims": [
+        {
+          "claim": "The model card describes a six-degree-of-freedom SO-101 configuration with overhead and wrist cameras for a ball-in-cup task.",
+          "category": "hardware",
+          "source_url": "https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md",
+          "attribution": "Upstream model card",
+          "source_revision": "c14c7f4108c07c0c04ec90b7f110213130c14a9f"
+        },
+        {
+          "claim": "The model card reports upstream VLM scores and qualitative task observations; Known Robot did not reproduce or verify them.",
+          "category": "evaluation",
+          "source_url": "https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md",
+          "attribution": "Upstream model card",
+          "source_revision": "c14c7f4108c07c0c04ec90b7f110213130c14a9f"
+        }
+      ],
+      "knownrobot_measured_results": [],
+      "portable_manifest_declarations": [
+        {
+          "path": "skill.source.type",
+          "basis": "Hugging Face model API",
+          "value": "huggingface"
+        },
+        {
+          "path": "skill.source.repository",
+          "basis": "Hugging Face model API",
+          "value": "abdul004/so101_act_policy_v5"
+        },
+        {
+          "path": "skill.source.revision",
+          "basis": "Hugging Face model API",
+          "value": "c14c7f4108c07c0c04ec90b7f110213130c14a9f"
+        },
+        {
+          "path": "skill.license",
+          "basis": "Hugging Face model-card metadata",
+          "value": "Apache-2.0"
+        }
+      ]
+    }
   },
   {
-    "record_type":"external_policy_assessment","schema_version":"1.0","slug":"lerobot-smolvla-base-d9f33c9","title":"SmolVLA base — external metadata assessment","summary":"A non-executing assessment showing why a base VLA checkpoint is not itself deployment-ready evidence.",
-    "source":{"provider":"huggingface","repository":"lerobot/smolvla_base","revision":"d9f33c94a60fb382c90dea2164c96845bd955e28","repository_url":"https://huggingface.co/lerobot/smolvla_base","revision_url":"https://huggingface.co/lerobot/smolvla_base/tree/d9f33c94a60fb382c90dea2164c96845bd955e28","model_card_url":"https://huggingface.co/lerobot/smolvla_base/blob/d9f33c94a60fb382c90dea2164c96845bd955e28/README.md","author":"LeRobot (Hugging Face)","license":"Apache-2.0"},
-    "assessment":{"method":"metadata_only","assessor":"Known Robot","validator_version":"1.3.0","assessed_at":"2026-09-24T15:40:00.000Z","executed_policy_code":false,"evaluated_policy":false,"established_compatibility":false,"status":"incomplete"},
-    "manifest":{"schema_version":"1.0","skill":{"name":"Lerobot Smolvla Base","version":null,"source":{"type":"local","repository":null,"revision":null}},"policy":{"framework":"lerobot","framework_version":null,"architecture":"smolvla"},"hardware":{"robot_family":null,"gripper":null,"sensors":[]},"runtime":{"control_frequency_hz":null,"observation_shape":{"observation.state":{"type":"STATE","shape":[6]},"observation.images.camera1":{"type":"VISUAL","shape":[3,256,256]},"observation.images.camera2":{"type":"VISUAL","shape":[3,256,256]},"observation.images.camera3":{"type":"VISUAL","shape":[3,256,256]}},"action_shape":{"action":{"type":"ACTION","shape":[6]}},"dependencies":[]},"dataset":{"repository":null,"revision":null,"schema":null},"compatibility":[],"evaluations":[]},
-    "findings":{"errors":[{"severity":"error","path":"skill.version","message":"Artifact version is missing."},{"severity":"error","path":"skill.source.repository","message":"Source repository is missing from inspected metadata."},{"severity":"error","path":"skill.source.revision","message":"Immutable source revision is missing from inspected metadata."},{"severity":"error","path":"policy.framework_version","message":"Framework version is not pinned."},{"severity":"error","path":"hardware.robot_family","message":"Robot family is not declared."},{"severity":"error","path":"hardware.gripper","message":"Gripper is not declared."},{"severity":"error","path":"hardware.sensors","message":"Sensors are not declared."},{"severity":"error","path":"runtime.control_frequency_hz","message":"Control frequency is not declared."},{"severity":"error","path":"runtime.dependencies","message":"Runtime dependencies are not declared."},{"severity":"error","path":"dataset.repository","message":"No task dataset is pinned for this base checkpoint."},{"severity":"error","path":"dataset.revision","message":"Dataset revision is not pinned."},{"severity":"error","path":"dataset.schema","message":"Dataset schema is not declared."},{"severity":"error","path":"dependency.unresolved","message":"Resolved dependency evidence is missing."}],"warnings":[{"severity":"warning","path":"evaluations","message":"No measured evaluation was found."},{"severity":"warning","path":"compatibility","message":"No compatibility evidence was found."}]},
-    "inspected_files":[{"path":"README.md","sha256":"a484071b8d7d0591452f795813fb54af9199fc1c48ef1ee995358d5ba07ee070","bytes":4625},{"path":"config.json","sha256":"650584b56c104720f7a3c91d1ec6bec9e8de8ac11e60c92ba2fa82d93eda147d","bytes":2299},{"path":"policy_preprocessor.json","sha256":"7683d648280a72f0d51e869fb8dd1596beed90b7f84849330cf1bc26634a4bd6","bytes":1872},{"path":"policy_postprocessor.json","sha256":"2b78bb742065288df2ec63b0ee35f97a1f6950171cf2272f7e34b1fe3873b17b","bytes":660}],
-    "upstream_claims":[{"claim":"The model card describes SmolVLA as a base model intended to be fine-tuned for a specific use case.","source_url":"https://huggingface.co/lerobot/smolvla_base/blob/d9f33c94a60fb382c90dea2164c96845bd955e28/README.md","attribution":"Upstream model card"}],
-    "limitations":["Only repository metadata was inspected; weights were not downloaded and policy code was not executed.","A base checkpoint is not a task-specific deployed policy and no target robot, task dataset or protocol is established here.","The detected feature shapes do not establish semantic compatibility, safe control or task performance."]
+    "slug": "lerobot-smolvla-base-d9f33c9",
+    "title": "SmolVLA base — external metadata assessment",
+    "source": {
+      "author": "lerobot",
+      "license": "Apache-2.0",
+      "provider": "huggingface",
+      "revision": "d9f33c94a60fb382c90dea2164c96845bd955e28",
+      "repository": "lerobot/smolvla_base",
+      "revision_url": "https://huggingface.co/lerobot/smolvla_base/tree/d9f33c94a60fb382c90dea2164c96845bd955e28",
+      "model_card_url": "https://huggingface.co/lerobot/smolvla_base/blob/d9f33c94a60fb382c90dea2164c96845bd955e28/README.md",
+      "repository_url": "https://huggingface.co/lerobot/smolvla_base"
+    },
+    "binding": {
+      "algorithm": "sha256",
+      "claims_sha256": "667372a0d2ecda4370ae97d1d4fe0e564d08a1d4b0c72a60bab05573c27fb177",
+      "manifest_sha256": "0ce8ab26273642380c8d0b985572c7d0add2101449b813b67fe27c50514806b7",
+      "source_revision": "d9f33c94a60fb382c90dea2164c96845bd955e28",
+      "inventory_sha256": "3a7c4a539b533e63ca9de0f88070baf1cbbb300497cf67794951d35d70bddca2"
+    },
+    "summary": "A non-executing assessment showing why a base VLA checkpoint is not itself deployment-ready evidence.",
+    "findings": {
+      "errors": [
+        {
+          "code": "metadata.missing",
+          "path": "skill.version",
+          "message": "Declare the policy or artifact version.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "policy.framework_version",
+          "message": "Pin the framework version.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.robot_family",
+          "message": "Declare the robot family used or targeted.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.gripper",
+          "message": "Declare the end effector or gripper.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "hardware.sensors",
+          "message": "Describe every required sensor and its role.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "runtime.control_frequency_hz",
+          "message": "Declare the required control frequency in hertz.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "runtime.dependencies",
+          "message": "Provide a dependency lockfile or dependency declaration.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "dataset.repository",
+          "message": "Identify the training or evaluation dataset.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "dataset.revision",
+          "message": "Pin the immutable dataset revision.",
+          "severity": "error"
+        },
+        {
+          "code": "metadata.missing",
+          "path": "dataset.schema",
+          "message": "Describe the dataset feature schema.",
+          "severity": "error"
+        },
+        {
+          "code": "dependency.unresolved",
+          "path": "runtime.dependencies",
+          "message": "Record resolved package versions; a filename or file hash alone is not an environment lock.",
+          "severity": "error"
+        }
+      ],
+      "warnings": [
+        {
+          "code": "evidence.absent",
+          "path": "evaluations",
+          "message": "No evaluation result is recorded; compatibility remains unverified.",
+          "severity": "warning"
+        },
+        {
+          "code": "compatibility.absent",
+          "path": "compatibility",
+          "message": "No known compatible or incompatible configuration is recorded.",
+          "severity": "warning"
+        }
+      ]
+    },
+    "manifest": {
+      "skill": {
+        "name": "Smolvla Base",
+        "source": {
+          "type": "huggingface",
+          "revision": "d9f33c94a60fb382c90dea2164c96845bd955e28",
+          "repository": "lerobot/smolvla_base"
+        },
+        "license": "Apache-2.0",
+        "version": null
+      },
+      "policy": {
+        "framework": "lerobot",
+        "architecture": "smolvla",
+        "framework_version": null
+      },
+      "dataset": {
+        "schema": null,
+        "revision": null,
+        "repository": null
+      },
+      "runtime": {
+        "action_shape": {
+          "action": {
+            "type": "ACTION",
+            "shape": [
+              6
+            ]
+          }
+        },
+        "dependencies": [],
+        "observation_shape": {
+          "observation.state": {
+            "type": "STATE",
+            "shape": [
+              6
+            ]
+          },
+          "observation.images.camera1": {
+            "type": "VISUAL",
+            "shape": [
+              3,
+              256,
+              256
+            ]
+          },
+          "observation.images.camera2": {
+            "type": "VISUAL",
+            "shape": [
+              3,
+              256,
+              256
+            ]
+          },
+          "observation.images.camera3": {
+            "type": "VISUAL",
+            "shape": [
+              3,
+              256,
+              256
+            ]
+          }
+        },
+        "control_frequency_hz": null
+      },
+      "hardware": {
+        "gripper": null,
+        "sensors": [],
+        "robot_family": null
+      },
+      "evaluations": [],
+      "compatibility": [],
+      "schema_version": "1.0"
+    },
+    "assessment": {
+      "method": "metadata_only",
+      "status": "incomplete",
+      "assessor": "Known Robot",
+      "assessed_at": "2026-09-24T21:19:56.122708Z",
+      "artifact_intents": [
+        "base_policy",
+        "training_checkpoint"
+      ],
+      "evaluated_policy": false,
+      "validator_version": "1.6.0",
+      "executed_policy_code": false,
+      "artifact_intent_notice": "Descriptive classification only; it is not a compatibility, performance, safety or deployment conclusion.",
+      "established_compatibility": false
+    },
+    "limitations": [
+      "Only allowlisted repository metadata was downloaded; weights were not downloaded and policy code was not executed.",
+      "Model-card statements are not converted into Known Robot measurements or compatibility claims.",
+      "A measured evaluation requires a separate evidence record with actual trials and attributable evidence."
+    ],
+    "record_type": "external_policy_assessment",
+    "schema_version": "1.0",
+    "inspected_files": [
+      {
+        "path": "README.md",
+        "bytes": 4625,
+        "sha256": "a484071b8d7d0591452f795813fb54af9199fc1c48ef1ee995358d5ba07ee070"
+      },
+      {
+        "path": "config.json",
+        "bytes": 2299,
+        "sha256": "650584b56c104720f7a3c91d1ec6bec9e8de8ac11e60c92ba2fa82d93eda147d"
+      },
+      {
+        "path": "policy_postprocessor.json",
+        "bytes": 660,
+        "sha256": "2b78bb742065288df2ec63b0ee35f97a1f6950171cf2272f7e34b1fe3873b17b"
+      },
+      {
+        "path": "policy_preprocessor.json",
+        "bytes": 1872,
+        "sha256": "7683d648280a72f0d51e869fb8dd1596beed90b7f84849330cf1bc26634a4bd6"
+      }
+    ],
+    "upstream_claims": [
+      {
+        "claim": "The model card describes SmolVLA as a base model intended to be fine-tuned for a specific use case.",
+        "category": "intended_use",
+        "source_url": "https://huggingface.co/lerobot/smolvla_base/blob/d9f33c94a60fb382c90dea2164c96845bd955e28/README.md",
+        "attribution": "Upstream model card",
+        "source_revision": "d9f33c94a60fb382c90dea2164c96845bd955e28"
+      }
+    ],
+    "evidence_classes": {
+      "validator_detected_facts": [
+        {
+          "path": "policy.framework",
+          "value": "lerobot"
+        },
+        {
+          "path": "policy.architecture",
+          "value": "smolvla"
+        },
+        {
+          "path": "runtime.observation_shape",
+          "value": {
+            "observation.state": {
+              "type": "STATE",
+              "shape": [
+                6
+              ]
+            },
+            "observation.images.camera1": {
+              "type": "VISUAL",
+              "shape": [
+                3,
+                256,
+                256
+              ]
+            },
+            "observation.images.camera2": {
+              "type": "VISUAL",
+              "shape": [
+                3,
+                256,
+                256
+              ]
+            },
+            "observation.images.camera3": {
+              "type": "VISUAL",
+              "shape": [
+                3,
+                256,
+                256
+              ]
+            }
+          }
+        },
+        {
+          "path": "runtime.action_shape",
+          "value": {
+            "action": {
+              "type": "ACTION",
+              "shape": [
+                6
+              ]
+            }
+          }
+        }
+      ],
+      "upstream_attributed_claims": [
+        {
+          "claim": "The model card describes SmolVLA as a base model intended to be fine-tuned for a specific use case.",
+          "category": "intended_use",
+          "source_url": "https://huggingface.co/lerobot/smolvla_base/blob/d9f33c94a60fb382c90dea2164c96845bd955e28/README.md",
+          "attribution": "Upstream model card",
+          "source_revision": "d9f33c94a60fb382c90dea2164c96845bd955e28"
+        }
+      ],
+      "knownrobot_measured_results": [],
+      "portable_manifest_declarations": [
+        {
+          "path": "skill.source.type",
+          "basis": "Hugging Face model API",
+          "value": "huggingface"
+        },
+        {
+          "path": "skill.source.repository",
+          "basis": "Hugging Face model API",
+          "value": "lerobot/smolvla_base"
+        },
+        {
+          "path": "skill.source.revision",
+          "basis": "Hugging Face model API",
+          "value": "d9f33c94a60fb382c90dea2164c96845bd955e28"
+        },
+        {
+          "path": "skill.license",
+          "basis": "Hugging Face model-card metadata",
+          "value": "Apache-2.0"
+        }
+      ]
+    }
   }
 ]

@@ -1,5 +1,10 @@
 # Verification authority release
 
+The verification harness also exercises the external-assessment lifecycle,
+digest generation, immutable publication, append-only deletion guard, and
+dedicated assessor identity. Production verification should additionally query
+the REST API with the publishable key and confirm that drafts remain invisible.
+
 The `202609160001_verification_authority.sql` migration closes the verification
 authorization gap. Apply it after the initial registry migration. This is a
 database/API release; the account and result-page interfaces are separate work.

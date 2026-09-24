@@ -25,6 +25,7 @@ MAX_FILE_BYTES = 1_000_000
 MAX_TOTAL_BYTES = 8_000_000
 MAX_CLAIMS_BYTES = 100_000
 CLAIM_CATEGORIES = frozenset({"task", "hardware", "training", "evaluation", "limitation", "intended_use", "other"})
+ARTIFACT_INTENTS = frozenset({"task_policy", "base_policy", "training_checkpoint", "simulation_policy", "hardware_policy"})
 APPROVED_METADATA = frozenset({
     "README.md", "MODEL_CARD.md", "config.json", "policy_config.json", "train_config.json",
     "dataset_info.json", "meta/info.json", "configs/policy.json", "policy_preprocessor.json",
@@ -143,7 +144,11 @@ def _load_upstream_claims(path: Path | None, model_card_url: str, revision: str)
 def create_huggingface_assessment(repository: str, revision: str | None, output: Path, *,
                                   title: str | None = None, summary: str | None = None,
                                   catalog: Path | None = None, claims: Path | None = None, fetch: Fetch = _default_fetch,
+                                  artifact_intents: tuple[str, ...] = (),
                                   now: Callable[[], datetime] | None = None) -> dict[str, Any]:
+    normalized_intents = sorted(set(artifact_intents))
+    if not normalized_intents or any(intent not in ARTIFACT_INTENTS for intent in normalized_intents):
+        raise ValueError(f"Declare at least one descriptive artifact intent from: {', '.join(sorted(ARTIFACT_INTENTS))}.")
     output = output.expanduser().resolve()
     if output.exists():
         raise ValueError(f"Output already exists: {output}")
@@ -215,7 +220,9 @@ def create_huggingface_assessment(repository: str, revision: str | None, output:
                        "author": author, "license": license_name},
             "assessment": {"method": "metadata_only", "assessor": "Known Robot", "validator_version": __version__,
                            "assessed_at": timestamp, "executed_policy_code": False, "evaluated_policy": False,
-                           "established_compatibility": False, "status": "complete" if not errors else "incomplete"},
+                           "established_compatibility": False, "status": "complete" if not errors else "incomplete",
+                           "artifact_intents": normalized_intents,
+                           "artifact_intent_notice": "Descriptive classification only; it is not a compatibility, performance, safety or deployment conclusion."},
             "binding": {"algorithm": "sha256", "manifest_sha256": manifest_hash,
                         "inventory_sha256": inventory_hash, "claims_sha256": claims_hash, "source_revision": commit},
             "manifest": manifest, "findings": {"errors": errors, "warnings": warnings},

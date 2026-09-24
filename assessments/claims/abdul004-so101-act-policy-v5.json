@@ -1,0 +1,13 @@
+{
+  "format": "knownrobot-upstream-claims/1.0",
+  "claims": [
+    {
+      "category": "hardware",
+      "claim": "The model card describes a six-degree-of-freedom SO-101 configuration with overhead and wrist cameras for a ball-in-cup task."
+    },
+    {
+      "category": "evaluation",
+      "claim": "The model card reports upstream VLM scores and qualitative task observations; Known Robot did not reproduce or verify them."
+    }
+  ]
+}

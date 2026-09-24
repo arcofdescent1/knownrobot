@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.0 — 2026-09-24
+
+- Require one or more descriptive artifact-intent classifications without changing the publication-completeness or compatibility conclusions.
+- Add an append-only Supabase assessment registry with draft, review and published lifecycle gates, immutable published records, accountable assessor identity and unique source revisions.
+- Add `sync-assessment` for controlled database lifecycle transitions and `export-assessments` for source-controlled audit snapshots.
+- Read public assessments from the database with the checked-in export as an availability fallback.
+- Restore direct Vercel CLI access and isolate npm/browser tooling caches inside the project.
+- Verify downloadable assessment JSON through direct HTTP production smoke tests.
+
 ## 1.5.0 — 2026-09-24
 
 - Add durable `check --format assessment --output FILE` reports containing the manifest, complete findings, validator version, file hashes, execution boundary, provenance and evidence-class lanes.

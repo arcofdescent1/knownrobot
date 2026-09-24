@@ -3,6 +3,7 @@ const { spawn } = require('node:child_process');
 const http = require('node:http');
 const { setTimeout: delay } = require('node:timers/promises');
 const { demoRecord } = require('../.test-build/src/lib/demo-data.js');
+const { externalPolicyAssessments } = require('../.test-build/src/lib/external-assessment.js');
 const liveId = '40000000-0000-0000-0000-000000000001';
 const liveRecord = structuredClone(demoRecord);
 liveRecord.id = liveId;
@@ -69,7 +70,7 @@ async function main() {
     const missingNote = await fetch(origin + '/field-notes/nonexistent', { headers: { 'User-Agent': 'Bingbot' } });
     assert.equal(missingNote.status, 404); assert.ok((await missingNote.text()).includes('noindex'));
     const sitemap = await (await fetch(origin + '/sitemap.xml')).text();
-    assert.ok(!sitemap.includes('<lastmod>')); assert.ok(!sitemap.includes('<loc>https://knownrobot.com/</loc>'));
+    assert.equal((sitemap.match(/<lastmod>/g) || []).length, 3, 'Only dated assessment records carry lastmod'); assert.ok(!sitemap.includes('<loc>https://knownrobot.com/</loc>'));
     assert.ok(sitemap.includes('https://knownrobot.com/thesis')); assert.ok(!sitemap.includes('example-so101'));
     const robots = await (await fetch(origin + '/robots.txt')).text();
     assert.ok(robots.includes('Sitemap: https://knownrobot.com/sitemap.xml'));
@@ -105,8 +106,26 @@ async function main() {
     assert.ok((await (await fetch(origin + '/adapters')).text()).includes('No confirmed adapter owners yet'));
     assert.deepEqual((await (await fetch(origin + '/adapters/record.json')).json()).adapters, []);
     assert.ok((await (await fetch(origin + '/corrections')).text()).includes('Appeal without rewriting the past'));
+    for (const slug of ['aadarshram-act-pusht-6d403b1', 'abdul004-so101-act-policy-v5-c14c7f4', 'lerobot-smolvla-base-d9f33c9']) {
+      const assessmentPage = await fetch(`${origin}/assessments/${slug}`);
+      assert.equal(assessmentPage.status, 200);
+      const assessmentHtml = await assessmentPage.text();
+      assert.ok(assessmentHtml.includes('Artifact intent'));
+      assert.ok(assessmentHtml.includes('descriptive only') || assessmentHtml.includes('Descriptive classification only'));
+      for (const artifact of ['report.json', 'manifest.json']) {
+        const response = await fetch(`${origin}/assessments/${slug}/${artifact}`, { headers: { Accept: 'application/json' } });
+        assert.equal(response.status, 200, `${slug}/${artifact}`);
+        assert.match(response.headers.get('content-type'), /application\/json/);
+        assert.match(response.headers.get('content-disposition'), /inline; filename=/);
+        assert.match(response.headers.get('cache-control'), /s-maxage=300/);
+        const document = await response.json();
+        assert.equal(document.source.revision.length, 40);
+        assert.ok(document.assessment.artifact_intents.length > 0);
+      }
+    }
+    assert.equal((await fetch(origin + '/assessments/not-a-real-assessment/report.json')).status, 404);
   });
-  console.log('PASS: unconfigured production pages and download status');
+  console.log('PASS: unconfigured production pages, downloadable JSON artifacts and HTTP status');
   await withSite({ KNOWNROBOT_REGISTRY_MODE: 'demo' }, async origin => {
     await metadataCheck(origin, '/', false);
     await metadataCheck(origin, '/evaluations/example-so101', false);
@@ -128,6 +147,10 @@ async function main() {
   const api = http.createServer((request, response) => {
     if (request.url.startsWith('/live/')) {
       response.writeHead(200, { 'Content-Type': 'application/json' });
+      if (request.url.includes('external_policy_assessments')) {
+        response.end(JSON.stringify(externalPolicyAssessments.map(record => ({ record }))));
+        return;
+      }
       if (request.url.includes('public_policy_attempts')) {
         response.end(JSON.stringify({ identity: { policy:'a'.repeat(64), hardware:'b'.repeat(64), protocol:'c'.repeat(64) }, page:1, total:0, records:[] }));
         return;
@@ -154,9 +177,13 @@ async function main() {
       assert.equal(invalidEvidence.status, 404, 'Invalid identifiers return HTTP 404 for browsers too');
       const sitemap = await (await fetch(origin + '/sitemap.xml')).text();
       assert.ok(sitemap.includes(`<loc>https://knownrobot.com/evaluations/${liveId}</loc>`));
-      assert.ok(!sitemap.includes('badge.svg')); assert.ok(!sitemap.includes('lastmod'));
+      assert.ok(!sitemap.includes('badge.svg')); assert.equal((sitemap.match(/<lastmod>/g) || []).length, 3);
       const page = await (await fetch(`${origin}/evaluations/${liveId}`)).text();
       assert.ok(page.includes('What does the evidence say for this configuration?'));
+      const assessmentsPage = await (await fetch(`${origin}/assessments`)).text();
+      assert.ok(assessmentsPage.includes('append-only assessment registry'));
+      const assessmentDetail = await (await fetch(`${origin}/assessments/${externalPolicyAssessments[0].slug}`)).text();
+      assert.ok(assessmentDetail.includes('Artifact intent'));
       const answerResponse = await fetch(`${origin}/evaluations/${liveId}/compatibility.json`);
       assert.equal(answerResponse.status, 200);
       const answer = await answerResponse.json();

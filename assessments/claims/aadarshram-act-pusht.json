@@ -1,0 +1,9 @@
+{
+  "format": "knownrobot-upstream-claims/1.0",
+  "claims": [
+    {
+      "category": "training",
+      "claim": "The model card states that the ACT policy was trained on the PushT dataset for 80,000 steps."
+    }
+  ]
+}

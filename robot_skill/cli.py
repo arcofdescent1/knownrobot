@@ -32,12 +32,23 @@ def _parser() -> argparse.ArgumentParser:
     assess.add_argument("--title", help="public assessment title")
     assess.add_argument("--summary", help="public assessment summary")
     assess.add_argument("--claims", help="validated JSON file of human-authored, categorized upstream model-card claim paraphrases")
+    assess.add_argument("--artifact-intent", action="append", required=True,
+                        choices=("task_policy", "base_policy", "training_checkpoint", "simulation_policy", "hardware_policy"),
+                        help="descriptive artifact intent; repeat for multiple classifications (required)")
     assess.add_argument("--catalog", help="atomically append the record to an existing Known Robot assessment catalog")
     verify_assessment = subparsers.add_parser("verify-assessment", help="verify an external-assessment bundle, source snapshot and provenance binding")
     verify_assessment.add_argument("bundle")
     verify_report = subparsers.add_parser("verify-report", help="verify a durable validator report and its inspected policy metadata")
     verify_report.add_argument("report")
     verify_report.add_argument("--policy", required=True, help="policy directory whose inspected metadata must match the report")
+    sync_assessment = subparsers.add_parser("sync-assessment", help="advance a verified assessment bundle through the append-only Supabase publication lifecycle")
+    sync_assessment.add_argument("bundle")
+    sync_assessment.add_argument("--lifecycle", required=True, choices=("draft", "review", "published"))
+    sync_assessment.add_argument("--assessor-id", required=True, help="UUID of the accountable Known Robot assessment identity")
+    sync_assessment.add_argument("--supabase-url", help="Supabase project URL; defaults to SUPABASE_URL")
+    export_assessments = subparsers.add_parser("export-assessments", help="export published database assessments to an auditable source-controlled JSON catalog")
+    export_assessments.add_argument("--output", "-o", required=True)
+    export_assessments.add_argument("--supabase-url", help="Supabase project URL; defaults to SUPABASE_URL")
     validate = subparsers.add_parser("validate", help="validate an existing robot-skill YAML or JSON manifest")
     validate.add_argument("manifest", nargs="?", default="robot-skill.yaml")
     validate.add_argument("--format", choices=("text", "json"), default="text")
@@ -98,6 +109,14 @@ def _print_result(result, output_format: str, stream=None) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
+        if args.command == "export-assessments":
+            from .database import export_published_assessments
+            print(json.dumps(export_published_assessments(Path(args.output), args.supabase_url), indent=2, allow_nan=False))
+            return 0
+        if args.command == "sync-assessment":
+            from .database import sync_assessment
+            print(json.dumps(sync_assessment(Path(args.bundle), args.lifecycle, args.assessor_id, args.supabase_url), indent=2, allow_nan=False))
+            return 0
         if args.command == "verify-report":
             from .report import verify_validation_report
             print(json.dumps(verify_validation_report(Path(args.report), Path(args.policy)), indent=2, allow_nan=False))
@@ -111,7 +130,8 @@ def main(argv: list[str] | None = None) -> int:
             record = create_huggingface_assessment(args.repository, args.revision, Path(args.output),
                                                    title=args.title, summary=args.summary,
                                                    catalog=Path(args.catalog) if args.catalog else None,
-                                                   claims=Path(args.claims) if args.claims else None)
+                                                   claims=Path(args.claims) if args.claims else None,
+                                                   artifact_intents=tuple(args.artifact_intent))
             print(json.dumps({"status": record["assessment"]["status"], "record_type": record["record_type"],
                               "slug": record["slug"], "source": record["source"], "binding": record["binding"],
                               "output": str(Path(args.output).expanduser().resolve()),

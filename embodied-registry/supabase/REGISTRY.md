@@ -1,5 +1,19 @@
 # Public evidence registry release
 
+## External policy assessments
+
+`external_policy_assessments` is deliberately separate from skills, hardware,
+benchmarks, evaluations, verification reviews, and compatibility-graph edges.
+Each Hugging Face provider/repository/revision can appear once. A verified admin
+bundle must move through `draft`, `review`, and `published` in order. Review
+freezes the record for publication; published rows cannot be updated or deleted.
+
+The accountable assessor is an `assessment_assessors` identity, not an inferred
+policy author or evaluator. Anonymous and authenticated clients can read only
+published rows. Only the service role can create or advance records. Published
+records are exported with `robot-skill export-assessments` so database state has
+a reviewable source-controlled audit copy.
+
 Apply `202609160002_public_evidence_registry.sql` after both earlier migrations,
 on the explicitly identified Known Robot project. This migration contains no seed
 evaluations, fictional successes, or invented participants.

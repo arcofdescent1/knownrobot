@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { getExternalPolicyAssessment, publicAssessmentRecord } from "@/lib/external-assessment";
-export const dynamic = "force-static";
+import { publicAssessmentRecord } from "@/lib/external-assessment";
+import { readExternalPolicyAssessment } from "@/lib/external-assessment-reader";
+export const dynamic = "force-dynamic";
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const record = getExternalPolicyAssessment((await params).slug);
+  const record = await readExternalPolicyAssessment((await params).slug);
   if (!record) return NextResponse.json({ error: "Assessment not found" }, { status: 404 });
-  return NextResponse.json(publicAssessmentRecord(record), { headers: { "Cache-Control": "public, max-age=0, s-maxage=86400, immutable", "Content-Disposition": `inline; filename="${record.slug}-report.json"` } });
+  return NextResponse.json(publicAssessmentRecord(record), { headers: { "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=86400", "Content-Disposition": `inline; filename="${record.slug}-report.json"` } });
 }

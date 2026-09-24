@@ -3,27 +3,28 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { StructuredData } from "@/components/structured-data";
-import { externalPolicyAssessments, getExternalPolicyAssessment } from "@/lib/external-assessment";
+import { artifactIntentLabels } from "@/lib/external-assessment";
+import { readExternalPolicyAssessment } from "@/lib/external-assessment-reader";
 import { pageMetadata } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
-export function generateStaticParams() { return externalPolicyAssessments.map(({ slug }) => ({ slug })); }
+export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const record = getExternalPolicyAssessment((await params).slug);
+  const record = await readExternalPolicyAssessment((await params).slug);
   if (!record) notFound();
   return pageMetadata(`/assessments/${record.slug}`, `${record.title} — Known Robot`, `${record.summary} Metadata-only; no policy execution or compatibility claim.`, { article: true, published: record.assessment.assessed_at });
 }
 function JsonRecord({ title, value }: { title: string; value: unknown }) { return <details className="evidence-json"><summary>{title}</summary><pre>{JSON.stringify(value, null, 2)}</pre></details>; }
 
 export default async function AssessmentPage({ params }: Props) {
-  const record = getExternalPolicyAssessment((await params).slug);
+  const record = await readExternalPolicyAssessment((await params).slug);
   if (!record) notFound();
   return <><SiteHeader /><main className="evidence-page">
     <StructuredData value={{ "@context": "https://schema.org", "@type": "TechArticle", headline: record.title, datePublished: record.assessment.assessed_at, author: { "@type": "Organization", name: "Known Robot" }, isBasedOn: record.source.revision_url, license: "https://www.apache.org/licenses/LICENSE-2.0", url: `https://knownrobot.com/assessments/${record.slug}` }} />
     <Link href="/assessments">← External assessments</Link>
     <div className="demo-ribbon" role="note">METADATA ASSESSMENT ONLY · NO POLICY EXECUTION · NO EVALUATION · NO COMPATIBILITY CLAIM</div>
     <header className="editorial-hero"><p className="kicker">EXTERNAL POLICY ASSESSMENT</p><h1>{record.title}</h1><p>{record.summary}</p><p>Known Robot is the metadata assessor. <strong>{record.source.author}</strong> is the attributed upstream author or organization. Known Robot is not the policy author or evaluator.</p></header>
-    <dl className="evidence-facts"><div><dt>Upstream source</dt><dd><a href={record.source.repository_url} rel="noopener noreferrer">{record.source.repository} ↗</a></dd></div><div><dt>Pinned revision</dt><dd><a href={record.source.revision_url} rel="noopener noreferrer"><code>{record.source.revision}</code> ↗</a></dd></div><div><dt>License</dt><dd>{record.source.license} · as declared by the upstream repository</dd></div><div><dt>Assessment method</dt><dd><code>{record.assessment.method}</code> · validator {record.assessment.validator_version}</dd></div><div><dt>Assessment status</dt><dd>{record.assessment.status} · {record.findings.errors.length} missing requirements</dd></div><div><dt>Assessed</dt><dd><time dateTime={record.assessment.assessed_at}>{record.assessment.assessed_at.slice(0,10)} UTC</time></dd></div></dl>
+    <dl className="evidence-facts"><div><dt>Upstream source</dt><dd><a href={record.source.repository_url} rel="noopener noreferrer">{record.source.repository} ↗</a></dd></div><div><dt>Pinned revision</dt><dd><a href={record.source.revision_url} rel="noopener noreferrer"><code>{record.source.revision}</code> ↗</a></dd></div><div><dt>Artifact intent</dt><dd>{record.assessment.artifact_intents.map(intent => artifactIntentLabels[intent]).join(" · ")}<br/><small>{record.assessment.artifact_intent_notice}</small></dd></div><div><dt>License</dt><dd>{record.source.license} · as declared by the upstream repository</dd></div><div><dt>Assessment method</dt><dd><code>{record.assessment.method}</code> · validator {record.assessment.validator_version}</dd></div><div><dt>Publication contract</dt><dd>{record.assessment.status} · {record.findings.errors.length} missing requirements</dd></div><div><dt>Assessed</dt><dd><time dateTime={record.assessment.assessed_at}>{record.assessment.assessed_at.slice(0,10)} UTC</time></dd></div></dl>
     <section><h2>Evidence boundary</h2><p>The validator inspected the listed metadata files only. It did not download weights, import policy code, run inference, control hardware, execute simulation or verify model-card results.</p><JsonRecord title="Machine-readable assessment boundary" value={record.assessment} />{record.binding && <JsonRecord title="Cryptographic source and manifest binding" value={record.binding} />}</section>
     <section><h2>Evidence classification</h2><p>Each statement stays in one evidence lane. Detection is not declaration, an upstream claim is not a Known Robot measurement, and none of these lanes establishes compatibility.</p>
       <h3>Validator-detected facts</h3>{record.evidence_classes?.validator_detected_facts.length ? <ul>{record.evidence_classes.validator_detected_facts.map(item => <li key={item.path}><code>{item.path}</code> — {JSON.stringify(item.value)}</li>)}</ul> : <p>This legacy assessment does not include a field-level detection ledger. Inspect the generated manifest and file inventory.</p>}

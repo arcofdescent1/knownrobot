@@ -1,0 +1,9 @@
+{
+  "format": "knownrobot-upstream-claims/1.0",
+  "claims": [
+    {
+      "category": "intended_use",
+      "claim": "The model card describes SmolVLA as a base model intended to be fine-tuned for a specific use case."
+    }
+  ]
+}

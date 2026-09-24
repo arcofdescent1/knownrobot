@@ -6,16 +6,16 @@ import { StructuredData } from "@/components/structured-data";
 
 export const metadata: Metadata = pageMetadata("/validator", "Robot Policy Validator for LeRobot — Known Robot", "Check LeRobot policy metadata, compare declared hardware configurations, and generate robot-skill.yaml for GitHub or Hugging Face. CLI quickstart and CI guide.");
 
-const install = "pipx install .  # from the Known Robot 1.5.0 checkout";
+const install = "pipx install .  # from the Known Robot 1.6.0 checkout";
 
 export default function ValidatorPage() {
   return <>
     <SiteHeader />
     <main className="validator-page">
-      <StructuredData value={{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Known Robot robot-skill validator", url: "https://knownrobot.com/validator", applicationCategory: "DeveloperApplication", operatingSystem: "Windows, macOS, Linux", softwareVersion: "1.5.0", description: "Open-source command-line validator for LeRobot policy reproducibility metadata, durable assessment reports and robot-skill.yaml manifests.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, license: "https://www.apache.org/licenses/LICENSE-2.0", codeRepository: "https://github.com/arcofdescent1/knownrobot" }}/>
+      <StructuredData value={{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Known Robot robot-skill validator", url: "https://knownrobot.com/validator", applicationCategory: "DeveloperApplication", operatingSystem: "Windows, macOS, Linux", softwareVersion: "1.6.0", description: "Open-source command-line validator for LeRobot policy reproducibility metadata, durable assessment reports and robot-skill.yaml manifests.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, license: "https://www.apache.org/licenses/LICENSE-2.0", codeRepository: "https://github.com/arcofdescent1/knownrobot" }}/>
       <section className="validator-hero">
         <div>
-          <p className="kicker">OPEN UTILITY · VERSION 1.5.0</p>
+          <p className="kicker">OPEN UTILITY · VERSION 1.6.0</p>
           <h1>Validate robot-policy reproducibility.</h1>
           <p className="editorial-deck">Check a LeRobot policy repository before attempting reproduction on an SO-100 or SO-101 arm. The validator inventories reproducibility evidence, writes a portable <code>robot-skill.yaml</code>, and identifies missing metadata. Configuration comparison does not prove physical transfer or safe operation.</p>
         </div>
@@ -78,8 +78,8 @@ export default function ValidatorPage() {
         <p className="section-number">05 / EXTERNAL ASSESSMENT</p>
         <h2>Pin, inspect and publish without executing.</h2>
         <p>The admin workflow resolves or verifies a full Hugging Face commit, downloads only allowlisted metadata, inserts verified repository provenance into the generated manifest, hashes every inspected file and emits a publication-ready assessment bundle.</p>
-        <pre className="evidence-json"><code>{`robot-skill assess-hf aadarshram/act_pusht \\\n+  --revision 6d403b142934aaef61fc07f5eec1515c4325751f \\\n+  --output assessments/aadarshram-act-pusht`}</code></pre>
-        <p>Add <code>--claims upstream-claims.json</code> for reviewed, categorized model-card paraphrases and <code>--catalog embodied-registry/src/data/external-policy-assessments.json</code> to atomically append the record. Validator detections, manifest declarations, upstream claims and Known Robot measurements remain separate evidence classes. Checkpoint weights and policy code are never downloaded or executed.</p>
+        <pre className="evidence-json"><code>{`robot-skill assess-hf aadarshram/act_pusht \\\n  --revision 6d403b142934aaef61fc07f5eec1515c4325751f \\\n  --artifact-intent task_policy --artifact-intent simulation_policy \\\n  --output assessments/aadarshram-act-pusht`}</code></pre>
+        <p>Artifact intent is descriptive only; it does not change completeness or establish compatibility. Add <code>--claims upstream-claims.json</code> for reviewed, categorized model-card paraphrases. After verification, <code>sync-assessment</code> advances the record through draft, review and published database states; <code>export-assessments</code> creates the source-controlled audit snapshot. Checkpoint weights and policy code are never downloaded or executed.</p>
       </section>
 
       <section className="behavior-section" id="durable-report">

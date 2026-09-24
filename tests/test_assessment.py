@@ -44,6 +44,7 @@ class HuggingFaceAssessmentTests(unittest.TestCase):
             output = Path(directory) / "assessment"
             record = create_huggingface_assessment(
                 "aadarshram/act_pusht", REVISION, output, fetch=self.fetcher(requested),
+                artifact_intents=("task_policy", "simulation_policy"),
                 now=lambda: datetime(2026, 9, 24, 18, tzinfo=timezone.utc),
             )
             self.assertTrue((output / "assessment.json").is_file())
@@ -60,6 +61,7 @@ class HuggingFaceAssessmentTests(unittest.TestCase):
             self.assertFalse(any(item["path"].startswith("skill.source") for item in record["findings"]["errors"]))
             self.assertFalse(record["assessment"]["executed_policy_code"])
             self.assertFalse(record["assessment"]["evaluated_policy"])
+            self.assertEqual(record["assessment"]["artifact_intents"], ["simulation_policy", "task_policy"])
             self.assertEqual(record["manifest"]["skill"]["name"], "Act Pusht")
             self.assertEqual(len([item for item in record["findings"]["errors"] if item["code"] == "dependency.unresolved"]), 1)
             self.assertEqual(verify_assessment_bundle(output)["status"], "integrity_checked")
@@ -74,11 +76,11 @@ class HuggingFaceAssessmentTests(unittest.TestCase):
             catalog = root / "catalog.json"
             catalog.write_text("[]\n", encoding="utf-8")
             record = create_huggingface_assessment("aadarshram/act_pusht", REVISION, root / "first",
-                                                  catalog=catalog, fetch=self.fetcher([]))
+                                                  catalog=catalog, fetch=self.fetcher([]), artifact_intents=("task_policy",))
             self.assertEqual(json.loads(catalog.read_text(encoding="utf-8"))[0]["slug"], record["slug"])
             with self.assertRaisesRegex(ValueError, "already exists"):
                 create_huggingface_assessment("aadarshram/act_pusht", REVISION, root / "second",
-                                              catalog=catalog, fetch=self.fetcher([]))
+                                              catalog=catalog, fetch=self.fetcher([]), artifact_intents=("task_policy",))
 
     def test_claims_are_typed_attributed_pinned_and_integrity_bound(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -90,7 +92,7 @@ class HuggingFaceAssessmentTests(unittest.TestCase):
             ]}), encoding="utf-8")
             output = root / "bundle"
             record = create_huggingface_assessment("aadarshram/act_pusht", REVISION, output,
-                                                  claims=claims, fetch=self.fetcher([]))
+                                                  claims=claims, fetch=self.fetcher([]), artifact_intents=("task_policy",))
             self.assertEqual([item["category"] for item in record["upstream_claims"]], ["hardware", "evaluation"])
             self.assertTrue(all(item["source_revision"] == REVISION and REVISION in item["source_url"] for item in record["upstream_claims"]))
             self.assertEqual(record["evidence_classes"]["knownrobot_measured_results"], [])
@@ -114,13 +116,14 @@ class HuggingFaceAssessmentTests(unittest.TestCase):
                 claims.write_text(json.dumps(document), encoding="utf-8")
                 with self.assertRaises(ValueError):
                     create_huggingface_assessment("aadarshram/act_pusht", REVISION, root / "bundle",
-                                                  claims=claims, fetch=self.fetcher([]))
+                                                  claims=claims, fetch=self.fetcher([]), artifact_intents=("task_policy",))
 
     def test_rejects_mutable_or_abbreviated_revision_before_network(self):
         for revision in ("main", "6d403b1", "A" * 40):
             with self.subTest(revision=revision), tempfile.TemporaryDirectory() as directory:
                 with self.assertRaisesRegex(ValueError, "full lowercase 40-character"):
                     create_huggingface_assessment("aadarshram/act_pusht", revision, Path(directory) / "out",
+                                                  artifact_intents=("task_policy",),
                                                   fetch=lambda *_: self.fail("network must not be called"))
 
     def test_rejects_untrusted_repository_shapes(self):
@@ -128,7 +131,14 @@ class HuggingFaceAssessmentTests(unittest.TestCase):
             with self.subTest(repository=repository), tempfile.TemporaryDirectory() as directory:
                 with self.assertRaisesRegex(ValueError, "owner/name"):
                     create_huggingface_assessment(repository, REVISION, Path(directory) / "out",
+                                                  artifact_intents=("task_policy",),
                                                   fetch=lambda *_: self.fail("network must not be called"))
+
+    def test_artifact_intent_is_required_and_descriptive_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(ValueError, "Declare at least one"):
+                create_huggingface_assessment("aadarshram/act_pusht", REVISION, Path(directory) / "out",
+                                              fetch=lambda *_: self.fail("network must not be called"))
 
 
 if __name__ == "__main__":
