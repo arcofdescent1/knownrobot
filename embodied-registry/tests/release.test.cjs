@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { receipt } = require('../scripts/release-receipt.cjs');
+const { receipt, releaseSourceAccepted } = require('../scripts/release-receipt.cjs');
 test('source-upload receipts preserve unknown cleanliness, exclude secrets and normalize text', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'knownrobot-release-test-'));
   const app = path.join(directory, 'embodied-registry');
@@ -29,4 +29,12 @@ test('source-upload receipts preserve unknown cleanliness, exclude secrets and n
     if (path.dirname(path.resolve(directory)) !== path.resolve(os.tmpdir())) throw Error('Unsafe test cleanup path');
     fs.rmSync(directory, { recursive:true, force:true });
   }
+});
+
+test('release gate accepts only clean Git or commit-bound Vercel source snapshots', () => {
+  assert.equal(releaseSourceAccepted({ scope:'git_repository', dirty:false, revision:'a'.repeat(40) }, {}), true);
+  assert.equal(releaseSourceAccepted({ scope:'git_repository', dirty:true, revision:'a'.repeat(40) }, {}), false);
+  assert.equal(releaseSourceAccepted({ scope:'application_snapshot_without_git', dirty:null, revision:'a'.repeat(40) }, { VERCEL:'1' }), true);
+  assert.equal(releaseSourceAccepted({ scope:'application_snapshot_without_git', dirty:null, revision:null }, { VERCEL:'1' }), false);
+  assert.equal(releaseSourceAccepted({ scope:'application_snapshot_without_git', dirty:null, revision:'a'.repeat(40) }, {}), false);
 });

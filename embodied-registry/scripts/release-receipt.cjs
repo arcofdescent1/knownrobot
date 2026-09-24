@@ -44,9 +44,14 @@ function receipt(sourceRoot = root) {
     limitations: 'A build-time source receipt, not a signed security attestation or proof of database migration, live sign-in, community activity or release approval.',
   };
 }
+function releaseSourceAccepted(result, env = process.env) {
+  if (result.scope === 'git_repository') return result.dirty === false;
+  return result.scope === 'application_snapshot_without_git' && result.dirty === null
+    && /^[a-f0-9]{40}$/.test(result.revision ?? '') && env.VERCEL === '1';
+}
 function main() {
   const result = receipt();
-  if (process.argv.includes('--require-clean') && (result.dirty !== false || result.scope !== 'git_repository')) throw Error('A verified clean Git checkout is required; unknown or dirty source cannot pass the release gate');
+  if (process.argv.includes('--require-clean') && !releaseSourceAccepted(result)) throw Error('Release requires a clean Git checkout or a Vercel source snapshot bound to a full Git commit');
   if (process.argv.includes('--check')) {
     const built = JSON.parse(fs.readFileSync(path.join(root, 'embodied-registry/src/data/release.generated.json'), 'utf8'));
     if (JSON.stringify(built) !== JSON.stringify(result)) throw Error('Build receipt differs from current source; rebuild before release');
@@ -54,4 +59,4 @@ function main() {
   console.log(JSON.stringify(result, null, 2));
 }
 if (require.main === module) main();
-module.exports = { receipt };
+module.exports = { receipt, releaseSourceAccepted };
