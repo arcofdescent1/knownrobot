@@ -6,11 +6,43 @@ export type FieldNote = {
   published: string;
   datePublished: string;
   readTime: string;
+  label?: string;
+  cta?: { prompt: string; label: string; href: string };
   sections: { heading: string; paragraphs: string[]; bullets?: string[] }[];
   sources: { label: string; href: string }[];
 };
 
 export const fieldNotes: FieldNote[] = [
+  {
+    slug: "same-checkpoint-different-executable-policy",
+    number: "05",
+    title: "Same checkpoint, different executable policy",
+    summary: "Why repository and commit identity are necessary but insufficient when normalization, processors and controller conventions are resolved at runtime.",
+    published: "October 3, 2026",
+    datePublished: "2026-10-03",
+    readTime: "6 min",
+    label: "OPEN EVIDENCE QUESTION",
+    cta: {
+      prompt: "Which resolved runtime value has changed the behavior of a policy you reproduced?",
+      label: "Add direct evidence →",
+      href: "/participate",
+    },
+    sections: [
+      { heading: "A commit identifies stored inputs, not every resolved behavior", paragraphs: ["Pinning a policy repository and commit is essential: without an immutable revision, the underlying files can change after an evaluation is reported. But the revision alone may not identify the executable policy that produced a rollout.", "At load time, a robotics stack can select normalization statistics, preprocessors, postprocessors, action conventions and controller behavior. If those resolved values are not captured, two teams can cite the same checkpoint while executing materially different control pipelines."] },
+      { heading: "Normalization is part of policy identity", paragraphs: ["A model commonly predicts normalized actions. The robot receives physical commands only after those outputs are unnormalized and interpreted through a controller. Different statistics, units, joint order, clipping or controller conventions can turn the same tensor into a different motion.", "A durable record should preserve the digest of the resolved normalization data actually used by the rollout—not only the path of a statistics file that can later be replaced or selected differently."] },
+      { heading: "Processors can change the executable contract", paragraphs: ["Camera renaming, resizing, observation selection, action tokenization and safety postprocessing can alter what the model observes or what the robot executes. Their ordered identities and configurations belong beside the checkpoint identity.", "This does not mean every processor choice is a new trained model. It means a measured result must make the effective execution pipeline distinguishable from another pipeline that shares the weights."] },
+      { heading: "The proposed executable-policy fingerprint", paragraphs: ["Known Robot’s current working proposal is a content-addressed fingerprint calculated from resolved runtime facts. It would supplement—not replace—the repository and revision."], bullets: ["Immutable policy repository, revision and weights digest.", "Resolved normalization-statistics digest and selection rule.", "Ordered preprocessing and postprocessing identities, versions and configuration digests.", "Observation and action schema, joint order, units, coordinate frames and clipping rules.", "Controller convention and hardware adapter identity.", "Framework, runtime and dependency-lock revisions.", "Execution topology when batching, concurrency or state sharing can affect results."] },
+      { heading: "What the fingerprint would and would not prove", paragraphs: ["A matching fingerprint would establish that two reports declare the same executable contract. It would not prove that either policy ran successfully, that the hardware was calibrated equivalently, or that the evaluation followed its stated protocol.", "Those remain measured-evidence questions. The purpose of the fingerprint is narrower: prevent unlike executions from being silently pooled under one checkpoint identity."] },
+      { heading: "The question for practitioners", paragraphs: ["Which runtime value has caused two apparently identical policy runs to diverge in your work? The answer should determine the smallest useful fingerprint. Known Robot will treat this as an open evidence question until independently reported failures justify each required field."] },
+    ],
+    sources: [
+      { label: "LeRobot issue #4617: policy identity and resolved controller conventions", href: "https://github.com/huggingface/lerobot/issues/4617" },
+      { label: "Same Weights, Different Robot", href: "https://arxiv.org/abs/2606.03724" },
+      { label: "LeRobot issue #4548: checkpoint preprocessing and evaluation mismatch", href: "https://github.com/huggingface/lerobot/issues/4548" },
+      { label: "LeRobot issue #4327: evaluation concurrency changes results", href: "https://github.com/huggingface/lerobot/issues/4327" },
+      { label: "LeRobot policy contribution and evaluation guidance", href: "https://github.com/huggingface/lerobot/blob/main/docs/source/bring_your_own_policies.mdx" },
+    ],
+  },
   {
     slug: "five-reasons-policies-fail-to-transfer",
     number: "01",
