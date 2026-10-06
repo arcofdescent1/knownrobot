@@ -14,6 +14,89 @@ export type FieldNote = {
 
 export const fieldNotes: FieldNote[] = [
   {
+    slug: "what-a-lerobot-evaluation-dataset-proves",
+    number: "06",
+    title: "What a LeRobot evaluation dataset proves—and what it doesn’t",
+    summary: "A practical evidence boundary for turning recorded evaluation episodes into portable compatibility knowledge without overstating what the data establishes.",
+    published: "October 6, 2026",
+    datePublished: "2026-10-06",
+    readTime: "6 min",
+    label: "EVIDENCE BOUNDARY",
+    cta: {
+      prompt: "Have a public LeRobot evaluation dataset we can map into a portable evidence record?",
+      label: "Submit the artifact →",
+      href: "/participate",
+    },
+    sections: [
+      {
+        heading: "Recorded episodes are evidence, not a complete conclusion",
+        paragraphs: [
+          "LeRobot’s evaluation workflow can record rollout episodes into a dataset while a policy runs on a robot. That is materially stronger than a model-card claim: it preserves observations and actions from an actual execution rather than only describing what reportedly happened.",
+          "The dataset still does not establish every fact needed to compare results across teams. A trustworthy registry must retain what the artifact directly proves, identify what was declared elsewhere, and leave unsupported conclusions unresolved.",
+        ],
+      },
+      {
+        heading: "What the dataset can establish",
+        paragraphs: [
+          "When its metadata and files are intact, a LeRobot evaluation dataset can provide durable evidence about the recorded rollout and its declared capture contract.",
+        ],
+        bullets: [
+          "The episodes, frames, observations and actions that were actually recorded.",
+          "Declared robot type, camera feature names, tensor shapes, data types and capture frequency.",
+          "Task descriptions and episode-level organization retained by the recording workflow.",
+          "An immutable dataset revision when the repository is pinned to an exact commit.",
+          "A reviewable artifact that another practitioner can inspect without rerunning the robot.",
+        ],
+      },
+      {
+        heading: "What it cannot establish by itself",
+        paragraphs: [
+          "A dataset can show that data was recorded, but it cannot independently prove that the declared policy produced every action, that the robot was calibrated as claimed, or that a success label followed a shared protocol.",
+        ],
+        bullets: [
+          "The immutable policy revision, resolved preprocessing pipeline and weights digest unless they are explicitly bound to the dataset.",
+          "Calibration correctness, camera placement, units, joint semantics or absolute-versus-delta action interpretation.",
+          "The physical scene, reset procedure, intervention policy and safety constraints unless separately recorded.",
+          "Who judged success, which predicate they used, and whether failures or aborted trials were retained.",
+          "Independent verification. A self-recorded evaluation remains self-reported until another party reviews or reproduces it.",
+        ],
+      },
+      {
+        heading: "Preflight and rollout belong in separate evidence layers",
+        paragraphs: [
+          "Inspect Robots’ SO-101 adapter makes the boundary explicit. Its preflight can confirm declared dimensions, state keys, cameras and control semantics before motion, while its documentation warns that matching contracts do not prove identical unit interpretation or successful behavior.",
+          "KnownRobot should therefore preserve a preflight result as validator-detected evidence and a rollout dataset as execution evidence. Neither should silently upgrade the other. A passing preflight is not a successful trial; a recorded trial is not automatically an independently verified result.",
+        ],
+      },
+      {
+        heading: "The minimum portable import",
+        paragraphs: [
+          "A useful importer should create a draft evidence record, never a verified claim. It should bind the source artifacts cryptographically and expose missing fields before publication.",
+        ],
+        bullets: [
+          "Pinned dataset repository and commit, plus hashes for the inspected metadata and episode index.",
+          "Pinned policy repository, commit and executable-policy fingerprint when available.",
+          "Robot, sensors, calibration fingerprint, action/observation contract and runtime configuration.",
+          "Task and protocol revision, success predicate, evaluator identity, intervention rules and trial outcomes.",
+          "Separate labels for validator-detected facts, portable declarations, upstream claims and KnownRobot-measured or independently reviewed evidence.",
+        ],
+      },
+      {
+        heading: "The experiment",
+        paragraphs: [
+          "We are looking for one public LeRobot evaluation dataset to map into this evidence contract. The immediate goal is not to award a compatibility badge. It is to learn which facts survive the current recording workflow, which require a companion record, and which cannot be recovered after the run.",
+          "The result will remain attributed to its original authors and will clearly distinguish recorded facts from interpretation. If you maintain a suitable public dataset, submit the immutable repository URL and revision through the participation page.",
+        ],
+      },
+    ],
+    sources: [
+      { label: "LeRobot agent guide: evaluating policies", href: "https://github.com/huggingface/lerobot/blob/main/AGENT_GUIDE.md" },
+      { label: "LeRobot dataset metadata implementation", href: "https://github.com/huggingface/lerobot/blob/main/src/lerobot/datasets/dataset_metadata.py" },
+      { label: "Inspect Robots SO-101: preflight, execution and safety boundaries", href: "https://github.com/robocurve/inspect-robots-so101" },
+      { label: "KnownRobot interoperability proposal for portable preflight and rollout evidence", href: "https://github.com/robocurve/inspect-robots-so101/issues/28" },
+    ],
+  },
+  {
     slug: "same-checkpoint-different-executable-policy",
     number: "05",
     title: "Same checkpoint, different executable policy",
