@@ -54,7 +54,7 @@ async function withSite(env, check) {
 async function main() {
   if (process.argv.includes('--preview')) {
     await withSite({ VERCEL_ENV: 'preview' }, async origin => {
-      for (const path of ['/', '/thesis', '/validator', '/sprints', '/field-notes', '/field-notes/minimum-reproducibility-record', '/participate', '/adapters', '/corrections']) {
+      for (const path of ['/', '/thesis', '/validator', '/lerobot-dataset-version-compatibility', '/sprints', '/field-notes', '/field-notes/minimum-reproducibility-record', '/participate', '/adapters', '/corrections']) {
         await metadataCheck(origin, path, false);
         assert.match((await fetch(origin + path)).headers.get('x-robots-tag'), /noindex/);
       }
@@ -66,12 +66,12 @@ async function main() {
   }
   await withSite({}, async origin => {
     await metadataCheck(origin, '/', false);
-    for (const route of ['/thesis', '/validator', '/sprints', '/field-notes', '/participate', '/adapters', '/corrections', '/field-notes/five-reasons-policies-fail-to-transfer', '/field-notes/missing-from-policy-repositories', '/field-notes/minimum-reproducibility-record', '/field-notes/what-the-validator-cannot-infer']) await metadataCheck(origin, route);
+    for (const route of ['/thesis', '/validator', '/lerobot-dataset-version-compatibility', '/sprints', '/field-notes', '/participate', '/adapters', '/corrections', '/field-notes/five-reasons-policies-fail-to-transfer', '/field-notes/missing-from-policy-repositories', '/field-notes/minimum-reproducibility-record', '/field-notes/what-the-validator-cannot-infer']) await metadataCheck(origin, route);
     const missingNote = await fetch(origin + '/field-notes/nonexistent', { headers: { 'User-Agent': 'Bingbot' } });
     assert.equal(missingNote.status, 404); assert.ok((await missingNote.text()).includes('noindex'));
     const sitemap = await (await fetch(origin + '/sitemap.xml')).text();
     assert.equal((sitemap.match(/<lastmod>/g) || []).length, 3, 'Only dated assessment records carry lastmod'); assert.ok(!sitemap.includes('<loc>https://knownrobot.com/</loc>'));
-    assert.ok(sitemap.includes('https://knownrobot.com/thesis')); assert.ok(!sitemap.includes('example-so101'));
+    assert.ok(sitemap.includes('https://knownrobot.com/thesis')); assert.ok(sitemap.includes('https://knownrobot.com/lerobot-dataset-version-compatibility')); assert.ok(!sitemap.includes('example-so101'));
     const robots = await (await fetch(origin + '/robots.txt')).text();
     assert.ok(robots.includes('Sitemap: https://knownrobot.com/sitemap.xml'));
     const html = await (await fetch(origin)).text();

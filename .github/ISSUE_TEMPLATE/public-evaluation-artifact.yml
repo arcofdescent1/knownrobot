@@ -1,0 +1,92 @@
+name: Submit a public evaluation artifact
+description: Propose a public rollout dataset, evaluation bundle, preflight report, or failure record for a KnownRobot evidence assessment.
+title: "[Artifact]: "
+labels: ["evidence", "artifact-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submit only public evidence you are authorized to share. KnownRobot will preserve attribution and distinguish recorded facts, declarations, upstream claims, measured results, and independent review. Submission does not create a verified result or compatibility claim.
+  - type: dropdown
+    id: artifact-type
+    attributes:
+      label: Artifact type
+      options:
+        - Robot rollout or evaluation dataset
+        - Evaluation bundle or trial ledger
+        - Validator or preflight report
+        - Failed or blocked reproduction record
+        - Simulation evaluation
+        - Physical-hardware evaluation
+        - Other public evidence
+    validations:
+      required: true
+  - type: input
+    id: public-url
+    attributes:
+      label: Public artifact URL
+      description: Link directly to the repository, dataset, release, or evidence bundle.
+      placeholder: "https://huggingface.co/datasets/owner/dataset or https://github.com/owner/repository"
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Immutable revision
+      description: Provide the full commit SHA, release digest, DOI version, or another immutable identifier. Do not use main, latest, or a mutable tag.
+      placeholder: "40-character commit SHA or immutable release identifier"
+    validations:
+      required: true
+  - type: input
+    id: original-authors
+    attributes:
+      label: Original authors or maintainers
+      description: Name the people or organization that should receive attribution.
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License or reuse terms
+      description: Link to the license or state where the public reuse terms are documented.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence-establishes
+    attributes:
+      label: What the artifact directly establishes
+      description: Describe only facts supported by files, logs, measurements, or recorded episodes.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence-does-not-establish
+    attributes:
+      label: What the artifact does not establish
+      description: Examples include independent verification, physical compatibility, calibration correctness, safety, or task success.
+    validations:
+      required: true
+  - type: textarea
+    id: execution-context
+    attributes:
+      label: Execution context
+      description: If code ran, identify the policy, hardware or simulator, task, protocol, runtime, trial counts and evaluator. Write “metadata only; no execution” when applicable.
+    validations:
+      required: true
+  - type: textarea
+    id: sensitive-review
+    attributes:
+      label: Sensitive-information review
+      description: Confirm that the public artifact contains no credentials, private personal data, confidential material, serial numbers, private facility information, or unsafe operational secrets.
+    validations:
+      required: true
+  - type: checkboxes
+    id: authorization
+    attributes:
+      label: Authorization and publication
+      options:
+        - label: I am authorized to share this public URL and the information in this issue.
+          required: true
+        - label: I understand KnownRobot may publish an attributed assessment that clearly states its evidence limits.
+          required: true
+        - label: I understand submission does not imply endorsement, verification, compatibility, or safety certification.
+          required: true

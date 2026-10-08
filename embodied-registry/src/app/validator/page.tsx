@@ -96,6 +96,7 @@ export default function ValidatorPage() {
           <a href="/schema/robot-skill/1.0.json">Download schema 1.0 ↗</a>
           <a href="https://github.com/arcofdescent1/knownrobot/blob/main/docs/distribution.md">Reusable GitHub Action and portable credit guide ↗</a>
           <Link href="/adapters">Inspect adapter ownership →</Link>
+          <Link href="/lerobot-dataset-version-compatibility">Check LeRobot dataset-version compatibility →</Link>
           <Link href="/corrections">Corrections and disputes →</Link>
           <Link href="/participate">Report a transfer failure →</Link>
         </div>
