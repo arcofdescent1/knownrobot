@@ -14,6 +14,7 @@
     "release:check": "node scripts/sync-manifest-contract.cjs --check && node scripts/release-receipt.cjs --check --require-clean",
     "sprint:verify": "tsc -p tests/tsconfig.json && node scripts/sprint-operations.cjs verify",
     "sprint:operate": "tsc -p tests/tsconfig.json && node scripts/sprint-operations.cjs operate",
+    "sprint:select": "tsc -p tests/tsconfig.json && node scripts/sprint-operations.cjs select",
     "test:smoke": "node tests/production-smoke.cjs",
     "test:preview": "node tests/preview-smoke.cjs"
   },

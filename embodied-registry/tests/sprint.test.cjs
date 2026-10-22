@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { sprintSchema, sprintState, commitments, protocolDigest, teamDigest, evidenceDigest, hash, assertSprintTransition } = require("../.test-build/src/lib/sprint-contract.js");
 const { sprintCalendar } = require("../.test-build/src/lib/sprint-calendar.js");
 const { communityProof } = require("../.test-build/src/lib/community-proof.js");
-const { tasks, verify, operate } = require("../scripts/sprint-operations.cjs");
+const { allTasks, tasks, verify, operate, operateSelection, selectionTitle } = require("../scripts/sprint-operations.cjs");
 const source = require("../src/data/sprint-01.json");
 const fixture = () => structuredClone(source);
 const sha = "a".repeat(40);
@@ -129,6 +129,54 @@ test("operating loop covers seven gates with stable idempotency markers", () => 
   assert.deepEqual(due.map(t => t.stage), ["recruit", "freeze", "kickoff", "evidence", "review", "results", "report"]);
   assert.equal(due.every(t => !t.done), true);
   assert.deepEqual(tasks(s, new Date("2027-03-11")).map(t => t.marker), due.map(t => t.marker));
+});
+test("schedule postponements close premature gates while keeping recruitment accountable", async () => {
+  const originalToken = process.env.GITHUB_TOKEN; process.env.GITHUB_TOKEN = "test-only-not-a-real-token";
+  try {
+    const s = fixture(); const now = new Date("2026-10-22");
+    const issues = allTasks(s, now).slice(0, 4).map((task, index) => ({ number: index + 4, state: "open", body: task.marker }));
+    const request = async (url, options) => {
+      if (url.startsWith("issues?")) return structuredClone(issues);
+      const payload = JSON.parse(options.body);
+      Object.assign(issues.find(issue => `issues/${issue.number}` === url), payload);
+      return {};
+    };
+    await operate(s, request, now);
+    assert.equal(issues[0].state, "open");
+    assert.deepEqual(issues.slice(1).map(issue => [issue.state, issue.state_reason]), [
+      ["closed", "not_planned"], ["closed", "not_planned"], ["closed", "not_planned"],
+    ]);
+  } finally {
+    if (originalToken === undefined) delete process.env.GITHUB_TOKEN; else process.env.GITHUB_TOKEN = originalToken;
+  }
+});
+test("monthly selection waits for a terminal sprint and retires obsolete cycle issues", async () => {
+  const originalToken = process.env.GITHUB_TOKEN; process.env.GITHUB_TOKEN = "test-only-not-a-real-token";
+  try {
+    const s = fixture();
+    const issues = [{ number: 8, title: "Select November 2026 Reproduction Sprint policy", state: "open", body: "" }];
+    const request = async (url, options) => {
+      if (url.startsWith("issues?")) return structuredClone(issues);
+      const payload = JSON.parse(options.body);
+      if (url === "issues") issues.push({ number: issues.length + 8, state: "open", ...payload });
+      else Object.assign(issues.find(issue => `issues/${issue.number}` === url), payload);
+      return {};
+    };
+    await operateSelection(s, request, new Date("2026-10-22"));
+    assert.equal(issues[0].state, "closed");
+    assert.equal(issues[0].state_reason, "not_planned");
+
+    s.lead = confirmation("organizer", protocolDigest(s));
+    s.cancelled = { reason: "Insufficient commitments", confirmation: confirmation("organizer", "0".repeat(64)) };
+    s.cancelled.confirmation.digest = commitments(s).find(c => c.role === "CANCEL").expected;
+    await operateSelection(s, request, new Date("2027-03-06"));
+    assert.equal(issues.at(-1).title, selectionTitle(new Date("2027-03-06")).title);
+    const count = issues.length;
+    await operateSelection(s, request, new Date("2027-03-06"));
+    assert.equal(issues.length, count);
+  } finally {
+    if (originalToken === undefined) delete process.env.GITHUB_TOKEN; else process.env.GITHUB_TOKEN = originalToken;
+  }
 });
 test("corrections preserve attributable snapshots without invalidating historical consent", () => {
   const s = ready(); start(s); outcomes(s);

@@ -5,7 +5,7 @@ const { execFileSync } = require("node:child_process");
 const { sprintSchema, sprintState, commitments, assertSprintTransition } = require("../.test-build/src/lib/sprint-contract.js");
 const repo = "arcofdescent1/knownrobot";
 
-function tasks(s, now = new Date()) {
+function allTasks(s, now = new Date()) {
   const state = sprintState(s, now);
   return [
     ["recruit", s.schedule.applicationsOpen, state.ready, "Confirm 3–5 teams, at least two physical setups, three materially different configurations, an event lead and two independent reviewers. Applications alone do not count."],
@@ -15,7 +15,15 @@ function tasks(s, now = new Date()) {
     ["review", s.schedule.evidence, s.teams.length >= 3 && !state.reviewPending.length && !state.evidencePending.length, "Each named independent reviewer checks identity, revision, pre-trial configuration, protocol, counts, safety stops and evidence. Record substantive rationale and accepted/changes_requested public review. Sprint review does not grant registry verification."],
     ["results", s.schedule.review, !!s.session, "Hold a public results session. Publish notes, corrections, credits, failed outcomes and nominated improvements. Lead confirms the immutable notes URL."],
     ["report", s.schedule.results, state.status === "Completed", "Publish the joint report: every team outcome, evidence links, reviewer credits, deviations, corrections and improvement issue links. Lead confirms the report and evidence digest."],
-  ].filter(([, due]) => now >= new Date(due)).map(([stage, due, done, instructions]) => ({ stage, due, done, instructions, marker: `<!-- knownrobot-operations:${s.id}:${stage} -->` }));
+  ].map(([stage, due, done, instructions]) => ({
+    stage, due, done, instructions,
+    dueNow: now >= new Date(due),
+    marker: `<!-- knownrobot-operations:${s.id}:${stage} -->`,
+  }));
+}
+
+function tasks(s, now = new Date()) {
+  return allTasks(s, now).filter(task => task.dueNow);
 }
 
 async function api(endpoint, options = {}) {
@@ -49,14 +57,14 @@ async function operate(s, request = api, now = new Date()) {
     if (page >= 100) throw new Error("Issue inventory exceeds safe limit; no writes performed");
   }
   const state = sprintState(s, now);
-  const due = tasks(s, now);
-  for (const task of due) if (existing.filter(i => i.body?.includes(task.marker)).length > 1) throw new Error(`Duplicate operating issues for ${task.stage}; no writes performed`);
-  for (const task of due) {
+  const operatingTasks = allTasks(s, now);
+  for (const task of operatingTasks) if (existing.filter(i => i.body?.includes(task.marker)).length > 1) throw new Error(`Duplicate operating issues for ${task.stage}; no writes performed`);
+  for (const task of operatingTasks) {
     const matches = existing.filter(i => i.body?.includes(task.marker));
     if (matches.length > 1) throw new Error(`Duplicate operating issues for ${task.stage}; resolve before continuing`);
     const found = matches[0];
-    if (s.cancelled || task.done) {
-      if (found?.state === "open") await request(`issues/${found.number}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ state: "closed", state_reason: s.cancelled ? "not_planned" : "completed" }) });
+    if (s.cancelled || task.done || !task.dueNow) {
+      if (found?.state === "open") await request(`issues/${found.number}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ state: "closed", state_reason: task.done ? "completed" : "not_planned" }) });
       continue;
     }
     const body = `${task.marker}\n## ${s.title}: ${task.stage}\n\n${task.instructions}\n\nAccountable event lead: ${s.lead ? `@${s.lead.handle}` : "NOT APPOINTED — maintainer must recruit and confirm a lead"}.\n\nNamed evidence assignments:\n${s.teams.map(t => `- ${t.name}: @${t.reviewer}`).join("\n") || "None — no teams committed"}\n\nGate opens: ${task.due}.\n\nPublic status: ${state.status}.\n\n${state.blockers.map(b => `- ${b}`).join("\n")}\n\n[Operating record](https://knownrobot.com/sprints/status.json) · [Runbook](https://github.com/${repo}/blob/main/community/sprints/README.md)\n\nThis issue is closed automatically only when the operating record satisfies its gate. Missing human commitments remain blockers.`;
@@ -67,9 +75,49 @@ async function operate(s, request = api, now = new Date()) {
   }
 }
 
+function selectionTitle(now = new Date()) {
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  const cycle = next.toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  return { cycle, title: `Select ${cycle} Reproduction Sprint policy` };
+}
+
+async function operateSelection(s, request = api, now = new Date()) {
+  if (!process.env.GITHUB_TOKEN) throw new Error("GITHUB_TOKEN with repository issues:write is required only for select");
+  const existing = [];
+  for (let page = 1; ; page++) {
+    const batch = await request(`issues?state=all&labels=sprint-operations&per_page=100&page=${page}`);
+    existing.push(...batch.filter(i => !i.pull_request));
+    if (batch.length < 100) break;
+    if (page >= 100) throw new Error("Issue inventory exceeds safe limit; no writes performed");
+  }
+  const selectionIssues = existing.filter(issue => /^Select .+ Reproduction Sprint policy$/.test(issue.title));
+  const terminal = !!s.cancelled || sprintState(s, now).status === "Completed";
+  if (!terminal) {
+    for (const issue of selectionIssues.filter(issue => issue.state === "open")) {
+      await request(`issues/${issue.number}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ state: "closed", state_reason: "not_planned" }) });
+    }
+    return;
+  }
+  const { cycle, title } = selectionTitle(now);
+  if (selectionIssues.some(issue => issue.title === title)) return;
+  await request("issues", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title, labels: ["sprint-operations"],
+      body: [
+        `This issue operates the ${cycle} Known Robot Reproduction Sprint.`, "", "Selection gate:",
+        "- Public policy and immutable revision", "- Public dataset or documented task",
+        "- Runnable on low-cost LeRobot-compatible hardware", "- At least three materially different eligible configurations",
+        "- Explicit success predicate and safe operating envelope", "- Named event lead and evidence reviewer", "",
+        "Close this issue after the event page, application deadline, kickoff, evidence deadline, results session, and report date are published.",
+      ].join("\n"),
+    }),
+  });
+}
+
 async function main() {
   const mode = process.argv[2];
-  if (!["check", "verify", "operate"].includes(mode)) throw new Error("Usage: sprint-operations.cjs check|verify|operate");
+  if (!["check", "verify", "operate", "select"].includes(mode)) throw new Error("Usage: sprint-operations.cjs check|verify|operate|select");
   const s = sprintSchema.parse(JSON.parse(fs.readFileSync(path.join(__dirname, "../src/data/sprint-01.json"), "utf8")));
   if (process.env.SPRINT_BASE_REF) {
     if (!/^[a-f0-9]{40}$/.test(process.env.SPRINT_BASE_REF)) throw new Error("SPRINT_BASE_REF must be a full Git commit");
@@ -88,6 +136,7 @@ async function main() {
   if (stale.length) throw new Error(`Stale commitments: ${stale.map(c => c.role).join(", ")}`);
   if (mode === "verify") await verify(s);
   if (mode === "operate") await operate(s);
+  if (mode === "select") await operateSelection(s);
 }
-module.exports = { tasks, verify, operate };
+module.exports = { allTasks, tasks, verify, operate, operateSelection, selectionTitle };
 if (require.main === module) main().catch(error => { console.error(error.message); process.exitCode = 1; });
