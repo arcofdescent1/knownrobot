@@ -12,6 +12,19 @@ const { handleSchema, profileSchema, submissionSchema } = require('../.test-buil
 const { oneRelation } = require('../.test-build/src/lib/identity-reader.js');
 const { manifestIssues } = require('../.test-build/src/lib/manifest-contract.js');
 const { compatibilityAnswer } = require('../.test-build/src/lib/compatibility-answer.js');
+test('account activity migration keeps active-account measurement private, idempotent and workflow-based', () => {
+  const migration = require('node:fs').readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202610240001_account_activity_measurement.sql'),'utf8');
+  assert.match(migration,/unique \(account_id, event_type, dedupe_key\)/);
+  assert.match(migration,/grant execute on function public\.operator_account_activity_summary\(timestamptz\) to service_role/);
+  assert.match(migration,/revoke all on all tables in schema private from public, anon, authenticated/);
+  assert.match(migration,/event_type in \('profile_completed','account_workspace_return','team_created','team_joined','evaluation_draft_saved','evaluation_published','review_contributed','sprint_participated'\)/);
+  assert.doesNotMatch(migration,/email\s+text|ip_address|user_agent/);
+  assert.match(migration,/not exists\(select 1 from private\.account_measurement_exclusions/);
+  assert.match(migration,/occurred_at > p_as_of - interval '30 days'/);
+  const backfill = require('node:fs').readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202610240002_backfill_account_activity.sql'),'utf8');
+  for (const event of ['account_verified','profile_completed','team_created','evaluation_draft_saved','evaluation_published']) assert.match(backfill,new RegExp(`'${event}'`));
+  assert.match(backfill,/on conflict\(account_id,event_type,dedupe_key\) do nothing/g);
+});
 test('compatibility answers separate execution, incomplete protocols, pages and review strength without pooling', () => {
   const anchor = liveRecord(); anchor.evaluation.runtime.execution = 'simulation';
   anchor.benchmark.protocol.timeout = 30;

@@ -91,6 +91,8 @@ export default async function AccountPage() {
         </main>
       </>
     );
+  // Server-derived and daily-deduplicated. Failure never blocks account access.
+  await client!.rpc("record_account_workspace_activity");
   const [profileResult, memberships, invitations, drafts] = await Promise.all([
     client!.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     client!
