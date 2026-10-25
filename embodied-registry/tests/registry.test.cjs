@@ -12,6 +12,19 @@ const { handleSchema, profileSchema, submissionSchema } = require('../.test-buil
 const { oneRelation } = require('../.test-build/src/lib/identity-reader.js');
 const { manifestIssues } = require('../.test-build/src/lib/manifest-contract.js');
 const { compatibilityAnswer } = require('../.test-build/src/lib/compatibility-answer.js');
+const { reportingTokenAccepted, privacySafeAccountSummary, accountActivitySummarySchema } = require('../.test-build/src/lib/operator-report.js');
+test('operator reporting uses constant-shape bearer checks and suppresses small channel cohorts', () => {
+  const token = 'a'.repeat(64);
+  assert.equal(reportingTokenAccepted(`Bearer ${token}`, token), true);
+  for (const value of [null,'',`Basic ${token}`,'Bearer short',`Bearer ${'b'.repeat(64)}`]) assert.equal(reportingTokenAccepted(value,token),false);
+  assert.equal(reportingTokenAccepted(`Bearer ${token}`,'short'),false);
+  const summary = accountActivitySummarySchema.parse({ as_of:'2026-10-25T14:00:00.000Z',definition:'test',verified_accounts:8,activated_accounts:6,active_accounts_30d:5,retained_accounts_7d:2,retained_accounts_30d:1,excluded_accounts:1,qualifying_events_30d:9,channels_30d:{organic_search:4,community:5} });
+  const safe = privacySafeAccountSummary(summary);
+  assert.equal(safe.channels_30d.organic_search,null);
+  assert.equal(safe.channels_30d.community,5);
+  assert.equal('account_id' in safe,false);
+  assert.equal('email' in safe,false);
+});
 test('account activity migration keeps active-account measurement private, idempotent and workflow-based', () => {
   const migration = require('node:fs').readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202610240001_account_activity_measurement.sql'),'utf8');
   assert.match(migration,/unique \(account_id, event_type, dedupe_key\)/);

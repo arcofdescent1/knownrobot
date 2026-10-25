@@ -24,3 +24,7 @@ Only the Supabase service role can manage exclusions or call `operator_account_a
 Call `operator_account_activity_summary(as_of)` with the service role. The result reports confirmed accounts, activated accounts, trailing-30-day active accounts, 7- and 30-day retained accounts, exclusions, qualifying event volume and coarse channel counts. Unknown attribution remains `direct_or_unknown`; it is never guessed.
 
 Before publishing a scoreboard, record the `as_of` timestamp and preserve the returned JSON as the evidence source. A missing report is `unknown`, never zero.
+
+## Automation access
+
+`GET /api/internal/marketing-metrics` is the only application reporting surface. It requires a bearer credential from the server-only `KNOWNROBOT_REPORTING_TOKEN`, calls the service-role-only aggregate function, validates its response, disables caching and indexing, and returns no raw account records. Per-channel cohorts below five accounts are returned as `null`; top-line operator totals remain exact so milestone accounting cannot silently turn “fewer than five” into zero. Missing credentials, database configuration or malformed database output fail closed.
