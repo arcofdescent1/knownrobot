@@ -48,6 +48,7 @@ def main() -> None:
         subprocess.run(db + ["-f", str(root / "tests/compatibility_graph.sql")], check=True)
         subprocess.run(db + ["-f", str(root / "tests/external_assessments.sql")], check=True)
         subprocess.run(db + ["-f", str(root / "tests/artifacts.sql")], check=True)
+        subprocess.run(db + ["-f", str(root / "tests/collaboration.sql")], check=True)
         baseline = json.loads((root.parent / "schema/example.robot-skill.json").read_text())
         for case in json.loads((root.parents[1] / "robot_skill/manifest-contract.cases.json").read_text()):
             manifest = copy.deepcopy(baseline)

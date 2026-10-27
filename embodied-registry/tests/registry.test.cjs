@@ -14,6 +14,13 @@ const { manifestIssues } = require('../.test-build/src/lib/manifest-contract.js'
 const { compatibilityAnswer } = require('../.test-build/src/lib/compatibility-answer.js');
 const { reportingTokenAccepted, privacySafeAccountSummary, accountActivitySummarySchema } = require('../.test-build/src/lib/operator-report.js');
 const { parseArtifactUrl, importArtifactSchema } = require('../.test-build/src/lib/artifact-contract.js');
+const { collectionSchema, attemptSchema, positionSchema } = require('../.test-build/src/lib/collaboration-contract.js');
+test('collections and collaboration reject ambiguous or unattributed records', () => {
+  assert.equal(collectionSchema.safeParse({title:'SO-101 ACT policies',slug:'so101-act-policies',description:'Pinned public policies',organization_id:''}).success,true);
+  assert.equal(attemptSchema.safeParse({artifact_id:'72000000-0000-4000-8000-000000000001',evaluation_id:'40000000-0000-4000-8000-000000000001',relationship:'reproduction',notes:'Failure remains useful'}).success,true);
+  assert.equal(positionSchema.safeParse({attempt_id:'74000000-0000-0000-0000-000000000001',position:'disputes',rationale:'Too short',evidence_url:'https://example.com',supersedes_id:''}).success,false);
+  assert.equal(positionSchema.safeParse({attempt_id:'74000000-0000-0000-0000-000000000001',position:'supports',rationale:'Independent evidence supports the recorded attempt.',evidence_url:'http://example.com',supersedes_id:''}).success,false);
+});
 test('artifact URLs canonicalize supported repositories without allowing arbitrary fetch targets', () => {
   assert.deepEqual(parseArtifactUrl('https://github.com/huggingface/lerobot/tree/main'), { provider:'github',kind:'repository',repository:'huggingface/lerobot',url:'https://github.com/huggingface/lerobot',embeddedRevision:'main' });
   assert.deepEqual(parseArtifactUrl('https://huggingface.co/datasets/lerobot/pusht/tree/abc'), { provider:'huggingface',kind:'dataset',repository:'lerobot/pusht',url:'https://huggingface.co/datasets/lerobot/pusht',embeddedRevision:'abc' });

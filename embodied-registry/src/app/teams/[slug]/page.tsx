@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getPublicSupabaseClient } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/seo";
 import { oneRelation } from "@/lib/identity-reader";
+import { ResourceFollow } from "@/components/resource-follow";
 export const dynamic = "force-dynamic";
 const readTeam = cache(async (slug: string) => {
   if (!/^[a-z0-9][a-z0-9-]{2,62}$/.test(slug)) notFound();
@@ -17,7 +18,7 @@ const readTeam = cache(async (slug: string) => {
     .maybeSingle();
   if (error) throw new Error("Team data unavailable.");
   if (!team) notFound();
-  const [members, skills, artifacts] = await Promise.all([
+  const [members, skills, artifacts, collections] = await Promise.all([
     client
       .from("organization_members")
       .select("role,profiles(handle,display_name)")
@@ -28,8 +29,9 @@ const readTeam = cache(async (slug: string) => {
       .eq("owner_organization_id", team.id)
       .not("published_at", "is", null),
     client.from("artifacts").select("id,slug,title,artifact_type").eq("owner_organization_id", team.id).order("updated_at", { ascending: false }).limit(50),
+    client.from("collections").select("id,slug,title,description").eq("owner_organization_id", team.id).order("updated_at", { ascending: false }).limit(50),
   ]);
-  if (members.error || skills.error || artifacts.error)
+  if (members.error || skills.error || artifacts.error || collections.error)
     throw new Error("Team contributions unavailable.");
   const evidence = skills.data?.length
     ? await client
@@ -48,6 +50,7 @@ const readTeam = cache(async (slug: string) => {
     members: (members.data || []).map(member=>({...member,profiles:oneRelation(member.profiles)})),
     evaluations: evidence.data || [],
     artifacts: artifacts.data || [],
+    collections: collections.data || [],
   };
 });
 export async function generateMetadata({
@@ -69,7 +72,7 @@ export default async function TeamPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { team, members, evaluations, artifacts } = await readTeam((await params).slug);
+  const { team, members, evaluations, artifacts, collections } = await readTeam((await params).slug);
   return (
     <>
       <SiteHeader />
@@ -79,6 +82,7 @@ export default async function TeamPage({
           Known Robot team ID: <code>{team.id}</code>
         </p>
         <p>{team.description}</p>
+        <ResourceFollow type="organization" id={team.id} />
         <p>
           This is a contributor-managed team, not a verified institution. Team
           roles manage membership and do not grant evaluation verification
@@ -109,6 +113,9 @@ export default async function TeamPage({
         <h2>Repository-verified artifacts</h2>
         {artifacts.map(item => <p key={item.id}><Link href={`/artifacts/${item.slug}`}>{item.title}</Link> — {item.artifact_type}</p>)}
         {!artifacts.length ? <p>No claimed artifacts yet.</p> : null}
+        <h2>Collections</h2>
+        {collections.map(item => <p key={item.id}><Link href={`/collections/${item.slug}`}>{item.title}</Link> — {item.description}</p>)}
+        {!collections.length ? <p>No public collections yet.</p> : null}
         <p>
           Shows up to 50 recent public evaluations. Membership changes do not
           rewrite historical evaluation or review attribution.

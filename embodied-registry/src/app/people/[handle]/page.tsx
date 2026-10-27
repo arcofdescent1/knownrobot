@@ -20,7 +20,7 @@ const readProfile = cache(async (handle: string) => {
     .maybeSingle();
   if (error) throw new Error("Profiles are temporarily unavailable.");
   if (!profile) notFound();
-  const [evaluations, reviews, teams, artifacts, artifactContributions] = await Promise.all([
+  const [evaluations, reviews, teams, artifacts, artifactContributions, collections] = await Promise.all([
     client
       .from("public_registry_records")
       .select("id,record")
@@ -39,8 +39,9 @@ const readProfile = cache(async (handle: string) => {
       .eq("profile_id", profile.id),
     client.from("artifacts").select("id,slug,title,artifact_type").eq("owner_profile_id", profile.id).order("updated_at", { ascending: false }).limit(50),
     client.from("artifact_contributions").select("id,kind,summary,created_at,artifacts(slug,title)").eq("contributor_profile_id", profile.id).order("created_at", { ascending: false }).limit(50),
+    client.from("collections").select("id,slug,title,description").eq("owner_profile_id", profile.id).order("updated_at", { ascending: false }).limit(50),
   ]);
-  if ([evaluations, reviews, teams, artifacts, artifactContributions].some((result) => result.error))
+  if ([evaluations, reviews, teams, artifacts, artifactContributions, collections].some((result) => result.error))
     throw new Error("Contribution records are temporarily unavailable.");
   return {
     profile,
@@ -49,6 +50,7 @@ const readProfile = cache(async (handle: string) => {
     teams: (teams.data || []).map(team=>({...team,organizations:oneRelation(team.organizations)})),
     artifacts: artifacts.data || [],
     artifactContributions: (artifactContributions.data || []).map(item => ({ ...item, artifacts: oneRelation(item.artifacts) })),
+    collections: collections.data || [],
   };
 });
 export async function generateMetadata({
@@ -70,7 +72,7 @@ export default async function ProfilePage({
 }: {
   params: Promise<{ handle: string }>;
 }) {
-  const { profile, evaluations, reviews, teams, artifacts, artifactContributions } = await readProfile(
+  const { profile, evaluations, reviews, teams, artifacts, artifactContributions, collections } = await readProfile(
     (await params).handle,
   );
   return (
@@ -118,6 +120,9 @@ export default async function ProfilePage({
         <h2>Artifact contributions</h2>
         {artifactContributions.map(item => <p key={item.id}>{item.kind}: {item.artifacts?.slug ? <Link href={`/artifacts/${item.artifacts.slug}`}>{item.artifacts.title}</Link> : "artifact"} — {item.summary}</p>)}
         {!artifactContributions.length ? <p>No artifact contributions yet.</p> : null}
+        <h2>Collections</h2>
+        {collections.map(item => <p key={item.id}><Link href={`/collections/${item.slug}`}>{item.title}</Link> — {item.description}</p>)}
+        {!collections.length ? <p>No public collections yet.</p> : null}
         <h2>Published evaluations</h2>
         {evaluations.map((item) => (
           <p key={item.id}>

@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { IdentityForm } from "@/components/identity-form";
+import { ApiTokenForm } from "@/components/collaboration-forms";
 import { emailAuthReady, getSessionClient } from "@/lib/supabase/session";
 import { pageMetadata } from "@/lib/seo";
 import { oneRelation } from "@/lib/identity-reader";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
+import { markNotificationRead, revokeApiToken } from "@/app/collaboration-actions";
 import {
   requestEmailCode,
   verifyEmailCode,
@@ -133,6 +136,12 @@ export default async function AccountPage() {
     ...draft,
     skills: oneRelation(draft.skills),
   }));
+  const service = getServiceSupabaseClient();
+  const [collections, notifications, tokens] = service ? await Promise.all([
+    service.from("collections").select("id,slug,title").or(`owner_profile_id.eq.${user.id},created_by.eq.${user.id}`).order("updated_at", { ascending: false }).limit(50),
+    service.from("notifications").select("id,title,body,href,read_at,created_at").eq("recipient_id", user.id).order("created_at", { ascending: false }).limit(50),
+    service.from("api_tokens").select("id,name,token_prefix,last_used_at,expires_at,revoked_at,created_at").eq("owner_id", user.id).order("created_at", { ascending: false }).limit(50),
+  ]) : [{data:[]},{data:[]},{data:[]}];
   return (
     <>
       <SiteHeader />
@@ -328,6 +337,24 @@ export default async function AccountPage() {
           <h3>Recent artifact activity</h3>
           {artifactContributions.data?.map(item => { const artifact = oneRelation(item.artifacts); return <p key={item.id}>{item.kind}: {artifact?.slug ? <Link href={`/artifacts/${artifact.slug}`}>{artifact.title}</Link> : "artifact"} — {item.summary}</p>; })}
           {!artifactContributions.data?.length ? <p>No artifact contributions yet.</p> : null}
+        </section>
+        <section>
+          <h2>Collections</h2>
+          <p><Link href="/collections/new">Create a focused public collection →</Link></p>
+          {collections.data?.map(item => <p key={item.id}><Link href={`/collections/${item.slug}`}>{item.title}</Link></p>)}
+          {!collections.data?.length ? <p>No collections yet.</p> : null}
+        </section>
+        <section>
+          <h2>Updates you follow</h2>
+          {notifications.data?.map(item => <article key={item.id} className={item.read_at ? "notification read" : "notification"}><h3><Link href={item.href}>{item.title}</Link></h3><p>{item.body}</p><p>{new Date(item.created_at).toLocaleString("en-US")}</p>{!item.read_at ? <form action={markNotificationRead}><input type="hidden" name="notification_id" value={item.id}/><button>Mark read</button></form> : null}</article>)}
+          {!notifications.data?.length ? <p>No updates yet. Follow an artifact or collection to start an intentional, private update feed.</p> : null}
+        </section>
+        <section>
+          <h2>Repository API tokens</h2>
+          <p>Tokens are scoped to metadata imports, expire after 180 days and are stored only as hashes.</p>
+          <ApiTokenForm />
+          {tokens.data?.map(item => <p key={item.id}><code>{item.token_prefix}…</code> — {item.name} — {item.revoked_at ? "revoked" : `expires ${new Date(item.expires_at).toLocaleDateString("en-US")}`} {!item.revoked_at ? <form action={revokeApiToken} className="inline-action"><input type="hidden" name="token_id" value={item.id}/><button>Revoke</button></form> : null}</p>)}
+          <p><Link href="/distribution">GitHub Action and import API guide →</Link></p>
         </section>
         <section>
           <h2>Your evaluations</h2>

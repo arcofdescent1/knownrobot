@@ -3,6 +3,8 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { requireIdentity } from "@/lib/supabase/session";
 import { manifestIssues } from "@/lib/manifest-contract";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
+import { notifyFollowers } from "@/lib/platform-service";
 import {
   submissionSchema,
   type IdentityActionState,
@@ -12,7 +14,7 @@ export async function submitEvaluation(
   _: IdentityActionState,
   form: FormData,
 ): Promise<IdentityActionState> {
-  const { client } = await requireIdentity();
+  const { client, user } = await requireIdentity();
   if (form.get("consent") !== "on")
     return {
       ok: false,
@@ -58,13 +60,22 @@ export async function submitEvaluation(
       message:
         "Could not save this evaluation. Check your public profile, team membership, artifact metadata and whether this submission ID was already used.",
     };
+  if (mode === "publish") {
+    const service = getServiceSupabaseClient();
+    if (service) {
+      const evaluation = await service.from("evaluations").select("hardware_profile_id,skills(owner_organization_id,name)").eq("id", data).single();
+      const skill = Array.isArray(evaluation.data?.skills) ? evaluation.data.skills[0] : evaluation.data?.skills;
+      await notifyFollowers(service, { hardware_profile_id: evaluation.data!.hardware_profile_id }, "evaluation_attempt", `${parsed.data.robot_family} has new evaluation evidence`, `${parsed.data.name} published ${parsed.data.success_count}/${parsed.data.trial_count} successful trials.`, `/evaluations/${data}`, user.id, data);
+      if (skill?.owner_organization_id) await notifyFollowers(service, { organization_id: skill.owner_organization_id }, "organization_update", `${skill.name} has new evaluation evidence`, "A team-owned policy received a published evaluation.", `/evaluations/${data}`, user.id, data);
+    }
+  }
   redirect(mode === "publish" ? `/evaluations/${data}` : "/account");
 }
 export async function publishDraft(
   _: IdentityActionState,
   form: FormData,
 ): Promise<IdentityActionState> {
-  const { client } = await requireIdentity();
+  const { client, user } = await requireIdentity();
   if (form.get("consent") !== "on")
     return {
       ok: false,
@@ -81,5 +92,12 @@ export async function publishDraft(
       message:
         error.code === "22023" ? "Draft metadata is incomplete or inconsistent. Save a corrected revision with a complete portable manifest before publishing." : "Draft could not be published. Only its submitter can publish, and current artifact ownership or team membership is required.",
     };
+  const service = getServiceSupabaseClient();
+  if (service) {
+    const evaluation = await service.from("evaluations").select("hardware_profile_id,skills(owner_organization_id,name)").eq("id", id.data).single();
+    const skill = Array.isArray(evaluation.data?.skills) ? evaluation.data.skills[0] : evaluation.data?.skills;
+    await notifyFollowers(service, { hardware_profile_id: evaluation.data!.hardware_profile_id }, "evaluation_attempt", `${skill?.name || "Policy"} has new evaluation evidence`, "A private draft was published as attributable evidence.", `/evaluations/${id.data}`, user.id, id.data);
+    if (skill?.owner_organization_id) await notifyFollowers(service, { organization_id: skill.owner_organization_id }, "organization_update", `${skill.name} has new evaluation evidence`, "A team-owned policy received a published evaluation.", `/evaluations/${id.data}`, user.id, id.data);
+  }
   redirect(`/evaluations/${id.data}`);
 }

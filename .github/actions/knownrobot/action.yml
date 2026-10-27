@@ -1,0 +1,24 @@
+name: KnownRobot metadata import
+description: Pin and publish approved robotics repository metadata without executing the artifact
+inputs:
+  source-url: { description: Canonical public GitHub or Hugging Face repository URL, required: true }
+  revision: { description: Immutable commit SHA, required: true }
+  artifact-type: { description: policy dataset hardware software benchmark or repository, required: true }
+  token: { description: KnownRobot API token, required: true }
+runs:
+  using: composite
+  steps:
+    - name: Import pinned metadata
+      shell: bash
+      env:
+        KR_SOURCE_URL: ${{ inputs.source-url }}
+        KR_REVISION: ${{ inputs.revision }}
+        KR_ARTIFACT_TYPE: ${{ inputs.artifact-type }}
+        KR_TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+        case "$KR_ARTIFACT_TYPE" in policy|dataset|hardware|software|benchmark|repository) ;; *) echo "Invalid artifact type" >&2; exit 2;; esac
+        payload="$(jq -cn --arg source_url "$KR_SOURCE_URL" --arg revision "$KR_REVISION" --arg artifact_type "$KR_ARTIFACT_TYPE" '{source_url:$source_url,revision:$revision,artifact_type:$artifact_type}')"
+        response="$(curl --fail-with-body --retry 2 --max-time 45 -sS -X POST https://knownrobot.com/api/v1/imports -H "Authorization: Bearer $KR_TOKEN" -H 'Content-Type: application/json' --data "$payload")"
+        echo "$response" | jq -e '.artifact_url and .revision'
+        echo "KnownRobot record: $(echo "$response" | jq -r '.artifact_url')"
