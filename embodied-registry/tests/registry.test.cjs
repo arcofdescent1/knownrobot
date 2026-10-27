@@ -13,6 +13,14 @@ const { oneRelation } = require('../.test-build/src/lib/identity-reader.js');
 const { manifestIssues } = require('../.test-build/src/lib/manifest-contract.js');
 const { compatibilityAnswer } = require('../.test-build/src/lib/compatibility-answer.js');
 const { reportingTokenAccepted, privacySafeAccountSummary, accountActivitySummarySchema } = require('../.test-build/src/lib/operator-report.js');
+const { parseArtifactUrl, importArtifactSchema } = require('../.test-build/src/lib/artifact-contract.js');
+test('artifact URLs canonicalize supported repositories without allowing arbitrary fetch targets', () => {
+  assert.deepEqual(parseArtifactUrl('https://github.com/huggingface/lerobot/tree/main'), { provider:'github',kind:'repository',repository:'huggingface/lerobot',url:'https://github.com/huggingface/lerobot',embeddedRevision:'main' });
+  assert.deepEqual(parseArtifactUrl('https://huggingface.co/datasets/lerobot/pusht/tree/abc'), { provider:'huggingface',kind:'dataset',repository:'lerobot/pusht',url:'https://huggingface.co/datasets/lerobot/pusht',embeddedRevision:'abc' });
+  assert.throws(() => parseArtifactUrl('https://example.com/owner/repo'));
+  assert.throws(() => parseArtifactUrl('https://user:secret@github.com/owner/repo'));
+  assert.equal(importArtifactSchema.safeParse({ source_url:'https://huggingface.co/lerobot/smolvla_base',revision:'main',artifact_type:'policy' }).success,true);
+});
 test('operator reporting uses constant-shape bearer checks and suppresses small channel cohorts', () => {
   const token = 'a'.repeat(64);
   assert.equal(reportingTokenAccepted(`Bearer ${token}`, token), true);

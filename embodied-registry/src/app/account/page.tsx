@@ -93,7 +93,7 @@ export default async function AccountPage() {
     );
   // Server-derived and daily-deduplicated. Failure never blocks account access.
   await client!.rpc("record_account_workspace_activity");
-  const [profileResult, memberships, invitations, drafts] = await Promise.all([
+  const [profileResult, memberships, invitations, drafts, ownedArtifacts, artifactContributions] = await Promise.all([
     client!.from("profiles").select("*").eq("id", user.id).maybeSingle(),
     client!
       .from("organization_members")
@@ -111,9 +111,11 @@ export default async function AccountPage() {
       .eq("submitted_by", user.id)
       .order("created_at", { ascending: false })
       .limit(50),
+    client!.from("artifacts").select("id,slug,title,artifact_type").or(`owner_profile_id.eq.${user.id},imported_by.eq.${user.id}`).order("updated_at", { ascending: false }).limit(50),
+    client!.from("artifact_contributions").select("id,kind,summary,created_at,artifacts(slug,title)").eq("contributor_profile_id", user.id).order("created_at", { ascending: false }).limit(50),
   ]);
   if (
-    [profileResult, memberships, invitations, drafts].some(
+    [profileResult, memberships, invitations, drafts, ownedArtifacts, artifactContributions].some(
       (result) => result.error,
     )
   )
@@ -317,6 +319,15 @@ export default async function AccountPage() {
               Publish team details and my owner membership.
             </label>
           </IdentityForm>
+        </section>
+        <section>
+          <h2>Your artifacts and contributions</h2>
+          <p><Link href="/artifacts/import">Import from GitHub or Hugging Face →</Link></p>
+          {ownedArtifacts.data?.map(item => <p key={item.id}><Link href={`/artifacts/${item.slug}`}>{item.title}</Link> — {item.artifact_type}</p>)}
+          {!ownedArtifacts.data?.length ? <p>No imported or claimed artifacts yet.</p> : null}
+          <h3>Recent artifact activity</h3>
+          {artifactContributions.data?.map(item => { const artifact = oneRelation(item.artifacts); return <p key={item.id}>{item.kind}: {artifact?.slug ? <Link href={`/artifacts/${artifact.slug}`}>{artifact.title}</Link> : "artifact"} — {item.summary}</p>; })}
+          {!artifactContributions.data?.length ? <p>No artifact contributions yet.</p> : null}
         </section>
         <section>
           <h2>Your evaluations</h2>

@@ -17,7 +17,7 @@ const readTeam = cache(async (slug: string) => {
     .maybeSingle();
   if (error) throw new Error("Team data unavailable.");
   if (!team) notFound();
-  const [members, skills] = await Promise.all([
+  const [members, skills, artifacts] = await Promise.all([
     client
       .from("organization_members")
       .select("role,profiles(handle,display_name)")
@@ -27,8 +27,9 @@ const readTeam = cache(async (slug: string) => {
       .select("id")
       .eq("owner_organization_id", team.id)
       .not("published_at", "is", null),
+    client.from("artifacts").select("id,slug,title,artifact_type").eq("owner_organization_id", team.id).order("updated_at", { ascending: false }).limit(50),
   ]);
-  if (members.error || skills.error)
+  if (members.error || skills.error || artifacts.error)
     throw new Error("Team contributions unavailable.");
   const evidence = skills.data?.length
     ? await client
@@ -46,6 +47,7 @@ const readTeam = cache(async (slug: string) => {
     team,
     members: (members.data || []).map(member=>({...member,profiles:oneRelation(member.profiles)})),
     evaluations: evidence.data || [],
+    artifacts: artifacts.data || [],
   };
 });
 export async function generateMetadata({
@@ -59,7 +61,7 @@ export async function generateMetadata({
     `/teams/${slug}`,
     `${result.team.name} — Known Robot team`,
     "Public team membership and attributable robot evaluation evidence.",
-    { index: result.evaluations.length > 0 },
+    { index: result.evaluations.length + result.artifacts.length > 0 },
   );
 }
 export default async function TeamPage({
@@ -67,7 +69,7 @@ export default async function TeamPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { team, members, evaluations } = await readTeam((await params).slug);
+  const { team, members, evaluations, artifacts } = await readTeam((await params).slug);
   return (
     <>
       <SiteHeader />
@@ -104,6 +106,9 @@ export default async function TeamPage({
           </p>
         ))}
         {!evaluations.length ? <p>No published team evaluations yet.</p> : null}
+        <h2>Repository-verified artifacts</h2>
+        {artifacts.map(item => <p key={item.id}><Link href={`/artifacts/${item.slug}`}>{item.title}</Link> — {item.artifact_type}</p>)}
+        {!artifacts.length ? <p>No claimed artifacts yet.</p> : null}
         <p>
           Shows up to 50 recent public evaluations. Membership changes do not
           rewrite historical evaluation or review attribution.

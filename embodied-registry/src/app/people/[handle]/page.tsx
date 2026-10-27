@@ -20,7 +20,7 @@ const readProfile = cache(async (handle: string) => {
     .maybeSingle();
   if (error) throw new Error("Profiles are temporarily unavailable.");
   if (!profile) notFound();
-  const [evaluations, reviews, teams] = await Promise.all([
+  const [evaluations, reviews, teams, artifacts, artifactContributions] = await Promise.all([
     client
       .from("public_registry_records")
       .select("id,record")
@@ -37,14 +37,18 @@ const readProfile = cache(async (handle: string) => {
       .from("organization_members")
       .select("role,organizations(slug,name)")
       .eq("profile_id", profile.id),
+    client.from("artifacts").select("id,slug,title,artifact_type").eq("owner_profile_id", profile.id).order("updated_at", { ascending: false }).limit(50),
+    client.from("artifact_contributions").select("id,kind,summary,created_at,artifacts(slug,title)").eq("contributor_profile_id", profile.id).order("created_at", { ascending: false }).limit(50),
   ]);
-  if ([evaluations, reviews, teams].some((result) => result.error))
+  if ([evaluations, reviews, teams, artifacts, artifactContributions].some((result) => result.error))
     throw new Error("Contribution records are temporarily unavailable.");
   return {
     profile,
     evaluations: evaluations.data || [],
     reviews: reviews.data || [],
     teams: (teams.data || []).map(team=>({...team,organizations:oneRelation(team.organizations)})),
+    artifacts: artifacts.data || [],
+    artifactContributions: (artifactContributions.data || []).map(item => ({ ...item, artifacts: oneRelation(item.artifacts) })),
   };
 });
 export async function generateMetadata({
@@ -58,7 +62,7 @@ export async function generateMetadata({
     `/people/${handle}`,
     `${result.profile.display_name || handle} — Known Robot contributor`,
     "Attributable public evaluations, review decisions and team memberships.",
-    { index: result.evaluations.length + result.reviews.length > 0 },
+    { index: result.evaluations.length + result.reviews.length + result.artifacts.length + result.artifactContributions.length > 0 },
   );
 }
 export default async function ProfilePage({
@@ -66,7 +70,7 @@ export default async function ProfilePage({
 }: {
   params: Promise<{ handle: string }>;
 }) {
-  const { profile, evaluations, reviews, teams } = await readProfile(
+  const { profile, evaluations, reviews, teams, artifacts, artifactContributions } = await readProfile(
     (await params).handle,
   );
   return (
@@ -108,6 +112,12 @@ export default async function ProfilePage({
           </p>
         ))}
         {!teams.length ? <p>No team memberships.</p> : null}
+        <h2>Owned artifacts</h2>
+        {artifacts.map(item => <p key={item.id}><Link href={`/artifacts/${item.slug}`}>{item.title}</Link> — {item.artifact_type}</p>)}
+        {!artifacts.length ? <p>No repository-verified artifact ownership yet.</p> : null}
+        <h2>Artifact contributions</h2>
+        {artifactContributions.map(item => <p key={item.id}>{item.kind}: {item.artifacts?.slug ? <Link href={`/artifacts/${item.artifacts.slug}`}>{item.artifacts.title}</Link> : "artifact"} — {item.summary}</p>)}
+        {!artifactContributions.length ? <p>No artifact contributions yet.</p> : null}
         <h2>Published evaluations</h2>
         {evaluations.map((item) => (
           <p key={item.id}>
