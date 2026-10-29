@@ -4,6 +4,8 @@ const { demoRecord } = require("../.test-build/src/lib/demo-data.js");
 const { evidenceBadge, badgeMarkdown, contributionCredits, citation, declaredSourceCredits } = require("../.test-build/src/lib/distribution.js");
 const { adaptersSchema, adapterSchema, adapterDigest, adapterState, verifyAdapter } = require("../.test-build/src/lib/adapter-contract.js");
 const { pageMetadata, registryMetadata, publicPages } = require("../.test-build/src/lib/seo.js");
+const { discussionThreadSchema, messageRequestSchema } = require("../.test-build/src/lib/community-contract.js");
+const { readFileSync } = require("node:fs");
 const record = () => ({ ...structuredClone(demoRecord), id: "40000000-0000-0000-0000-000000000001" });
 function adapter() {
   const a = { id: "test-arm", name: "Test adapter", robotFamily: "Test arm", repository: "https://github.com/example/adapter", revision: "a".repeat(40), scope: "Declared observation adapter", limitations: "Test fixture only; not physical verification", license: "Apache-2.0", tests: `https://github.com/example/adapter/blob/${"a".repeat(40)}/tests.json`, contract: `https://github.com/example/adapter/blob/${"a".repeat(40)}/contract.json`, supportIssue: "https://github.com/example/adapter/issues/1", updatedAt: "2026-09-16T00:00:00Z", expiresAt: "2026-12-01T00:00:00Z", status: "active", maintainers: [{ handle: "test-maintainer", comment: "https://github.com/arcofdescent1/knownrobot/issues/3#issuecomment-123", digest: "0".repeat(64) }] };
@@ -83,4 +85,29 @@ test("preview/development metadata is noindex even when public content is otherw
       assert.equal(pageMetadata("/thesis", "Thesis", "Description").robots.index, false);
     }
   } finally { if (previous === undefined) delete process.env.VERCEL_ENV; else process.env.VERCEL_ENV = previous; }
+});
+test("artifact discussions require substantive context and structured request outcomes", () => {
+  const base = { artifact_id: "40000000-0000-4000-8000-000000000001", kind: "discussion", title: "Controller-frequency mismatch", body: "Observed a controller-frequency mismatch while comparing the pinned configuration metadata.", desired_outcome: "" };
+  assert.equal(discussionThreadSchema.safeParse(base).success, true);
+  assert.equal(discussionThreadSchema.safeParse({ ...base, body: "Too short" }).success, false);
+  assert.equal(discussionThreadSchema.safeParse({ ...base, kind: "reproduction_request" }).success, false);
+  assert.equal(discussionThreadSchema.safeParse({ ...base, kind: "reproduction_request", desired_outcome: "Independent SO-101 attempt with a pinned manifest." }).success, true);
+});
+test("message requests require shared context language and reject unsolicited links", () => {
+  const request = { recipient_handle: "robot-maintainer", artifact_id: "40000000-0000-4000-8000-000000000001", note: "Could we coordinate the missing calibration metadata for this artifact?" };
+  assert.equal(messageRequestSchema.safeParse(request).success, true);
+  assert.equal(messageRequestSchema.safeParse({ ...request, note: "See https://spam.example for details" }).success, false);
+});
+test("private messaging is consent gated, rate limited, reportable, and excluded from contributor counts", () => {
+  const action = readFileSync("src/app/community-actions.ts", "utf8");
+  const migration = readFileSync("supabase/migrations/202610290003_artifact_discussions_and_messages.sql", "utf8");
+  assert.match(action, /status !== "accepted"/);
+  assert.match(action, />= 3/);
+  assert.match(action, />= 20/);
+  assert.match(action, /account_blocks/);
+  assert.match(action, /message_reports/);
+  assert.match(migration, /event_type not in \('account_verified','message_request_sent','direct_message_sent'\)/);
+  assert.match(migration, /private messages never qualify/);
+  assert.match(migration, /enable row level security/);
+  assert.doesNotMatch(migration, /grant select on public\.message_conversations/);
 });

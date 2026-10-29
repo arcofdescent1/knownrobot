@@ -350,6 +350,11 @@ export default async function AccountPage() {
           {!notifications.data?.length ? <p>No updates yet. Follow an artifact or collection to start an intentional, private update feed.</p> : null}
         </section>
         <section>
+          <h2>Private coordination</h2>
+          <p>Message requests require shared public artifact activity and recipient acceptance. Keep technical conclusions and evidence on the public artifact discussion.</p>
+          <p><Link href="/messages">Open messages and requests →</Link></p>
+        </section>
+        <section>
           <h2>Repository API tokens</h2>
           <p>Tokens are scoped to metadata imports, expire after 180 days and are stored only as hashes.</p>
           <ApiTokenForm />

@@ -1,0 +1,24 @@
+import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
+import { ConversationResponseForm, ConversationSafetyForm, DirectMessageForm, MessageRequestForm } from "@/components/community-forms";
+import { requireIdentity } from "@/lib/supabase/session";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
+import { pageMetadata } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
+export const metadata = pageMetadata("/messages", "Private coordination — Known Robot", "Consent-based private coordination between contributors with shared artifact context.", { index: false });
+const one = <T,>(value: T | T[] | null): T | null => Array.isArray(value) ? value[0] || null : value;
+export default async function MessagesPage() {
+  const { user, client } = await requireIdentity();
+  const profile = await client.from("profiles").select("handle").eq("id", user.id).maybeSingle();
+  const service = getServiceSupabaseClient(); if (!service) throw new Error("Messaging is unavailable.");
+  const conversations = await service.from("message_conversations").select("id,requester_id,recipient_id,artifact_id,status,accepted_at,created_at,updated_at,requester:profiles!message_conversations_requester_id_fkey(handle,display_name),recipient:profiles!message_conversations_recipient_id_fkey(handle,display_name),artifacts(slug,title)").or(`requester_id.eq.${user.id},recipient_id.eq.${user.id}`).order("updated_at", { ascending: false }).limit(50);
+  if (conversations.error) throw new Error("Messages are temporarily unavailable.");
+  const ids = (conversations.data || []).map(item => item.id);
+  const messages = ids.length ? await service.from("direct_messages").select("id,conversation_id,sender_id,body,created_at,profiles!direct_messages_sender_id_fkey(handle,display_name)").in("conversation_id", ids).order("created_at").limit(500) : { data: [], error: null };
+  if (messages.error) throw new Error("Message history is temporarily unavailable.");
+  const byConversation = new Map<string, typeof messages.data>();
+  for (const message of messages.data || []) byConversation.set(message.conversation_id, [...(byConversation.get(message.conversation_id) || []), message]);
+  return <><SiteHeader /><main className="editorial-page evidence-page"><p className="eyebrow">Private coordination</p><h1>Coordinate privately; publish evidence publicly.</h1><p>Message requests require shared public activity on one artifact and recipient acceptance. No bulk messaging, attachments, or unsolicited links in requests.</p>{!profile.data?.handle ? <p><Link href="/account">Complete your public profile</Link> before requesting a conversation.</p> : <section><h2>Request a conversation</h2><MessageRequestForm /></section>}<section><h2>Conversations</h2><div className="conversation-list">{(conversations.data || []).map(conversation => { const requester = one(conversation.requester as { handle: string; display_name: string } | Array<{ handle: string; display_name: string }> | null); const recipient = one(conversation.recipient as { handle: string; display_name: string } | Array<{ handle: string; display_name: string }> | null); const artifact = one(conversation.artifacts as { slug: string; title: string } | Array<{ slug: string; title: string }> | null); const other = conversation.requester_id === user.id ? recipient : requester; const isRecipient = conversation.recipient_id === user.id; const items = byConversation.get(conversation.id) || []; return <article key={conversation.id}><header><div><span className={`status-chip status-${conversation.status}`}>{conversation.status}</span><h3>{other?.display_name || other?.handle || "Contributor"}</h3><p>Shared context: {artifact?.slug ? <Link href={`/artifacts/${artifact.slug}`}>{artifact.title}</Link> : "artifact"}</p></div></header><div className="message-history">{items.map(message => { const sender = one(message.profiles as { handle: string; display_name: string } | Array<{ handle: string; display_name: string }> | null); return <div key={message.id} className={message.sender_id === user.id ? "message own-message" : "message"}><p>{message.body}</p><small>{sender?.display_name || sender?.handle || "Contributor"} · {new Date(message.created_at).toLocaleString("en-US")}</small></div>; })}</div>{conversation.status === "pending" && isRecipient ? <ConversationResponseForm conversationId={conversation.id} /> : null}{conversation.status === "pending" && !isRecipient ? <p>Waiting for recipient approval.</p> : null}{conversation.status === "accepted" ? <DirectMessageForm conversationId={conversation.id} /> : null}{!["declined", "closed"].includes(conversation.status) ? <ConversationSafetyForm conversationId={conversation.id} /> : null}</article>; })}</div>{!conversations.data?.length ? <p>No private conversations. Public artifact discussions are the default collaboration surface.</p> : null}</section></main></>;
+}
+
