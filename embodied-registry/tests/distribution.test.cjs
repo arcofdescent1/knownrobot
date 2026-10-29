@@ -7,6 +7,7 @@ const { pageMetadata, registryMetadata, publicPages } = require("../.test-build/
 const { discussionThreadSchema, messageRequestSchema } = require("../.test-build/src/lib/community-contract.js");
 const { signUpSchema, loginSchema, passwordUpdateSchema } = require("../.test-build/src/lib/auth-contract.js");
 const { inferPolicyFamily, inferHardwareContexts, normalizeDiscoveryFilters } = require("../.test-build/src/lib/discovery-contract.js");
+const { buildActivationJourney } = require("../.test-build/src/lib/activation-contract.js");
 const { readFileSync } = require("node:fs");
 const record = () => ({ ...structuredClone(demoRecord), id: "40000000-0000-0000-0000-000000000001" });
 function adapter() {
@@ -164,4 +165,26 @@ test("discovery is browse-first, evidence-honest, and still searchable", () => {
   assert.deepEqual(inferHardwareContexts({ title: "PushT dataset" }), ["simulation"]);
   assert.equal(normalizeDiscoveryFilters({ family: "unknown", evidence: "needs-evidence", q: "  ACT  " }).family, undefined);
   assert.equal(normalizeDiscoveryFilters({ evidence: "needs-evidence" }).evidence, "needs-evidence");
+});
+
+test("contributor activation always exposes one truthful recommended next step", () => {
+  const empty = buildActivationJourney({ profileComplete: false, artifactStarted: false, evidenceAction: false, collaborationAction: false });
+  assert.equal(empty.completed, 0);
+  assert.equal(empty.percent, 0);
+  assert.equal(empty.recommended.id, "profile");
+  assert.equal(empty.recommended.href, "/settings/profile");
+  const started = buildActivationJourney({ profileComplete: true, artifactStarted: true, evidenceAction: false, collaborationAction: false, artifactSlug: "test-artifact", artifactTitle: "Test artifact" });
+  assert.equal(started.completed, 2);
+  assert.equal(started.percent, 50);
+  assert.equal(started.recommended.id, "evidence");
+  assert.equal(started.recommended.href, "/artifacts/test-artifact/discussions");
+  const complete = buildActivationJourney({ profileComplete: true, artifactStarted: true, evidenceAction: true, collaborationAction: true });
+  assert.equal(complete.complete, true);
+  assert.equal(complete.percent, 100);
+  assert.equal(complete.recommended.href, "/discover?evidence=needs-evidence");
+  const dashboard = readFileSync("src/app/dashboard/page.tsx", "utf8");
+  const checklist = readFileSync("src/components/activation-checklist.tsx", "utf8");
+  assert.match(dashboard, /readActivationJourney/);
+  assert.match(checklist, /role="progressbar"/);
+  assert.match(checklist, /Recommended next step/);
 });
