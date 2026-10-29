@@ -42,7 +42,6 @@ export async function createDiscussion(_: CommunityState, form: FormData): Promi
     await activity(service, user.id, isRequest ? "collaboration_request_started" : "discussion_started", parsed.data.artifact_id, created.data.id);
     await notifyFollowers(service, { artifact_id: parsed.data.artifact_id }, isRequest ? "collaboration_request" : "discussion_reply", `${artifact.data.title}: ${parsed.data.title}`, isRequest ? parsed.data.desired_outcome : "A contributor started a public artifact discussion.", `/artifacts/${artifact.data.slug}/discussions/${created.data.id}`, user.id, created.data.id);
     revalidatePath(`/artifacts/${artifact.data.slug}`);
-    revalidatePath(`/artifacts/${artifact.data.slug}/discussions`);
     return { ok: true, message: isRequest ? "Collaboration request published." : "Discussion published.", href: `/artifacts/${artifact.data.slug}/discussions/${created.data.id}` };
   } catch (error) { return fail(error instanceof Error ? error.message : "Discussion could not be created."); }
 }

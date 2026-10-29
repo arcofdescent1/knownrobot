@@ -178,7 +178,7 @@ test("contributor activation always exposes one truthful recommended next step",
   assert.equal(started.completed, 2);
   assert.equal(started.percent, 50);
   assert.equal(started.recommended.id, "evidence");
-  assert.equal(started.recommended.href, "/artifacts/test-artifact/discussions");
+  assert.equal(started.recommended.href, "/artifacts/test-artifact?tab=discussions");
   const complete = buildActivationJourney({ profileComplete: true, artifactStarted: true, evidenceAction: true, collaborationAction: true });
   assert.equal(complete.complete, true);
   assert.equal(complete.percent, 100);
@@ -215,4 +215,20 @@ test("web validator pins trusted sources and reports actionable metadata gaps", 
   assert.match(component, /Import this pinned artifact/);
   assert.match(route, /content-length/);
   assert.match(route, /no-store/);
+});
+
+test("artifact work is unified behind one action bar and one canonical workspace", () => {
+  const workspace = readFileSync("src/components/artifact-workspace.tsx", "utf8");
+  const page = readFileSync("src/app/artifacts/[slug]/page.tsx", "utf8");
+  const collaborationRedirect = readFileSync("src/app/artifacts/[slug]/collaborate/page.tsx", "utf8");
+  const discussionRedirect = readFileSync("src/app/artifacts/[slug]/discussions/page.tsx", "utf8");
+  for (const action of ["Follow", "Add evidence", "Start discussion", "Save to collection", "Share / embed", "Claim as maintainer"]) assert.match(workspace, new RegExp(action, "i"));
+  for (const tab of ["Overview", "Evidence", "Discussions", "Reproductions", "History", "Distribution"]) assert.match(workspace, new RegExp(`label: "${tab}"`));
+  assert.match(workspace, /aria-label="Artifact actions"/);
+  assert.match(workspace, /aria-current=/);
+  assert.match(workspace, /<details><summary>Start repository-backed verification/);
+  assert.match(page, /SaveArtifactToCollectionForm|ArtifactWorkspace/);
+  assert.match(page, /listArtifactThreads/);
+  assert.match(collaborationRedirect, /tab=evidence/);
+  assert.match(discussionRedirect, /tab=discussions/);
 });

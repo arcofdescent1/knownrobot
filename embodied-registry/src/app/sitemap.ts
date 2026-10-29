@@ -20,10 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...routes.map(route => ({ url: `${siteOrigin}${route}` })),
     ...fieldNotes.map(note => ({ url: `${siteOrigin}/field-notes/${note.slug}` })),
     ...assessments.records.map(record => ({ url: `${siteOrigin}/assessments/${record.slug}`, lastModified: record.assessment.assessed_at })),
-    ...artifacts.flatMap(record => [
-      { url: `${siteOrigin}/artifacts/${record.slug}`, lastModified: record.updated_at },
-      { url: `${siteOrigin}/artifacts/${record.slug}/discussions`, lastModified: record.updated_at },
-    ]),
+    ...artifacts.map(record => ({ url: `${siteOrigin}/artifacts/${record.slug}`, lastModified: record.updated_at })),
     ...collections.map(record => ({ url: `${siteOrigin}/collections/${record.slug}`, lastModified: record.updated_at })),
     // Older records remain crawlable through registry pagination and evidence links.
     ...(result.state === "live" ? result.data.records.map(record => ({ url: `${siteOrigin}/evaluations/${record.id}` })) : []),

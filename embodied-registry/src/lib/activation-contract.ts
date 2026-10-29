@@ -19,7 +19,7 @@ export type ActivationStep = {
 
 export function buildActivationJourney(signals: ActivationSignals) {
   const artifactHref = signals.artifactSlug ? `/artifacts/${signals.artifactSlug}` : "/discover";
-  const discussionHref = signals.artifactSlug ? `/artifacts/${signals.artifactSlug}/discussions` : "/discussions";
+  const discussionHref = signals.artifactSlug ? `/artifacts/${signals.artifactSlug}?tab=discussions` : "/discussions";
   const steps: ActivationStep[] = [
     { id: "profile", number: 1, title: "Complete your contributor profile", description: "Choose a public handle so your work receives durable attribution.", complete: signals.profileComplete, href: "/settings/profile", action: "Complete profile" },
     { id: "artifact", number: 2, title: "Import or follow one artifact", description: "Start from a revision-pinned policy, dataset, repository, or hardware record.", complete: signals.artifactStarted, href: signals.profileComplete ? "/discover" : "/settings/profile", action: signals.profileComplete ? "Choose an artifact" : "Complete profile first" },
