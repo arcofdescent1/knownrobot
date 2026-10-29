@@ -16,11 +16,12 @@ export default async function ThreadPage({ params }: { params: Promise<{ slug: s
   const { slug, id } = await params; const result = await readDiscussionThread(id); if (!result) notFound();
   const artifact = one(result.thread.artifacts as { id: string; slug: string; title: string } | null); if (!artifact || artifact.slug !== slug) notFound();
   const author = one(result.thread.profiles as { handle: string; display_name: string } | Array<{ handle: string; display_name: string }> | null);
+  const publisher = one(result.thread.publisher as { handle: string; display_name: string } | Array<{ handle: string; display_name: string }> | null);
   const session = await getSessionClient(); const user = session ? (await session.auth.getUser()).data.user : null;
   return <><SiteHeader /><main className="editorial-page evidence-page">
     <p className="eyebrow">{result.thread.kind.replaceAll("_", " ")} · {result.thread.status.replace("_", " ")}</p>
     <h1>{result.thread.title}</h1><p><Link href={`/artifacts/${slug}?tab=discussions`}>← All {artifact.title} discussions</Link></p>
-    <article className="discussion-root"><p>{result.thread.body}</p>{result.thread.desired_outcome ? <aside className="boundary-note"><strong>Desired outcome:</strong> {result.thread.desired_outcome}</aside> : null}<p>Started by {author?.handle ? <Link href={`/people/${author.handle}`}>{author.display_name || author.handle}</Link> : "contributor"} on {new Date(result.thread.created_at).toLocaleString("en-US")}</p></article>
+    <article className="discussion-root"><p>{result.thread.body}</p>{result.thread.desired_outcome ? <aside className="boundary-note"><strong>Desired outcome:</strong> {result.thread.desired_outcome}</aside> : null}<p>Started by {author?.handle ? <Link href={`/people/${author.handle}`}>{author.display_name || author.handle}</Link> : publisher?.display_name || publisher?.handle || "contributor"} on {new Date(result.thread.created_at).toLocaleString("en-US")}</p></article>
     <section><h2>Public contributions</h2><ol className="discussion-posts">{result.posts.map(post => {
       const person = one(post.profiles as { handle: string; display_name: string } | Array<{ handle: string; display_name: string }> | null);
       return <li key={post.id} id={`post-${post.id}`} className={post.parent_id ? "nested-reply" : undefined}>

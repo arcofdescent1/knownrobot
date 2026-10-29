@@ -252,3 +252,15 @@ test("adding evidence offers a human evaluation chooser and guided create-and-re
   assert.match(action, /artifact_evaluation_attempts/);
   assert.match(action, /tab=evidence&added=evaluation/);
 });
+
+test("discussion discovery starts with substantive, publisher-attributed evidence work", () => {
+  const page = readFileSync("src/app/discussions/page.tsx", "utf8");
+  const reader = readFileSync("src/lib/community-reader.ts", "utf8");
+  const migration = readFileSync("supabase/migrations/202610290006_seed_evidence_discussions.sql", "utf8");
+  for (const action of ["Browse artifacts needing evidence", "Ask a compatibility question", "Request a reproduction"]) assert.match(page, new RegExp(action));
+  for (const title of ["What runtime details are required to reproduce ACT PushT?", "Can the SO-101 ball-in-cup ACT result be independently reproduced?", "What task-specific evidence is needed for the SmolVLA base checkpoint?"]) assert.match(migration, new RegExp(title.replace(/[?]/g, "\\?")));
+  assert.match(migration, /author_publisher_id/);
+  assert.match(migration, /num_nonnulls\(author_id,author_publisher_id\)=1/);
+  assert.match(reader, /discussion_threads_author_publisher_id_fkey/);
+  assert.doesNotMatch(migration, /insert into public\.profiles/i);
+});

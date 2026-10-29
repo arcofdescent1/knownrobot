@@ -21,8 +21,8 @@ async function context() {
 async function activity(service: NonNullable<ReturnType<typeof getServiceSupabaseClient>>, account: string, event: string, resource: string, dedupe: string) {
   await service.rpc("record_community_activity", { p_account: account, p_event: event, p_resource: resource, p_dedupe: dedupe });
 }
-async function notify(service: NonNullable<ReturnType<typeof getServiceSupabaseClient>>, recipients: string[], eventType: string, title: string, body: string, href: string, actor: string, resource: string) {
-  const rows = [...new Set(recipients)].filter(id => id !== actor).map(recipient_id => ({ recipient_id, event_type: eventType, title, body, href, actor_id: actor, resource_key: resource }));
+async function notify(service: NonNullable<ReturnType<typeof getServiceSupabaseClient>>, recipients: Array<string | null | undefined>, eventType: string, title: string, body: string, href: string, actor: string, resource: string) {
+  const rows = [...new Set(recipients)].filter((id): id is string => Boolean(id) && id !== actor).map(recipient_id => ({ recipient_id, event_type: eventType, title, body, href, actor_id: actor, resource_key: resource }));
   if (rows.length) await service.from("notifications").upsert(rows, { onConflict: "recipient_id,event_type,resource_key", ignoreDuplicates: true });
 }
 const relation = <T,>(value: T | T[] | null | undefined): T | null => Array.isArray(value) ? value[0] || null : value || null;
