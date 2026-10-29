@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { PublicVocabulary } from "@/components/public-vocabulary";
 import { getHomepageSnapshot } from "@/lib/home-reader";
 import { pageMetadata } from "@/lib/seo";
 
@@ -21,7 +22,7 @@ export default async function Home() {
       <div className="home-hero-copy">
         <p className="kicker">OPEN ROBOT ARTIFACT NETWORK</p>
         <h1>Find the artifact.<br />Inspect the evidence.<br /><em>Improve what is known.</em></h1>
-        <p className="home-deck">KnownRobot connects revision-pinned robot policies, datasets, software, hardware context, and evaluation evidence—without turning upstream claims into conclusions.</p>
+        <p className="home-deck">KnownRobot connects revision-pinned robot policies, datasets, software, hardware context, and published evidence—without turning upstream claims into conclusions.</p>
         <form className="home-search" action="/discover">
           <label><span className="sr-only">Search robot artifacts and evidence</span><input name="q" minLength={2} maxLength={100} placeholder="Search SO-101 ACT, SmolVLA, PushT…" /></label>
           <button type="submit">Search KnownRobot <span aria-hidden="true">→</span></button>
@@ -34,19 +35,20 @@ export default async function Home() {
           <Link href="/artifacts"><Count value={snapshot.counts.artifacts} /><span>canonical artifacts</span><small>Policies, datasets, and software pinned to source</small></Link>
           <Link href="/collections"><Count value={snapshot.counts.collections} /><span>curated collections</span><small>Focused paths through related robotics work</small></Link>
           <Link href="/assessments"><Count value={snapshot.counts.assessments} /><span>metadata assessments</span><small>Non-executing inspections with explicit gaps</small></Link>
-          <Link href="/participate"><Count value={snapshot.counts.attempts} /><span>measured attempts</span><small>Successful and failed executions, kept distinct</small></Link>
+          <Link href="/participate"><Count value={snapshot.counts.attempts} /><span>evidence records</span><small>What contributors observed or measured</small></Link>
         </div>
         <p className="home-proof-note"><span aria-hidden="true">●</span> Counts reflect published public records. Imported metadata is never treated as a measured result or maintainer endorsement.</p>
       </div>
     </section>
+    <PublicVocabulary />
 
     <section className="home-section" aria-labelledby="featured-artifacts">
-      <div className="home-section-heading"><div><p className="eyebrow">START WITH A REAL ARTIFACT</p><h2 id="featured-artifacts">Useful records, not an empty directory.</h2><p>Inspect provenance, pinned revisions, metadata gaps, discussion, and available evaluation evidence.</p></div><Link href="/artifacts">View all artifacts →</Link></div>
+      <div className="home-section-heading"><div><p className="eyebrow">START WITH A REAL ARTIFACT</p><h2 id="featured-artifacts">Useful artifacts, not an empty directory.</h2><p>Inspect provenance, pinned revisions, assessment gaps, discussion, and available evidence.</p></div><Link href="/artifacts">View all artifacts →</Link></div>
       <div className="home-artifact-grid">{snapshot.artifacts.map((artifact, index) => <article key={artifact.id} className={index === 0 ? "featured" : undefined}>
         <div className="home-card-meta"><span>{artifact.artifact_type}</span><span>{artifact.source_provider}</span></div>
         <h3><Link href={`/artifacts/${artifact.slug}`}>{artifact.title}</Link></h3>
         <p>{artifact.summary || "No upstream summary was available in approved metadata."}</p>
-        <footer><code>{artifact.source_repository}</code><Link href={`/artifacts/${artifact.slug}`} aria-label={`Inspect ${artifact.title}`}>Inspect record →</Link></footer>
+        <footer><code>{artifact.source_repository}</code><Link href={`/artifacts/${artifact.slug}`} aria-label={`Inspect ${artifact.title}`}>Open artifact →</Link></footer>
       </article>)}</div>
       {!snapshot.artifacts.length ? <div className="home-data-unavailable" role="status">Artifact inventory is temporarily unavailable. <Link href="/artifacts">Try the complete artifact index.</Link></div> : null}
     </section>
@@ -58,7 +60,7 @@ export default async function Home() {
 
     <section className="home-loop" aria-labelledby="home-loop-title">
       <div><p className="eyebrow">ONE OPEN EVIDENCE LOOP</p><h2 id="home-loop-title">From upstream artifact to reusable knowledge.</h2><p>KnownRobot keeps source, claims, metadata, execution, and review separate so every contribution makes the next reproduction easier to evaluate.</p></div>
-      <ol><li><span>01</span><div><strong>Discover</strong><p>Find a canonical artifact pinned to its upstream revision.</p></div></li><li><span>02</span><div><strong>Inspect</strong><p>See what metadata and evidence establish—and what remains unknown.</p></div></li><li><span>03</span><div><strong>Contribute</strong><p>Add a correction, discussion, measured attempt, or review.</p></div></li><li><span>04</span><div><strong>Follow</strong><p>Return when revisions, compatibility evidence, or conclusions change.</p></div></li></ol>
+      <ol><li><span>01</span><div><strong>Discover</strong><p>Find an artifact pinned to its upstream revision.</p></div></li><li><span>02</span><div><strong>Assess</strong><p>See what its metadata establishes—and what remains unknown.</p></div></li><li><span>03</span><div><strong>Contribute evidence</strong><p>Publish what you observed or measured.</p></div></li><li><span>04</span><div><strong>Reproduce</strong><p>Independently repeat a result and preserve differences.</p></div></li></ol>
     </section>
 
     <section className="home-cta"><div><p className="eyebrow">BUILD THE SHARED RECORD</p><h2>Have a robot artifact others should be able to understand?</h2><p>Import approved public metadata, preserve attribution, and expose uncertainty before anyone treats compatibility as fact.</p></div><div><Link className="primary-link lime" href="/artifacts/import">Import an artifact →</Link><Link href="/discussions">Browse evidence discussions</Link></div></section>

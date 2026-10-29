@@ -4,13 +4,14 @@ import { z } from "zod";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { IdentityForm } from "@/components/identity-form";
+import { PublicVocabulary } from "@/components/public-vocabulary";
 import { requireIdentity } from "@/lib/supabase/session";
 import { pageMetadata } from "@/lib/seo";
 import { submitEvaluation, publishDraft } from "./actions";
 export const metadata = pageMetadata(
   "/submit",
   "Submit robot evidence — Known Robot",
-  "Publish an attributable, self-reported robot evaluation or save a private draft.",
+  "Publish attributable observations and measurements from using a robot artifact, or save a private draft.",
   { index: false },
 );
 export const dynamic = "force-dynamic";
@@ -57,7 +58,7 @@ export default async function SubmitPage({
         <main className="editorial-page identity-page">
           <h1>Review your draft.</h1>
           <p>
-            Publishing makes this record and all associated policy, hardware and
+            Publishing makes this evidence and all associated artifact, hardware and
             protocol details public under your contributor identity. It remains
             self-reported; no independent reproduction or physical safety is
             certified.
@@ -75,7 +76,7 @@ export default async function SubmitPage({
           <p>Save a corrected revision below. Your original private draft is preserved; the new record has its own identity and remains private unless you choose publication. Supply the actual success count: the stored rounded percentage cannot reliably reconstruct it.</p>
           <IdentityForm action={submitEvaluation} label="Save corrected revision">
             <input name="submission_id" type="hidden" value={randomUUID()} />
-            <label>Evaluation JSON<textarea name="payload" required rows={24} maxLength={100000} spellCheck={false} defaultValue={JSON.stringify({
+            <label>Evidence JSON<textarea name="payload" required rows={24} maxLength={100000} spellCheck={false} defaultValue={JSON.stringify({
               name: data.skills.name, summary: data.skills.summary, source_url: data.skills.source_url,
               source_revision: data.skills.source_revision, framework: data.skills.framework, license: data.skills.license,
               manifest: data.skills.manifest, robot_family: data.hardware_profiles.robot_family,
@@ -96,10 +97,10 @@ export default async function SubmitPage({
     <>
       <SiteHeader />
       <main className="editorial-page identity-page">
-        <h1>Submit an actual evaluation.</h1>
+        <h1>Publish evidence from actual use.</h1>
         <p>
           Code and datasets stay on GitHub, Hugging Face or your own HTTPS host.
-          Known Robot records the evidence and your identity—not a copy of your
+          Evidence is what you observed or measured while using an artifact. KnownRobot records those observations and your identity—not a copy of your
           checkpoint. <Link href="/account">Save your public profile</Link>{" "}
           before submitting.
         </p>
@@ -108,14 +109,15 @@ export default async function SubmitPage({
           outcomes start as self-reported. Team membership and successful
           metadata validation never grant a stronger verification status.
         </p>
-        <h2>Evaluation JSON</h2>
+        <PublicVocabulary compact />
+        <h2>Evidence JSON</h2>
         <p>
-          Reproducing an existing policy? Use the same repository URL and immutable
+          Reproducing an existing result? Use the same artifact repository URL and immutable
           revision. Known Robot connects matching revisions automatically while
           preserving your own evidence and attribution. For multiple artifacts in
           one repository revision, put the exact repository-relative checkpoint
           location in <code>manifest.artifact_path</code>; use the same path as
-          the attempt you are reproducing. Use repository-root URLs for GitHub
+          the independent reproduction. Use repository-root URLs for GitHub
           and Hugging Face, not branch, tree or download URLs.
         </p>
         <p>
@@ -143,16 +145,16 @@ export default async function SubmitPage({
           <Link href="/sprints">reproduction sprint</Link>.
         </p>
         <p>
-          The local validator&apos;s manifest is one part of this evaluation, not a
+          A metadata assessment from the validator is one part of the context, not a
           replacement for observed outcomes.{" "}
           <a href="https://github.com/arcofdescent1/knownrobot/blob/main/docs/validator.md">
             CLI documentation →
           </a>
         </p>
-        <IdentityForm action={submitEvaluation} label="Save evaluation">
+        <IdentityForm action={submitEvaluation} label="Save evidence">
           <input type="hidden" name="submission_id" value={randomUUID()} />
           <label>
-            Evaluation JSON
+            Evidence JSON
             <textarea
               name="payload"
               required
@@ -173,7 +175,7 @@ export default async function SubmitPage({
           <label className="identity-consent">
             <input type="checkbox" name="consent" required />
             These are actual results; I have permission to share the artifacts
-            and attribute this evaluation to my profile. Public publication is
+            and attribute this evidence to my profile. Public publication is
             not independent verification.
           </label>
         </IdentityForm>

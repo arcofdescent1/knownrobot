@@ -49,7 +49,7 @@ export default async function ArtifactPage({ params, searchParams }: PageProps<"
       for (const collection of [...(profileCollections.data || []), ...(teamCollections.data || [])]) collectionMap.set(collection.id, collection);
       collections = [...collectionMap.values()];
       following = Boolean(follow.data);
-      publishedEvaluations = (evaluations.data || []).map(evaluation => ({ id: evaluation.id, name: relation(evaluation.skills)?.name || "Untitled evaluation", robotFamily: relation(evaluation.hardware_profiles)?.robot_family || "Hardware unspecified", trialCount: evaluation.trial_count, successRate: Number(evaluation.success_rate) }));
+      publishedEvaluations = (evaluations.data || []).map(evaluation => ({ id: evaluation.id, name: relation(evaluation.skills)?.name || "Untitled evidence", robotFamily: relation(evaluation.hardware_profiles)?.robot_family || "Hardware unspecified", trialCount: evaluation.trial_count, successRate: Number(evaluation.success_rate) }));
       const claim = result.claims[0];
       canCorrect = claim?.claimant_profile_id === user.id || Boolean(claim?.claimant_organization_id && teams.some(team => team.id === claim.claimant_organization_id));
       canManage ||= canCorrect;

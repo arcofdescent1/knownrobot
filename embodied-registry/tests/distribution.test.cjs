@@ -148,7 +148,7 @@ test("homepage leads with the live artifact network instead of an empty evaluati
   assert.match(homepage, /canonical artifacts/i);
   assert.match(homepage, /curated collections/i);
   assert.match(homepage, /metadata assessments/i);
-  assert.match(homepage, /measured attempts/i);
+  assert.match(homepage, /evidence records/i);
   assert.doesNotMatch(homepage, /No public evidence yet/i);
   assert.doesNotMatch(homepage, /listEvaluations/);
   assert.match(reader, /count: "exact"/);
@@ -244,13 +244,32 @@ test("adding evidence offers a human evaluation chooser and guided create-and-re
   const chooser = readFileSync("src/components/collaboration-forms.tsx", "utf8");
   const route = readFileSync("src/app/artifacts/[slug]/evaluate/page.tsx", "utf8");
   const action = readFileSync("src/app/artifact-evaluation-actions.ts", "utf8");
-  assert.match(chooser, /I already have a KnownRobot evaluation/);
-  assert.match(chooser, /Create one/);
+  assert.match(chooser, /I already published evidence on KnownRobot/);
+  assert.match(chooser, /Publish new evidence/);
   assert.doesNotMatch(chooser, /Your published evaluation ID/);
   for (const step of ["Confirm provenance", "Describe the exact setup", "Record the protocol and trials", "Link evidence and publish"]) assert.match(route, new RegExp(step));
   assert.match(action, /submit_identity_evaluation/);
   assert.match(action, /artifact_evaluation_attempts/);
   assert.match(action, /tab=evidence&added=evaluation/);
+});
+
+test("public language teaches four platform nouns consistently", () => {
+  const vocabulary = readFileSync("src/components/public-vocabulary.tsx", "utf8");
+  for (const term of ["Artifact", "Evidence", "Assessment", "Reproduction"]) assert.match(vocabulary, new RegExp(`term: "${term}"`));
+  assert.match(vocabulary, /policy, dataset, hardware, or software itself/);
+  assert.match(vocabulary, /observed or measured while using an artifact/);
+  assert.match(vocabulary, /source metadata establishes without executing the artifact/);
+  assert.match(vocabulary, /independent attempt to repeat a reported result/);
+  for (const file of ["src/app/page.tsx", "src/app/discover/page.tsx", "src/app/artifacts/page.tsx", "src/app/assessments/page.tsx", "src/components/artifact-workspace.tsx"]) {
+    assert.match(readFileSync(file, "utf8"), /PublicVocabulary/);
+  }
+  const evidencePage = readFileSync("src/app/evaluations/[id]/page.tsx", "utf8");
+  const submitPage = readFileSync("src/app/submit/page.tsx", "utf8");
+  const termsPage = readFileSync("src/app/terms/page.tsx", "utf8");
+  assert.match(evidencePage, /PUBLISHED EVIDENCE/);
+  assert.doesNotMatch(evidencePage, /PUBLISHED EVALUATION/);
+  assert.match(submitPage, /Publish evidence from actual use/);
+  assert.match(termsPage, /How they connect/);
 });
 
 test("discussion discovery starts with substantive, publisher-attributed evidence work", () => {

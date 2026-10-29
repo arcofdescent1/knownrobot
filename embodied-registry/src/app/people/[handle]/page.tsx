@@ -123,7 +123,7 @@ export default async function ProfilePage({
         <h2>Collections</h2>
         {collections.map(item => <p key={item.id}><Link href={`/collections/${item.slug}`}>{item.title}</Link> — {item.description}</p>)}
         {!collections.length ? <p>No public collections yet.</p> : null}
-        <h2>Published evaluations</h2>
+        <h2>Published evidence</h2>
         {evaluations.map((item) => (
           <p key={item.id}>
             <Link href={`/evaluations/${item.id}`}>
