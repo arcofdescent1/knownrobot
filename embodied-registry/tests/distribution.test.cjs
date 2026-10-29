@@ -6,6 +6,7 @@ const { adaptersSchema, adapterSchema, adapterDigest, adapterState, verifyAdapte
 const { pageMetadata, registryMetadata, publicPages } = require("../.test-build/src/lib/seo.js");
 const { discussionThreadSchema, messageRequestSchema } = require("../.test-build/src/lib/community-contract.js");
 const { signUpSchema, loginSchema, passwordUpdateSchema } = require("../.test-build/src/lib/auth-contract.js");
+const { inferPolicyFamily, inferHardwareContexts, normalizeDiscoveryFilters } = require("../.test-build/src/lib/discovery-contract.js");
 const { readFileSync } = require("node:fs");
 const record = () => ({ ...structuredClone(demoRecord), id: "40000000-0000-0000-0000-000000000001" });
 function adapter() {
@@ -149,4 +150,18 @@ test("homepage leads with the live artifact network instead of an empty evaluati
   assert.doesNotMatch(homepage, /listEvaluations/);
   assert.match(reader, /count: "exact"/);
   assert.match(reader, /attemptResult\.error \? null/);
+});
+
+test("discovery is browse-first, evidence-honest, and still searchable", () => {
+  const page = readFileSync("src/app/discover/page.tsx", "utf8");
+  for (const label of ["Featured artifacts", "Browse by policy family", "Browse by documented hardware context", "Browse by evidence status", "Recently updated", "Needs evidence", "Reproduction failures", "Popular collections"]) assert.match(page, new RegExp(label, "i"));
+  assert.match(page, /not a compatibility claim/i);
+  assert.match(page, /No failure is inferred from missing evidence/i);
+  assert.match(page, /Individual follows remain private/i);
+  assert.equal(inferPolicyFamily({ title: "SO-101 ACT policy" }), "act");
+  assert.equal(inferPolicyFamily({ title: "SmolVLA LIBERO" }), "smolvla");
+  assert.deepEqual(inferHardwareContexts({ title: "SO-101 ACT policy" }), ["so101"]);
+  assert.deepEqual(inferHardwareContexts({ title: "PushT dataset" }), ["simulation"]);
+  assert.equal(normalizeDiscoveryFilters({ family: "unknown", evidence: "needs-evidence", q: "  ACT  " }).family, undefined);
+  assert.equal(normalizeDiscoveryFilters({ evidence: "needs-evidence" }).evidence, "needs-evidence");
 });
