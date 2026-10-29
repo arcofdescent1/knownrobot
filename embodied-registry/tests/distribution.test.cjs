@@ -137,3 +137,16 @@ test("message read state remains private and recipient-specific", () => {
   assert.match(migration, /where read_at is null/);
   assert.match(migration, /revoke all on table public\.direct_messages from anon, authenticated/i);
 });
+
+test("homepage leads with the live artifact network instead of an empty evaluation registry", () => {
+  const homepage = readFileSync("src/app/page.tsx", "utf8");
+  const reader = readFileSync("src/lib/home-reader.ts", "utf8");
+  assert.match(homepage, /canonical artifacts/i);
+  assert.match(homepage, /curated collections/i);
+  assert.match(homepage, /metadata assessments/i);
+  assert.match(homepage, /measured attempts/i);
+  assert.doesNotMatch(homepage, /No public evidence yet/i);
+  assert.doesNotMatch(homepage, /listEvaluations/);
+  assert.match(reader, /count: "exact"/);
+  assert.match(reader, /attemptResult\.error \? null/);
+});
