@@ -328,3 +328,19 @@ test("empty states explain value and always lead to a primary action", () => {
     assert.doesNotMatch(combined, new RegExp(passive));
   }
 });
+
+test("primary and account navigation expose route-aware location feedback", () => {
+  const navigation = readFileSync("src/components/active-navigation.tsx", "utf8");
+  const header = readFileSync("src/components/site-header.tsx", "utf8");
+  const account = readFileSync("src/components/account-nav.tsx", "utf8");
+  const styles = readFileSync("src/app/globals.css", "utf8");
+  assert.match(navigation, /usePathname/);
+  assert.match(navigation, /aria-current=\{current \? "page"/);
+  assert.match(navigation, /pathname\.startsWith/);
+  assert.match(navigation, /current section:/);
+  assert.match(header, /<PrimaryNavigation \/>/);
+  assert.match(header, /<MobilePrimaryNavigation \/>/);
+  assert.match(account, /<AccountNavigation \/>/);
+  assert.match(styles, /\.account-nav \.nav-active/);
+  assert.match(styles, /\.mobile-nav nav \.nav-active/);
+});
