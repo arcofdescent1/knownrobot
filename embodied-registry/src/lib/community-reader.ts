@@ -12,6 +12,19 @@ export const listArtifactThreads = cache(async (artifactId: string) => {
   return result.data || [];
 });
 
+export async function listDiscussionFeed({ kind, status, artifactIds }: { kind?: string; status?: string; artifactIds?: string[] }) {
+  const client = getPublicSupabaseClient();
+  if (!client) return [];
+  if (artifactIds && !artifactIds.length) return [];
+  let query = client.from("discussion_threads").select("id,artifact_id,kind,title,body,desired_outcome,status,created_at,updated_at,profiles!discussion_threads_author_id_fkey(handle,display_name),artifacts(slug,title),discussion_posts(count)").order("updated_at", { ascending: false }).limit(100);
+  if (kind) query = query.eq("kind", kind);
+  if (status) query = query.eq("status", status);
+  if (artifactIds) query = query.in("artifact_id", artifactIds);
+  const result = await query;
+  if (result.error) throw new Error("Discussions are temporarily unavailable.");
+  return result.data || [];
+}
+
 export const readDiscussionThread = cache(async (id: string) => {
   const client = getPublicSupabaseClient();
   if (!client) throw new Error("Discussions are unavailable.");

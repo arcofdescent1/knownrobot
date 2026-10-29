@@ -1,12 +1,7 @@
 "use server";
 import { z } from "zod";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import {
-  emailAuthReady,
-  getSessionClient,
-  requireIdentity,
-} from "@/lib/supabase/session";
+import { requireIdentity } from "@/lib/supabase/session";
 import {
   profileSchema,
   teamSchema,
@@ -17,72 +12,6 @@ const failure = (message: string): IdentityActionState => ({
   message,
 });
 
-export async function requestEmailCode(
-  _: IdentityActionState,
-  form: FormData,
-): Promise<IdentityActionState> {
-  if (!emailAuthReady())
-    return failure(
-      "Email sign-in is not open yet. Browsing and the validator remain available.",
-    );
-  const email = z.email().max(254).safeParse(form.get("email"));
-  if (!email.success) return failure("Enter a valid email address.");
-  try {
-    const client = await getSessionClient();
-    if (!client)
-      return failure("Account service is unavailable. Try again later.");
-    const { error } = await client.auth.signInWithOtp({
-      email: email.data,
-      options: { shouldCreateUser: true },
-    });
-    if (error)
-      return failure(
-        "We could not send a code. Wait before retrying, or contact the project through Participate.",
-      );
-    return {
-      ok: true,
-      message:
-        "Check your email for your one-time sign-in code. It expires after one hour.",
-    };
-  } catch {
-    return failure("Account service is unavailable. Try again later.");
-  }
-}
-export async function verifyEmailCode(
-  _: IdentityActionState,
-  form: FormData,
-): Promise<IdentityActionState> {
-  const input = z
-    .object({
-      email: z.email().max(254),
-      token: z.string().regex(/^\d{6,10}$/),
-    })
-    .safeParse(Object.fromEntries(form));
-  if (!input.success)
-    return failure(
-      "Enter your email address and the numeric code from the email.",
-    );
-  try {
-    const client = await getSessionClient();
-    if (!client) return failure("Account service is unavailable.");
-    const { error } = await client.auth.verifyOtp({
-      ...input.data,
-      type: "email",
-    });
-    if (error)
-      return failure(
-        "This code is invalid or expired. Request a new code and try again.",
-      );
-  } catch {
-    return failure("Account service is unavailable.");
-  }
-  redirect("/account");
-}
-export async function signOut() {
-  const client = await getSessionClient();
-  if (client) await client.auth.signOut({ scope: "local" });
-  redirect("/account");
-}
 export async function saveProfile(
   _: IdentityActionState,
   form: FormData,

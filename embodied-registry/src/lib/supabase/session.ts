@@ -33,11 +33,11 @@ export async function getSessionClient() {
 }
 export async function requireIdentity() {
   const client = await getSessionClient();
-  if (!client) redirect("/account");
+  if (!client) redirect("/login");
   const {
     data: { user },
     error,
   } = await client.auth.getUser();
-  if (error || !user?.email_confirmed_at) redirect("/account");
+  if (error || !user?.email_confirmed_at) redirect("/login");
   return { client, user };
 }

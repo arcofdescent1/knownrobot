@@ -1,0 +1,2 @@
+import Link from "next/link";
+export function AccountNav() { return <nav className="account-nav" aria-label="Account navigation"><Link href="/dashboard">Overview</Link><Link href="/messages">Messages</Link><Link href="/notifications">Notifications</Link><Link href="/contributions">Contributions</Link><Link href="/organizations">Organizations</Link><Link href="/settings/profile">Profile</Link><Link href="/settings/account">Account</Link><Link href="/settings/security">Security</Link></nav>; }

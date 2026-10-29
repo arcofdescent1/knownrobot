@@ -1,0 +1,10 @@
+import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
+import { AccountNav } from "@/components/account-nav";
+import { requireIdentity } from "@/lib/supabase/session";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
+import { markAllNotificationsRead, markNotificationRead } from "@/app/collaboration-actions";
+import { pageMetadata } from "@/lib/seo";
+export const metadata = pageMetadata("/notifications", "Notifications — Known Robot", "Updates from artifacts, discussions, and collections you follow.", { index: false });
+export const dynamic="force-dynamic";
+export default async function NotificationsPage() { const { user }=await requireIdentity(); const service=getServiceSupabaseClient(); if(!service)throw new Error("Notification service unavailable."); const result=await service.from("notifications").select("id,title,body,href,read_at,created_at").eq("recipient_id",user.id).order("created_at",{ascending:false}).limit(100); if(result.error)throw result.error; const unread=result.data.filter(item=>!item.read_at).length; return <><SiteHeader/><main className="app-page"><AccountNav/><header className="app-heading"><div><p className="eyebrow">Notification center</p><h1>Updates</h1><p>Evidence, compatibility, discussion, collection, and coordination activity.</p></div>{unread?<form action={markAllNotificationsRead}><button>Mark all read</button></form>:null}</header><div className="notification-feed">{result.data.map(item=><article key={item.id} className={item.read_at?"notification-card read":"notification-card unread"}><div><h2><Link href={item.href}>{item.title}</Link></h2><p>{item.body}</p><small>{new Date(item.created_at).toLocaleString("en-US")}</small></div>{!item.read_at?<form action={markNotificationRead}><input type="hidden" name="notification_id" value={item.id}/><button>Mark read</button></form>:null}</article>)}</div>{!result.data.length?<p>No notifications yet. Follow an artifact or collection to receive relevant updates.</p>:null}</main></>; }

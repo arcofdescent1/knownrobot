@@ -128,7 +128,7 @@ export async function requestConversation(_: CommunityState, form: FormData): Pr
     if ((recent.count || 0) >= 3) return fail("Daily message-request limit reached. Try again tomorrow.");
     const conversation = await service.from("message_conversations").insert({ requester_id: user.id, recipient_id: recipient.data.id, artifact_id: artifact.data.id }).select("id").single();
     if (conversation.error) return fail(conversation.error.code === "23505" ? "A request for this contributor and artifact is already pending." : "Message request could not be created.");
-    const first = await service.from("direct_messages").insert({ conversation_id: conversation.data.id, sender_id: user.id, body: parsed.data.note }).select("id").single();
+    const first = await service.from("direct_messages").insert({ conversation_id: conversation.data.id, sender_id: user.id, recipient_id: recipient.data.id, body: parsed.data.note }).select("id").single();
     if (first.error) throw first.error;
     await activity(service, user.id, "message_request_sent", artifact.data.id, conversation.data.id);
     await notify(service, [recipient.data.id], "message_request", `Message request about ${artifact.data.title}`, "A contributor with shared public artifact activity requested a private conversation.", "/messages", user.id, conversation.data.id);
@@ -166,7 +166,7 @@ export async function sendDirectMessage(_: CommunityState, form: FormData): Prom
     ]);
     if (blocked.data?.length) return fail("Conversation is blocked.");
     if ((recent.count || 0) >= 20) return fail("Hourly message limit reached. Try again later.");
-    const sent = await service.from("direct_messages").insert({ conversation_id: conversation.data.id, sender_id: user.id, body: parsed.data.body }).select("id").single();
+    const sent = await service.from("direct_messages").insert({ conversation_id: conversation.data.id, sender_id: user.id, recipient_id: other, body: parsed.data.body }).select("id").single();
     if (sent.error) throw sent.error;
     await activity(service, user.id, "direct_message_sent", conversation.data.id, sent.data.id);
     await service.from("message_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversation.data.id);
@@ -207,5 +207,14 @@ export async function reportConversation(_: CommunityState, form: FormData): Pro
     if (report.error) return fail(report.error.code === "23505" ? "You already reported this conversation." : "Report could not be submitted.");
     return { ok: true, message: "Report submitted for moderation. Use Block if you also want to stop contact immediately." };
   } catch (error) { return fail(error instanceof Error ? error.message : "Report failed."); }
+}
+
+export async function markConversationRead(form: FormData) {
+  const { user, service } = await context();
+  const id = String(form.get("conversation_id") || "");
+  const conversation = await service.from("message_conversations").select("id,requester_id,recipient_id").eq("id", id).maybeSingle();
+  if (!conversation.data || ![conversation.data.requester_id, conversation.data.recipient_id].includes(user.id)) return;
+  await service.from("direct_messages").update({ read_at: new Date().toISOString() }).eq("conversation_id", id).eq("recipient_id", user.id).is("read_at", null);
+  revalidatePath("/messages"); revalidatePath("/dashboard");
 }
 

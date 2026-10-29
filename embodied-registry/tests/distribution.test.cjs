@@ -5,6 +5,7 @@ const { evidenceBadge, badgeMarkdown, contributionCredits, citation, declaredSou
 const { adaptersSchema, adapterSchema, adapterDigest, adapterState, verifyAdapter } = require("../.test-build/src/lib/adapter-contract.js");
 const { pageMetadata, registryMetadata, publicPages } = require("../.test-build/src/lib/seo.js");
 const { discussionThreadSchema, messageRequestSchema } = require("../.test-build/src/lib/community-contract.js");
+const { signUpSchema, loginSchema, passwordUpdateSchema } = require("../.test-build/src/lib/auth-contract.js");
 const { readFileSync } = require("node:fs");
 const record = () => ({ ...structuredClone(demoRecord), id: "40000000-0000-0000-0000-000000000001" });
 function adapter() {
@@ -117,4 +118,22 @@ test("community table privileges expose only public discussions", () => {
   assert.match(migration, /revoke all on table[\s\S]*message_conversations[\s\S]*direct_messages[\s\S]*from anon, authenticated/i);
   assert.match(migration, /grant select on table[\s\S]*discussion_threads[\s\S]*discussion_posts[\s\S]*discussion_history[\s\S]*to anon, authenticated/i);
   assert.doesNotMatch(migration, /grant (?:select|insert|update|delete|all)[\s\S]*message_conversations[\s\S]*to anon, authenticated/i);
+});
+
+test("standard account credentials are validated without custom password storage", () => {
+  const strong = "KnownRobot2026";
+  assert.equal(signUpSchema.safeParse({ email: "USER@example.com", password: strong, confirm_password: strong, terms: "on" }).success, true);
+  assert.equal(signUpSchema.safeParse({ email: "user@example.com", password: "weak", confirm_password: "weak", terms: "on" }).success, false);
+  assert.equal(signUpSchema.safeParse({ email: "user@example.com", password: strong, confirm_password: `${strong}!`, terms: "on" }).success, false);
+  assert.equal(loginSchema.safeParse({ email: "user@example.com", password: strong }).success, true);
+  assert.equal(passwordUpdateSchema.safeParse({ password: strong, confirm_password: strong }).success, true);
+});
+
+test("message read state remains private and recipient-specific", () => {
+  const migration = readFileSync("supabase/migrations/202610290005_message_read_state.sql", "utf8");
+  assert.match(migration, /add column recipient_id uuid/);
+  assert.match(migration, /add column read_at timestamptz/);
+  assert.match(migration, /set_direct_message_recipient_before_insert/);
+  assert.match(migration, /where read_at is null/);
+  assert.match(migration, /revoke all on table public\.direct_messages from anon, authenticated/i);
 });
