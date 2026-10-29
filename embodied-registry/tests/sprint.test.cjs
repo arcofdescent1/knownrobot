@@ -5,6 +5,8 @@ const { sprintCalendar } = require("../.test-build/src/lib/sprint-calendar.js");
 const { communityProof } = require("../.test-build/src/lib/community-proof.js");
 const { allTasks, tasks, verify, operate, operateSelection, selectionTitle } = require("../scripts/sprint-operations.cjs");
 const source = require("../src/data/sprint-01.json");
+const fs = require("node:fs");
+const path = require("node:path");
 const fixture = () => structuredClone(source);
 const sha = "a".repeat(40);
 const immutable = `https://github.com/example/test/blob/${sha}/record.yaml`;
@@ -177,6 +179,19 @@ test("monthly selection waits for a terminal sprint and retires obsolete cycle i
   } finally {
     if (originalToken === undefined) delete process.env.GITHUB_TOKEN; else process.env.GITHUB_TOKEN = originalToken;
   }
+});
+
+test("sprint recruitment has one readiness panel and a native application", () => {
+  const page = fs.readFileSync(path.join(__dirname, "../src/app/sprints/page.tsx"), "utf8");
+  const action = fs.readFileSync(path.join(__dirname, "../src/app/sprints/actions.ts"), "utf8");
+  const migration = fs.readFileSync(path.join(__dirname, "../supabase/migrations/202610290007_native_sprint_applications.sql"), "utf8");
+  assert.match(page, /READINESS · ONE HONEST STATUS/);
+  assert.match(page, /Apply to join the sprint/);
+  assert.match(page, /SprintApplicationForm/);
+  assert.doesNotMatch(page, /issues\/new\?template=sprint-application/);
+  assert.match(action, /from\("sprint_applications"\)\.upsert/);
+  assert.match(migration, /create table public\.sprint_applications/);
+  assert.match(migration, /revoke all on public\.sprint_applications from public,anon,authenticated/);
 });
 test("corrections preserve attributable snapshots without invalidating historical consent", () => {
   const s = ready(); start(s); outcomes(s);
