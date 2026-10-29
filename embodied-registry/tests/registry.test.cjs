@@ -33,12 +33,21 @@ test('operator reporting uses constant-shape bearer checks and suppresses small 
   assert.equal(reportingTokenAccepted(`Bearer ${token}`, token), true);
   for (const value of [null,'',`Basic ${token}`,'Bearer short',`Bearer ${'b'.repeat(64)}`]) assert.equal(reportingTokenAccepted(value,token),false);
   assert.equal(reportingTokenAccepted(`Bearer ${token}`,'short'),false);
-  const summary = accountActivitySummarySchema.parse({ as_of:'2026-10-25T14:00:00.000Z',definition:'test',verified_accounts:8,activated_accounts:6,active_accounts_30d:5,retained_accounts_7d:2,retained_accounts_30d:1,excluded_accounts:1,qualifying_events_30d:9,channels_30d:{organic_search:4,community:5} });
+  const summary = accountActivitySummarySchema.parse({ as_of:'2026-10-25T14:00:00.000Z',definition:'test',verified_accounts:8,activated_accounts:6,active_accounts_30d:5,active_contributors_30d:4,new_contributors_30d:3,repeat_contributors_30d:2,retained_accounts_7d:2,retained_accounts_30d:1,excluded_accounts:1,qualifying_events_30d:9,contribution_events_30d:7,median_minutes_to_first_contribution:4.5,channels_30d:{organic_search:4,community:5},contribution_events_by_type_30d:{artifact_imported:3,artifact_corrected:1} });
   const safe = privacySafeAccountSummary(summary);
   assert.equal(safe.channels_30d.organic_search,null);
   assert.equal(safe.channels_30d.community,5);
   assert.equal('account_id' in safe,false);
   assert.equal('email' in safe,false);
+});
+test('contributor funnel excludes passive account activity from the north star', () => {
+  const migration = require('node:fs').readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202610290001_contributor_activation_funnel.sql'),'utf8');
+  for (const event of ['artifact_imported','artifact_claimed','artifact_corrected','evaluation_published','collection_created','attempt_attached','evidence_reviewed']) assert.match(migration,new RegExp(`'${event}'`));
+  assert.match(migration,/active_contributors_30d/);
+  assert.match(migration,/repeat_contributors_30d/);
+  assert.match(migration,/median_minutes_to_first_contribution/);
+  assert.doesNotMatch(migration,/contribution_events as \([\s\S]*?'profile_completed'/);
+  assert.doesNotMatch(migration,/contribution_events as \([\s\S]*?'account_workspace_return'/);
 });
 test('account activity migration keeps active-account measurement private, idempotent and workflow-based', () => {
   const migration = require('node:fs').readFileSync(require('node:path').join(__dirname,'../supabase/migrations/202610240001_account_activity_measurement.sql'),'utf8');

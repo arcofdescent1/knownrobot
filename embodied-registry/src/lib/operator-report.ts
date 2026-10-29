@@ -9,11 +9,17 @@ export const accountActivitySummarySchema = z.object({
   verified_accounts: count,
   activated_accounts: count,
   active_accounts_30d: count,
+  active_contributors_30d: count,
+  new_contributors_30d: count,
+  repeat_contributors_30d: count,
   retained_accounts_7d: count,
   retained_accounts_30d: count,
   excluded_accounts: count,
   qualifying_events_30d: count,
+  contribution_events_30d: count,
+  median_minutes_to_first_contribution: z.number().nonnegative(),
   channels_30d: z.record(z.string(), count),
+  contribution_events_by_type_30d: z.record(z.string(), count),
 });
 
 export type AccountActivitySummary = z.infer<

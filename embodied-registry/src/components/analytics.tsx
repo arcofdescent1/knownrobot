@@ -43,6 +43,9 @@ function eventNameForLink(href: string) {
 }
 
 function routeEvent(pathname: string) {
+  if (pathname === "/artifacts/import") return "artifact_import_view";
+  if (/^\/artifacts\/[^/]+$/.test(pathname)) return "artifact_detail_view";
+  if (/^\/artifacts\/[^/]+\/collaborate$/.test(pathname)) return "artifact_collaboration_view";
   if (/^\/assessments\/[^/]+$/.test(pathname)) return "assessment_detail_view";
   if (pathname === "/assessments") return "assessment_index_view";
   if (pathname === "/validator") return "validator_view";
@@ -79,8 +82,12 @@ export function Analytics() {
       if (name) sendEvent(name, { link_url: anchor.href, page_path: window.location.pathname });
     };
     const submit = (event: SubmitEvent) => {
+      const form = event.target as HTMLFormElement;
+      const workflowEvent = form.dataset.analyticsEvent;
+      if (workflowEvent) {
+        sendEvent(workflowEvent, { page_path: window.location.pathname });
+      }
       if (window.location.pathname === "/submit") {
-        const form = event.target as HTMLFormElement;
         const mode = new FormData(form).get("mode");
         sendEvent("evaluation_submit_attempt", {
           submission_mode: mode === "publish" ? "publish" : "draft",
