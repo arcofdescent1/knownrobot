@@ -9,6 +9,7 @@ const { signUpSchema, loginSchema, passwordUpdateSchema } = require("../.test-bu
 const { inferPolicyFamily, inferHardwareContexts, normalizeDiscoveryFilters } = require("../.test-build/src/lib/discovery-contract.js");
 const { buildActivationJourney } = require("../.test-build/src/lib/activation-contract.js");
 const { buildWebValidation, webValidatorRequestSchema } = require("../.test-build/src/lib/web-validator-contract.js");
+const { guidedEvaluationSchema, buildGuidedEvaluation } = require("../.test-build/src/lib/guided-evaluation-contract.js");
 const { readFileSync } = require("node:fs");
 const record = () => ({ ...structuredClone(demoRecord), id: "40000000-0000-0000-0000-000000000001" });
 function adapter() {
@@ -231,4 +232,23 @@ test("artifact work is unified behind one action bar and one canonical workspace
   assert.match(page, /listArtifactThreads/);
   assert.match(collaborationRedirect, /tab=evidence/);
   assert.match(discussionRedirect, /tab=discussions/);
+});
+
+test("adding evidence offers a human evaluation chooser and guided create-and-return flow", () => {
+  const raw = { artifact_id: "72000000-0000-4000-8000-000000000001", submission_id: "40000000-0000-4000-8000-000000000001", relationship: "reproduction", license: "Apache-2.0", framework: "ACT", framework_version: "0.3.3", architecture: "ACT", robot_family: "SO-101", gripper: "SO-101 gripper", sensors: "wrist camera\njoint encoders", calibration: "Calibration revision 4", control_frequency_hz: "30", observation_shape: '{"state":{"shape":[6]}}', action_shape: '{"action":{"shape":[6]}}', dependencies: "lerobot==0.3.3\ntorch==2.7.1", dataset_repository: "https://huggingface.co/datasets/example/robot", dataset_revision: "b".repeat(40), dataset_schema: '{"state":{"shape":[6]}}', benchmark_name: "Ball in cup", benchmark_version: "1.0", success_criterion: "Ball remains in the cup for two seconds.", reset_procedure: "Reset to the marked start pose.", timeout_seconds: "30", trial_count: "10", success_count: "3", runtime_environment: "Physical SO-101 workbench", runtime_notes: "Three successful trials and seven observed failures.", failure_notes: "Ball missed cup", evidence_label: "Trial log", evidence_url: "https://github.com/example/evidence/blob/main/results.md" };
+  const parsed = guidedEvaluationSchema.parse(raw);
+  const payload = buildGuidedEvaluation(parsed, { title: "SO-101 ACT policy", summary: null, source_url: "https://huggingface.co/example/policy", source_provider: "huggingface", source_revision: "a".repeat(40) }, { display_name: "Test evaluator", handle: "test-evaluator" });
+  assert.equal(payload.trial_count, 10);
+  assert.equal(payload.success_count, 3);
+  assert.equal(payload.manifest.evaluations[0].successes, 3);
+  const chooser = readFileSync("src/components/collaboration-forms.tsx", "utf8");
+  const route = readFileSync("src/app/artifacts/[slug]/evaluate/page.tsx", "utf8");
+  const action = readFileSync("src/app/artifact-evaluation-actions.ts", "utf8");
+  assert.match(chooser, /I already have a KnownRobot evaluation/);
+  assert.match(chooser, /Create one/);
+  assert.doesNotMatch(chooser, /Your published evaluation ID/);
+  for (const step of ["Confirm provenance", "Describe the exact setup", "Record the protocol and trials", "Link evidence and publish"]) assert.match(route, new RegExp(step));
+  assert.match(action, /submit_identity_evaluation/);
+  assert.match(action, /artifact_evaluation_attempts/);
+  assert.match(action, /tab=evidence&added=evaluation/);
 });
