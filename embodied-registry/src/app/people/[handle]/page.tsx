@@ -6,6 +6,7 @@ import { getPublicSupabaseClient } from "@/lib/supabase/server";
 import { safeEvidenceUrl } from "@/lib/evidence-contract";
 import { pageMetadata } from "@/lib/seo";
 import { oneRelation } from "@/lib/identity-reader";
+import { ActionEmptyState } from "@/components/action-empty-state";
 export const dynamic = "force-dynamic";
 const readProfile = cache(async (handle: string) => {
   if (!/^[a-z0-9][a-z0-9-]{2,38}$/.test(handle)) notFound();
@@ -113,16 +114,16 @@ export default async function ProfilePage({
             — {team.role}
           </p>
         ))}
-        {!teams.length ? <p>No team memberships.</p> : null}
+        {!teams.length ? <ActionEmptyState compact title="Collaboration starts with shared work" description="Teams make ongoing artifact and evidence work attributable to a lab or project." actionHref="/discussions" actionLabel="Browse open discussions"/> : null}
         <h2>Owned artifacts</h2>
         {artifacts.map(item => <p key={item.id}><Link href={`/artifacts/${item.slug}`}>{item.title}</Link> — {item.artifact_type}</p>)}
-        {!artifacts.length ? <p>No repository-verified artifact ownership yet.</p> : null}
+        {!artifacts.length ? <ActionEmptyState compact title="Ownership can be verified from the repository" description="A maintainer claim connects upstream stewardship to the canonical record without moving or copying the artifact." actionHref="/artifacts" actionLabel="Browse claimable artifacts"/> : null}
         <h2>Artifact contributions</h2>
         {artifactContributions.map(item => <p key={item.id}>{item.kind}: {item.artifacts?.slug ? <Link href={`/artifacts/${item.artifacts.slug}`}>{item.artifacts.title}</Link> : "artifact"} — {item.summary}</p>)}
-        {!artifactContributions.length ? <p>No artifact contributions yet.</p> : null}
+        {!artifactContributions.length ? <ActionEmptyState compact title="Make the first contribution count" description="A correction, evidence link, or focused discussion improves a shared artifact record and preserves attribution." actionHref="/discussions" actionLabel="Find a contribution"/> : null}
         <h2>Collections</h2>
         {collections.map(item => <p key={item.id}><Link href={`/collections/${item.slug}`}>{item.title}</Link> — {item.description}</p>)}
-        {!collections.length ? <p>No public collections yet.</p> : null}
+        {!collections.length ? <ActionEmptyState compact title="Curate a reusable path" description="Collections help other practitioners discover a coherent set of artifacts around one robotics problem." actionHref="/collections" actionLabel="Explore collections"/> : null}
         <h2>Published evidence</h2>
         {evaluations.map((item) => (
           <p key={item.id}>
@@ -131,7 +132,7 @@ export default async function ProfilePage({
             </Link>
           </p>
         ))}
-        {!evaluations.length ? <p>No published evaluations yet.</p> : null}
+        {!evaluations.length ? <ActionEmptyState compact title="Publish an observed result" description="Evidence records preserve setup, trials, outcome, and provenance so another practitioner can inspect or reproduce the work." actionHref="/artifacts" actionLabel="Choose an artifact"/> : null}
         <h2>Attributed review decisions</h2>
         {reviews.map((review) => (
           <p key={review.id}>
@@ -141,10 +142,7 @@ export default async function ProfilePage({
           </p>
         ))}
         {!reviews.length ? (
-          <p>
-            No public review decisions. This does not imply appointment as a
-            reviewer.
-          </p>
+          <ActionEmptyState compact title="Review follows attributable evidence" description="Public decisions stay tied to the exact evidence and reviewer appointment; absence does not imply reviewer status." actionHref="/registry" actionLabel="Inspect published evidence"/>
         ) : null}
         <p>
           Shows up to 50 recent evaluations and 50 public decisions. Credits

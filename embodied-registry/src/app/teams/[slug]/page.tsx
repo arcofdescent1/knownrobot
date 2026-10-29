@@ -6,6 +6,7 @@ import { getPublicSupabaseClient } from "@/lib/supabase/server";
 import { pageMetadata } from "@/lib/seo";
 import { oneRelation } from "@/lib/identity-reader";
 import { ResourceFollow } from "@/components/resource-follow";
+import { ActionEmptyState } from "@/components/action-empty-state";
 export const dynamic = "force-dynamic";
 const readTeam = cache(async (slug: string) => {
   if (!/^[a-z0-9][a-z0-9-]{2,62}$/.test(slug)) notFound();
@@ -109,13 +110,13 @@ export default async function TeamPage({
             </Link>
           </p>
         ))}
-        {!evaluations.length ? <p>No published team evaluations yet.</p> : null}
+        {!evaluations.length ? <ActionEmptyState compact title="Give the team a reproducible evidence trail" description="Published evidence connects observed outcomes to the exact artifact, hardware, and protocol." actionHref="/artifacts" actionLabel="Choose an artifact"/> : null}
         <h2>Repository-verified artifacts</h2>
         {artifacts.map(item => <p key={item.id}><Link href={`/artifacts/${item.slug}`}>{item.title}</Link> — {item.artifact_type}</p>)}
-        {!artifacts.length ? <p>No claimed artifacts yet.</p> : null}
+        {!artifacts.length ? <ActionEmptyState compact title="Connect upstream work to this team" description="A repository-backed claim makes maintenance responsibility visible while preserving the original host and attribution." actionHref="/artifacts" actionLabel="Browse artifacts"/> : null}
         <h2>Collections</h2>
         {collections.map(item => <p key={item.id}><Link href={`/collections/${item.slug}`}>{item.title}</Link> — {item.description}</p>)}
-        {!collections.length ? <p>No public collections yet.</p> : null}
+        {!collections.length ? <ActionEmptyState compact title="Publish a shared research path" description="A team collection groups the artifacts and evidence contributors need for one concrete robotics question." actionHref="/collections" actionLabel="Explore collections"/> : null}
         <p>
           Shows up to 50 recent public evaluations. Membership changes do not
           rewrite historical evaluation or review attribution.

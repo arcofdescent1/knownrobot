@@ -298,3 +298,33 @@ test("discussion discovery starts with substantive, publisher-attributed evidenc
   assert.match(reader, /discussion_threads_author_publisher_id_fkey/);
   assert.doesNotMatch(migration, /insert into public\.profiles/i);
 });
+
+test("empty states explain value and always lead to a primary action", () => {
+  const component = readFileSync("src/components/action-empty-state.tsx", "utf8");
+  assert.match(component, /role="status"/);
+  assert.match(component, /className="primary-link"/);
+  for (const file of [
+    "src/app/artifacts/page.tsx",
+    "src/app/collections/page.tsx",
+    "src/app/discussions/page.tsx",
+    "src/app/notifications/page.tsx",
+    "src/app/dashboard/page.tsx",
+    "src/app/messages/page.tsx",
+    "src/app/organizations/page.tsx",
+    "src/app/people/[handle]/page.tsx",
+    "src/app/teams/[slug]/page.tsx",
+    "src/components/artifact-workspace.tsx",
+  ]) {
+    assert.match(readFileSync(file, "utf8"), /ActionEmptyState/);
+  }
+  const combined = [
+    "src/app/artifacts/page.tsx",
+    "src/app/collections/page.tsx",
+    "src/app/discussions/page.tsx",
+    "src/app/notifications/page.tsx",
+    "src/app/messages/page.tsx",
+  ].map(file => readFileSync(file, "utf8")).join("\n");
+  for (const passive of ["No artifacts have been imported yet", "No public collections yet", "No discussions yet", "No notifications yet", "No conversations yet"]) {
+    assert.doesNotMatch(combined, new RegExp(passive));
+  }
+});
