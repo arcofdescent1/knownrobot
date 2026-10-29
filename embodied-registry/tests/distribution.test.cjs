@@ -111,3 +111,10 @@ test("private messaging is consent gated, rate limited, reportable, and excluded
   assert.match(migration, /enable row level security/);
   assert.doesNotMatch(migration, /grant select on public\.message_conversations/);
 });
+
+test("community table privileges expose only public discussions", () => {
+  const migration = readFileSync("supabase/migrations/202610290004_harden_community_privileges.sql", "utf8");
+  assert.match(migration, /revoke all on table[\s\S]*message_conversations[\s\S]*direct_messages[\s\S]*from anon, authenticated/i);
+  assert.match(migration, /grant select on table[\s\S]*discussion_threads[\s\S]*discussion_posts[\s\S]*discussion_history[\s\S]*to anon, authenticated/i);
+  assert.doesNotMatch(migration, /grant (?:select|insert|update|delete|all)[\s\S]*message_conversations[\s\S]*to anon, authenticated/i);
+});
