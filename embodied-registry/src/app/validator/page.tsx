@@ -3,8 +3,9 @@ import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { StructuredData } from "@/components/structured-data";
+import { WebValidator } from "@/components/web-validator";
 
-export const metadata: Metadata = pageMetadata("/validator", "Robot Policy Validator for LeRobot — Known Robot", "Check LeRobot policy metadata, compare declared hardware configurations, and generate robot-skill.yaml for GitHub or Hugging Face. CLI quickstart and CI guide.");
+export const metadata: Metadata = pageMetadata("/validator", "Validate a GitHub or Hugging Face Robot Policy — Known Robot", "Paste a public GitHub or Hugging Face URL to inspect pinned robot-policy metadata, identify reproducibility gaps, and continue with deeper CLI validation.");
 
 const install = "pipx install .  # from the Known Robot 1.6.0 checkout";
 
@@ -12,12 +13,12 @@ export default function ValidatorPage() {
   return <>
     <SiteHeader />
     <main className="validator-page">
-      <StructuredData value={{ "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Known Robot robot-skill validator", url: "https://knownrobot.com/validator", applicationCategory: "DeveloperApplication", operatingSystem: "Windows, macOS, Linux", softwareVersion: "1.6.0", description: "Open-source command-line validator for LeRobot policy reproducibility metadata, durable assessment reports and robot-skill.yaml manifests.", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, license: "https://www.apache.org/licenses/LICENSE-2.0", codeRepository: "https://github.com/arcofdescent1/knownrobot" }}/>
+      <StructuredData value={{ "@context": "https://schema.org", "@type": "WebApplication", name: "Known Robot robot-policy validator", url: "https://knownrobot.com/validator", applicationCategory: "DeveloperApplication", operatingSystem: "Any", browserRequirements: "JavaScript-enabled browser", softwareVersion: "1.6.0", description: "Interactive metadata-only validation for public GitHub and Hugging Face robotics artifacts, with an open-source CLI for deeper local and CI checks.", featureList: ["Immutable source revision resolution", "Approved metadata inspection", "Readable reproducibility-gap report", "GitHub and Hugging Face support"], offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, license: "https://www.apache.org/licenses/LICENSE-2.0", codeRepository: "https://github.com/arcofdescent1/knownrobot" }}/>
       <section className="validator-hero">
         <div>
-          <p className="kicker">OPEN UTILITY · VERSION 1.6.0</p>
-          <h1>Validate robot-policy reproducibility.</h1>
-          <p className="editorial-deck">Check a LeRobot policy repository before attempting reproduction on an SO-100 or SO-101 arm. The validator inventories reproducibility evidence, writes a portable <code>robot-skill.yaml</code>, and identifies missing metadata. Configuration comparison does not prove physical transfer or safe operation.</p>
+          <p className="kicker">WEB VALIDATOR · NO ACCOUNT REQUIRED</p>
+          <h1>Paste a robot repository. Find the reproducibility gaps.</h1>
+          <p className="editorial-deck">Inspect a public GitHub or Hugging Face repository before attempting reproduction. KnownRobot pins the source revision, reads approved metadata only, and turns missing declarations into clear next steps. Configuration review never proves physical transfer or safe operation.</p>
         </div>
         <div className="terminal-card" aria-label="Validator command example">
           <div className="terminal-bar"><span></span><span></span><span></span><b>policy / terminal</b></div>
@@ -25,8 +26,10 @@ export default function ValidatorPage() {
         </div>
       </section>
 
+      <WebValidator />
+
       <section className="quickstart" aria-labelledby="quickstart-title">
-        <div><p className="section-number">01 / QUICKSTART</p><h2 id="quickstart-title">From repository to manifest</h2></div>
+        <div><p className="section-number">CLI / DEEPER VALIDATION</p><h2 id="quickstart-title">Need local files, CI, or a portable manifest?</h2></div>
         <ol className="command-steps">
           <li><span>1</span><div><strong>Install</strong><code>{install}</code></div></li>
           <li><span>2</span><div><strong>Inspect a policy</strong><code>robot-skill check ./policy</code></div></li>

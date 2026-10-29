@@ -8,6 +8,7 @@ const { discussionThreadSchema, messageRequestSchema } = require("../.test-build
 const { signUpSchema, loginSchema, passwordUpdateSchema } = require("../.test-build/src/lib/auth-contract.js");
 const { inferPolicyFamily, inferHardwareContexts, normalizeDiscoveryFilters } = require("../.test-build/src/lib/discovery-contract.js");
 const { buildActivationJourney } = require("../.test-build/src/lib/activation-contract.js");
+const { buildWebValidation, webValidatorRequestSchema } = require("../.test-build/src/lib/web-validator-contract.js");
 const { readFileSync } = require("node:fs");
 const record = () => ({ ...structuredClone(demoRecord), id: "40000000-0000-0000-0000-000000000001" });
 function adapter() {
@@ -187,4 +188,31 @@ test("contributor activation always exposes one truthful recommended next step",
   assert.match(dashboard, /readActivationJourney/);
   assert.match(checklist, /role="progressbar"/);
   assert.match(checklist, /Recommended next step/);
+});
+
+test("web validator pins trusted sources and reports actionable metadata gaps", () => {
+  const parsed = webValidatorRequestSchema.parse({ source_url: "https://huggingface.co/example/robot-policy", revision: "main" });
+  assert.equal(parsed.source_url.provider, "huggingface");
+  assert.equal(parsed.source_url.repository, "example/robot-policy");
+  assert.equal(webValidatorRequestSchema.safeParse({ source_url: "https://example.com/private" }).success, false);
+  const result = buildWebValidation({
+    provider: "huggingface", repository: "example/robot-policy", url: "https://huggingface.co/example/robot-policy",
+    revision: "a".repeat(40), revisionUrl: `https://huggingface.co/example/robot-policy/tree/${"a".repeat(40)}`,
+    title: "Robot policy", summary: "", license: "apache-2.0",
+    files: [{ path: "README.md", text: "SO-101 policy trained on dataset_repo_id. 30 fps evaluation over 20 trials." }, { path: "config.json", text: "{}" }, { path: "requirements.txt", text: "lerobot==1.0" }],
+  });
+  assert.equal(result.schema, "knownrobot-web-validation/1.0");
+  assert.equal(result.source.revision, "a".repeat(40));
+  assert.ok(result.summary.score > 0 && result.summary.score < 100);
+  assert.equal(result.findings.find(item => item.code === "hardware.identity").status, "found");
+  assert.equal(result.findings.find(item => item.code === "evaluation.claims").status, "review");
+  assert.match(result.boundary, /did not execute code/i);
+  const page = readFileSync("src/app/validator/page.tsx", "utf8");
+  const component = readFileSync("src/components/web-validator.tsx", "utf8");
+  const route = readFileSync("src/app/api/validator/route.ts", "utf8");
+  assert.match(page, /<WebValidator/);
+  assert.match(component, /Validate repository/);
+  assert.match(component, /Import this pinned artifact/);
+  assert.match(route, /content-length/);
+  assert.match(route, /no-store/);
 });
