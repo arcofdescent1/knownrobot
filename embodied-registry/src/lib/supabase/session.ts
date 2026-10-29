@@ -6,10 +6,13 @@ export function emailAuthReady() {
   return process.env.KNOWNROBOT_EMAIL_AUTH_READY === "true";
 }
 export async function getSessionClient() {
+  // Reading the request cookie jar before checking configuration keeps every
+  // account-aware header request-bound instead of accidentally prerendering a
+  // signed-out header during a build that omits runtime credentials.
+  const jar = await cookies();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return null;
-  const jar = await cookies();
   return createServerClient(url, key, {
     cookieOptions: {
       httpOnly: true,

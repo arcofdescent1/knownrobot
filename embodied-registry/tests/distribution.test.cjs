@@ -133,6 +133,21 @@ test("standard account credentials are validated without custom password storage
   assert.equal(passwordUpdateSchema.safeParse({ password: strong, confirm_password: strong }).success, true);
 });
 
+test("account controls are present in the first server-rendered header without a hydration shift", () => {
+  const header = readFileSync("src/components/site-header.tsx", "utf8");
+  const controls = readFileSync("src/components/viewer-controls.tsx", "utf8");
+  const session = readFileSync("src/lib/supabase/session.ts", "utf8");
+  const styles = readFileSync("src/app/globals.css", "utf8");
+  assert.match(header, /await readViewerShell\(\)/);
+  assert.match(header, /<ViewerControls initialViewer=\{viewer\}/);
+  assert.match(controls, /useState<ViewerShell\|null>\(initialViewer\)/);
+  assert.doesNotMatch(controls, /viewer===undefined/);
+  assert.doesNotMatch(controls, /account-controls-loading/);
+  assert.ok(session.indexOf("await cookies()") < session.indexOf("if (!url || !key) return null"));
+  assert.match(styles, /\.top-actions \{[^}]*min-width:126px/);
+  assert.doesNotMatch(styles, /\.account-controls-loading/);
+});
+
 test("message read state remains private and recipient-specific", () => {
   const migration = readFileSync("supabase/migrations/202610290005_message_read_state.sql", "utf8");
   assert.match(migration, /add column recipient_id uuid/);
