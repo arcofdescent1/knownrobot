@@ -22,8 +22,16 @@ async function approvedFile(url: string, path: string) {
   return { path, size: bytes.length, sha256: createHash("sha256").update(bytes).digest("hex"), text: bytes.toString("utf8") };
 }
 
-function titleFrom(readme: string | undefined, fallback: string) {
+function titleFrom(readme: string | undefined, fallback: string, explicitTitle?: unknown) {
+  if (typeof explicitTitle === "string" && explicitTitle.trim()) return explicitTitle.trim().slice(0, 160);
   return readme?.match(/^#\s+(.+)$/m)?.[1]?.trim().slice(0, 160) || fallback;
+}
+
+function artifactTitle(source: ArtifactSource, api: Record<string, unknown>, readme: string | undefined) {
+  const repositoryName = source.repository.split("/")[1];
+  if (source.provider === "github") return titleFrom(readme, repositoryName, api.name);
+  const cardData = api.cardData as Record<string, unknown> | undefined;
+  return titleFrom(readme, repositoryName, cardData?.title);
 }
 
 export async function inspectArtifact(source: ArtifactSource, requestedRevision?: string) {
@@ -57,7 +65,7 @@ export async function inspectArtifact(source: ArtifactSource, requestedRevision?
     ...source,
     revision,
     revisionUrl: source.provider === "github" ? `${source.url}/tree/${revision}` : `${source.url}/tree/${revision}`,
-    title: titleFrom(readme, source.repository.split("/")[1]),
+    title: artifactTitle(source, api, readme),
     summary: typeof api.description === "string" ? api.description.slice(0, 2000) : "",
     license: typeof api.license === "string" ? api.license : typeof (api.cardData as Record<string, unknown> | undefined)?.license === "string" ? String((api.cardData as Record<string, unknown>).license) : "",
     metadata: { provider_response: api, inspection_boundary: "approved metadata files only" },
@@ -93,7 +101,7 @@ export async function inspectArtifactForValidation(source: ArtifactSource, reque
     url: source.url,
     revision,
     revisionUrl: `${source.url}/tree/${revision}`,
-    title: titleFrom(readme, source.repository.split("/")[1]),
+    title: artifactTitle(source, api, readme),
     summary: typeof api.description === "string" ? api.description.slice(0, 2000) : "",
     license: typeof api.license === "string" ? api.license : typeof (api.cardData as Record<string, unknown> | undefined)?.license === "string" ? String((api.cardData as Record<string, unknown>).license) : "",
     files: files.map(file => ({ path: String(file.path), ...(typeof file.text === "string" ? { text: file.text } : {}), ...(typeof file.omitted === "string" ? { omitted: file.omitted } : {}) })),
