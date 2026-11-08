@@ -3,11 +3,14 @@ import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ArtifactSource } from "./artifact-contract";
 import { inspectArtifact } from "./artifact-importer";
+import { recordAcquisitionAccountEvent } from "./acquisition-attribution";
 
 const slugify = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 72);
 export async function recordActivity(service: SupabaseClient, account: string, event: string, resource: string, dedupe: string) {
   const fn = event.startsWith("artifact_") && event !== "artifact_followed" ? "record_artifact_activity" : "record_collaboration_activity";
   await service.rpc(fn, { p_account: account, p_event: event, p_resource: resource, p_dedupe: dedupe });
+  const campaignEvent=event==="artifact_claimed"||event==="artifact_corrected"?"maintainer_action":event==="artifact_integrated"?"upstream_placement":"first_value";
+  await recordAcquisitionAccountEvent(service,campaignEvent,account,resource);
 }
 export async function notifyFollowers(service: SupabaseClient, target: { artifact_id?: string; hardware_profile_id?: string; organization_id?: string; collection_id?: string }, eventType: string, title: string, body: string, href: string, actor: string, resourceKey: string) {
   const [column, value] = Object.entries(target)[0];

@@ -14,6 +14,7 @@ const primaryItems: NavigationItem[] = [
   { href: "/artifacts", label: "Artifacts", sections: ["/artifacts", "/evaluations", "/hardware"] },
   { href: "/collections", label: "Collections" },
   { href: "/discussions", label: "Discussions" },
+  { href: "/opportunities", label: "Contribute" },
   { href: "/validator", label: "Validator" },
   { href: "/assessments", label: "Assessments" },
   { href: "/sprints", label: "Sprints" },

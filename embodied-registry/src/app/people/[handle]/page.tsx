@@ -21,7 +21,7 @@ const readProfile = cache(async (handle: string) => {
     .maybeSingle();
   if (error) throw new Error("Profiles are temporarily unavailable.");
   if (!profile) notFound();
-  const [evaluations, reviews, teams, artifacts, artifactContributions, collections] = await Promise.all([
+  const [evaluations, reviews, teams, artifacts, artifactContributions, collections, placements] = await Promise.all([
     client
       .from("public_registry_records")
       .select("id,record")
@@ -41,8 +41,9 @@ const readProfile = cache(async (handle: string) => {
     client.from("artifacts").select("id,slug,title,artifact_type").eq("owner_profile_id", profile.id).order("updated_at", { ascending: false }).limit(50),
     client.from("artifact_contributions").select("id,kind,summary,created_at,artifacts(slug,title)").eq("contributor_profile_id", profile.id).order("created_at", { ascending: false }).limit(50),
     client.from("collections").select("id,slug,title,description").eq("owner_profile_id", profile.id).order("updated_at", { ascending: false }).limit(50),
+    client.from("artifact_distribution_placements").select("id,placement_type,placement_url,created_at,artifacts(slug,title)").eq("contributor_id",profile.id).order("created_at",{ascending:false}).limit(50),
   ]);
-  if ([evaluations, reviews, teams, artifacts, artifactContributions, collections].some((result) => result.error))
+  if ([evaluations, reviews, teams, artifacts, artifactContributions, collections,placements].some((result) => result.error))
     throw new Error("Contribution records are temporarily unavailable.");
   return {
     profile,
@@ -52,6 +53,7 @@ const readProfile = cache(async (handle: string) => {
     artifacts: artifacts.data || [],
     artifactContributions: (artifactContributions.data || []).map(item => ({ ...item, artifacts: oneRelation(item.artifacts) })),
     collections: collections.data || [],
+    placements:(placements.data||[]).map(item=>({...item,artifacts:oneRelation(item.artifacts)})),
   };
 });
 export async function generateMetadata({
@@ -65,7 +67,7 @@ export async function generateMetadata({
     `/people/${handle}`,
     `${result.profile.display_name || handle} — Known Robot contributor`,
     "Attributable public evaluations, review decisions and team memberships.",
-    { index: result.evaluations.length + result.reviews.length + result.artifacts.length + result.artifactContributions.length > 0 },
+    { index: result.evaluations.length + result.reviews.length + result.artifacts.length + result.artifactContributions.length + result.placements.length > 0 },
   );
 }
 export default async function ProfilePage({
@@ -73,7 +75,7 @@ export default async function ProfilePage({
 }: {
   params: Promise<{ handle: string }>;
 }) {
-  const { profile, evaluations, reviews, teams, artifacts, artifactContributions, collections } = await readProfile(
+  const { profile, evaluations, reviews, teams, artifacts, artifactContributions, collections,placements } = await readProfile(
     (await params).handle,
   );
   return (
@@ -121,6 +123,9 @@ export default async function ProfilePage({
         <h2>Artifact contributions</h2>
         {artifactContributions.map(item => <p key={item.id}>{item.kind}: {item.artifacts?.slug ? <Link href={`/artifacts/${item.artifacts.slug}`}>{item.artifacts.title}</Link> : "artifact"} — {item.summary}</p>)}
         {!artifactContributions.length ? <ActionEmptyState compact title="Make the first contribution count" description="A correction, evidence link, or focused discussion improves a shared artifact record and preserves attribution." actionHref="/discussions" actionLabel="Find a contribution"/> : null}
+        <h2>Repository and model-card integrations</h2>
+        {placements.map(item=><p key={item.id}>{item.placement_type.replaceAll("_"," ")}: <a href={item.placement_url}>{item.artifacts?.title||"KnownRobot artifact"} ↗</a></p>)}
+        {!placements.length?<ActionEmptyState compact title="Carry evidence into the upstream workflow" description="A README badge, model-card link, or API integration makes a KnownRobot record discoverable where practitioners already work." actionHref="/opportunities" actionLabel="Find an artifact to integrate"/>:null}
         <h2>Collections</h2>
         {collections.map(item => <p key={item.id}><Link href={`/collections/${item.slug}`}>{item.title}</Link> — {item.description}</p>)}
         {!collections.length ? <ActionEmptyState compact title="Curate a reusable path" description="Collections help other practitioners discover a coherent set of artifacts around one robotics problem." actionHref="/collections" actionLabel="Explore collections"/> : null}

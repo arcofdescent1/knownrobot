@@ -2,10 +2,16 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSessionClient, emailAuthReady } from "@/lib/supabase/session";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
+import { recordAcquisitionAccountEvent } from "@/lib/acquisition-attribution";
 import { loginSchema, passwordUpdateSchema, resetRequestSchema, signUpSchema, type AuthActionState } from "@/lib/auth-contract";
 
 const fail = (message: string): AuthActionState => ({ ok: false, message });
 const success = (message: string): AuthActionState => ({ ok: true, message });
+function safeNext(value: FormDataEntryValue | null) {
+  const next = typeof value === "string" ? value : "/dashboard";
+  return next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : "/dashboard";
+}
 async function origin() {
   if (process.env.NODE_ENV === "production") return "https://knownrobot.com";
   const incoming = await headers();
@@ -19,9 +25,11 @@ export async function signUp(_: AuthActionState, form: FormData): Promise<AuthAc
   if (!parsed.success) return fail(parsed.error.issues[0].message);
   const client = await getSessionClient();
   if (!client) return fail("Account service is unavailable.");
-  const callback = `${await origin()}/auth/callback?next=/dashboard`;
-  const { error } = await client.auth.signUp({ email: parsed.data.email, password: parsed.data.password, options: { emailRedirectTo: callback } });
+  const callback = `${await origin()}/auth/callback?next=${encodeURIComponent(safeNext(form.get("next")))}`;
+  const { data, error } = await client.auth.signUp({ email: parsed.data.email, password: parsed.data.password, options: { emailRedirectTo: callback } });
   if (error) return fail(error.status === 429 ? "Too many attempts. Wait and try again." : "Registration could not be completed. Check the fields or use account recovery if you may already be registered.");
+  const service=getServiceSupabaseClient();
+  if(data.user&&service)await recordAcquisitionAccountEvent(service,"signup",data.user.id);
   return success("Check your email to verify your account, then sign in.");
 }
 export async function signInWithPassword(_: AuthActionState, form: FormData): Promise<AuthActionState> {
@@ -31,7 +39,7 @@ export async function signInWithPassword(_: AuthActionState, form: FormData): Pr
   if (!client) return fail("Account service is unavailable.");
   const { data, error } = await client.auth.signInWithPassword(parsed.data);
   if (error || !data.user?.email_confirmed_at) return fail("Email or password is incorrect, or the email is not verified.");
-  redirect("/dashboard");
+  redirect(safeNext(form.get("next")));
 }
 export async function requestPasswordReset(_: AuthActionState, form: FormData): Promise<AuthActionState> {
   const parsed = resetRequestSchema.safeParse(Object.fromEntries(form));
@@ -52,11 +60,11 @@ export async function updatePassword(_: AuthActionState, form: FormData): Promis
   if (error) return fail("The password could not be updated. Request a fresh reset link.");
   return success("Password updated. You can continue using KnownRobot.");
 }
-export async function signInWithGitHub() {
+export async function signInWithGitHub(form: FormData) {
   if (process.env.NEXT_PUBLIC_GITHUB_AUTH_ENABLED !== "true") redirect("/login?oauth=unavailable");
   const client = await getSessionClient();
   if (!client) redirect("/login?oauth=unavailable");
-  const { data, error } = await client.auth.signInWithOAuth({ provider: "github", options: { redirectTo: `${await origin()}/auth/callback?next=/dashboard`, scopes: "read:user user:email" } });
+  const { data, error } = await client.auth.signInWithOAuth({ provider: "github", options: { redirectTo: `${await origin()}/auth/callback?next=${encodeURIComponent(safeNext(form.get("next")))}`, scopes: "read:user user:email" } });
   if (error || !data.url) redirect("/login?oauth=unavailable");
   redirect(data.url);
 }

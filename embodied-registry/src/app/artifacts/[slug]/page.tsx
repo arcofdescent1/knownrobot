@@ -55,5 +55,5 @@ export default async function ArtifactPage({ params, searchParams }: PageProps<"
       canManage ||= canCorrect;
     }
   }
-  return <><SiteHeader /><main className="artifact-workspace"><ArtifactWorkspace artifact={result.artifact} tab={tab} userId={user?.id} following={following} canManage={canManage} canCorrect={canCorrect} teams={teams} collections={collections} publishedEvaluations={publishedEvaluations} claims={result.claims} revisions={result.revisions} contributions={result.contributions} attempts={result.attempts} relations={result.relations} threads={threads} /></main></>;
+  return <><SiteHeader /><main className="artifact-workspace"><ArtifactWorkspace artifact={result.artifact} tab={tab} userId={user?.id} following={following} canManage={canManage} canCorrect={canCorrect} teams={teams} collections={collections} publishedEvaluations={publishedEvaluations} claims={result.claims} revisions={result.revisions} contributions={result.contributions} attempts={result.attempts} relations={result.relations} placements={result.placements} threads={threads} /></main></>;
 }
