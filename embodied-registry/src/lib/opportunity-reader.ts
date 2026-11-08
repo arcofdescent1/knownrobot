@@ -7,7 +7,7 @@ export async function listOpportunities(){
   const [clinics,bounties,reviews]=await Promise.all([
     client.from("compatibility_clinics").select("*,clinic_submissions(count)").in("status",["open","full"]).order("starts_at"),
     client.from("evidence_bounties").select("*,artifacts(slug,title,artifact_type),evidence_bounty_submissions(count)").eq("status","open").order("updated_at",{ascending:false}),
-    client.from("artifacts").select("id,slug,title,summary,artifact_type,source_repository,source_url,license,artifact_revisions(source_revision,uncertainties,created_at),artifact_claims(id),artifact_review_submissions(count),artifact_contributions(kind,payload),artifact_evaluation_attempts(relationship),artifact_distribution_placements(id)").order("updated_at",{ascending:false}).limit(25),
+    client.from("artifacts").select("id,slug,title,summary,artifact_type,source_repository,source_url,license,artifact_revisions!artifact_revisions_artifact_id_fkey(source_revision,uncertainties,created_at),artifact_claims(id),artifact_review_submissions(count),artifact_contributions(kind,payload),artifact_evaluation_attempts(relationship),artifact_distribution_placements(id)").order("updated_at",{ascending:false}).limit(25),
   ]);
   if(clinics.error||bounties.error||reviews.error) {
     console.error("Contributor opportunity query failed", {
