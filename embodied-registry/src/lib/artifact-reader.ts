@@ -6,7 +6,15 @@ export const listArtifacts = cache(async () => {
   const client = getPublicSupabaseClient();
   if (!client) return [];
   const { data, error } = await client.from("artifacts").select("id,slug,title,summary,artifact_type,source_provider,source_kind,source_repository,updated_at,owner_profile_id,owner_organization_id").order("updated_at", { ascending: false }).limit(100);
-  if (error) throw new Error("Artifacts are temporarily unavailable.");
+  if (error) {
+    console.error("Artifact catalog query failed", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+    throw new Error("Artifacts are temporarily unavailable.");
+  }
   return data || [];
 });
 
