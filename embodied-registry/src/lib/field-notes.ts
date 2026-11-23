@@ -8,11 +8,68 @@ export type FieldNote = {
   readTime: string;
   label?: string;
   cta?: { prompt: string; label: string; href: string };
-  sections: { heading: string; paragraphs: string[]; bullets?: string[] }[];
+  sections: { heading: string; paragraphs: string[]; bullets?: string[]; command?: string }[];
   sources: { label: string; href: string }[];
 };
 
 export const fieldNotes: FieldNote[] = [
+  {
+    slug: "before-you-load-an-act-checkpoint-on-an-so-101",
+    number: "07",
+    title: "Before you load an ACT checkpoint on an SO-101: a worked compatibility check",
+    summary: "Compare a real ball-in-cup checkpoint with your own setup using its camera inputs, six-value state and action vectors, and the runtime details its metadata leaves unresolved.",
+    published: "November 23, 2026",
+    datePublished: "2026-11-23",
+    readTime: "4 min",
+    label: "METADATA-ONLY ASSESSMENT",
+    cta: {
+      prompt: "Have evidence from this exact checkpoint? Share your camera keys, how you confirmed the action mapping, and the first check or trial that diverged.",
+      label: "Share evidence →",
+      href: "/participate",
+    },
+    sections: [
+      {
+        heading: "Start with the exact checkpoint",
+        paragraphs: [
+          "This Known Robot walkthrough uses abdul004/so101_act_policy_v5 at commit c14c7f4108c07c0c04ec90b7f110213130c14a9f. The upstream model card describes a ball-in-cup task on an SO-101 with overhead and wrist cameras. Known Robot inspected the repository metadata without downloading weights, running the policy, or moving a robot.",
+        ],
+      },
+      {
+        heading: "Compare the inputs and outputs your setup actually exposes",
+        paragraphs: [
+          "The validator detected a LeRobot ACT configuration with four named features. Compare these with the features at the policy interface after any preprocessing, using the same names and dimensions.",
+        ],
+        bullets: [
+          "observation.images.overhead and observation.images.wrist each expect [3, 480, 640]. Match the feature names, channel layout, and dimensions. Then compare the camera viewpoints and preprocessing with the source setup.",
+          "observation.state expects [6] and action returns [6]. Confirm the order, units, and meaning of each entry. Two six-value vectors can have the same shape while assigning different meanings to the same position.",
+          "Worked example: a setup that exposes observation.images.front and observation.images.wrist has a feature-name mismatch at the policy interface. Check whether the front feed actually supplies the expected overhead view before mapping it to that key.",
+        ],
+      },
+      {
+        heading: "Record what remains unresolved",
+        paragraphs: [
+          "The exported manifest leaves the control frequency and LeRobot version unset and contains no resolved dependency versions. It names the training dataset but leaves its revision and feature schema unset. Record the expected control rate, framework version, gripper and calibration details, and feature semantics from a traceable source before treating a shape match as sufficient for a rollout.",
+          "The model card reports results from the upstream author. The Known Robot assessment contains no measured trials and records compatibility as unverified. Its incomplete status identifies missing evidence for another team to reproduce the setup.",
+        ],
+      },
+      {
+        heading: "Reproduce the metadata check",
+        paragraphs: [
+          "From a checkout with robot-skill 1.6.0 installed, run the following commands. The first creates a local assessment bundle. The second checks its stored hashes and retained source files. You can also download the existing manifest from the source links.",
+        ],
+        command: [
+          "robot-skill assess-hf abdul004/so101_act_policy_v5 --revision c14c7f4108c07c0c04ec90b7f110213130c14a9f --artifact-intent hardware_policy --artifact-intent task_policy --output so101-act-preflight",
+          "robot-skill verify-assessment so101-act-preflight",
+        ].join("\n"),
+      },
+    ],
+    sources: [
+      { label: "Pinned Hugging Face repository", href: "https://huggingface.co/abdul004/so101_act_policy_v5/tree/c14c7f4108c07c0c04ec90b7f110213130c14a9f" },
+      { label: "Upstream model card at the assessed revision", href: "https://huggingface.co/abdul004/so101_act_policy_v5/blob/c14c7f4108c07c0c04ec90b7f110213130c14a9f/README.md" },
+      { label: "Known Robot assessment", href: "/assessments/abdul004-so101-act-policy-v5-c14c7f4" },
+      { label: "Download the assessed manifest (JSON)", href: "/assessments/abdul004-so101-act-policy-v5-c14c7f4/manifest.json" },
+    ],
+  },
   {
     slug: "what-a-lerobot-evaluation-dataset-proves",
     number: "06",

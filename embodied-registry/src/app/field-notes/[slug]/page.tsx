@@ -27,7 +27,14 @@ export default async function FieldNotePage({ params }: { params: Promise<{ slug
       { "@type": "ListItem", position: 3, name: note.title, item: url },
     ] },
   ]}/><article className="article-page"><header><Link className="back-link" href="/field-notes">← All field notes</Link><p className="kicker">FIELD NOTE {note.number} · {note.label ?? "BASELINE DESK RESEARCH"}</p><h1>{note.title}</h1><p className="editorial-deck">{note.summary}</p><div className="article-meta"><span>{note.published}</span><span>{note.readTime} read</span><span>Version 1.0</span></div></header>
-    <div className="article-layout"><div className="article-body">{note.sections.map((section) => <section key={section.heading}><h2>{section.heading}</h2>{section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}{section.bullets && <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>}</section>)}</div><aside className="source-rail"><p className="eyebrow">PRIMARY SOURCES</p>{note.sources.map((source) => <a href={source.href} key={source.href} target="_blank" rel="noreferrer">{source.label}<span>↗</span></a>)}<div className="inference-key"><strong>Interpretation policy</strong><p>Sources establish observations. Recommendations and the proposed record are Known Robot’s current inferences.</p></div></aside></div>
+    <div className="article-layout"><div className="article-body">{note.sections.map((section) => (
+      <section key={section.heading}>
+        <h2>{section.heading}</h2>
+        {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        {section.bullets && <ul>{section.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}</ul>}
+        {section.command && <pre className="whitespace-pre-wrap wrap-anywhere"><code>{section.command}</code></pre>}
+      </section>
+    ))}</div><aside className="source-rail"><p className="eyebrow">PRIMARY SOURCES</p>{note.sources.map((source) => <a href={source.href} key={source.href} target="_blank" rel="noreferrer">{source.label}<span>↗</span></a>)}<div className="inference-key"><strong>Interpretation policy</strong><p>Sources establish observations. Recommendations and the proposed record are Known Robot’s current inferences.</p></div></aside></div>
     <section className="article-cta"><p>{note.cta?.prompt ?? "Did we miss the condition that determined your result?"}</p><Link href={note.cta?.href ?? "/participate"}>{note.cta?.label ?? "Add direct evidence →"}</Link></section>
   </article></main>;
 }
